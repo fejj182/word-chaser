@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky",
-    "gitleaks:scan": "gitleaks git --verbose",
-    "gitleaks:staged": "gitleaks git --staged --verbose"
+    "gitleaks:scan": "gitleaks git --config .gitleaks.toml --verbose",
+    "gitleaks:staged": "gitleaks git --staged --config .gitleaks.toml --verbose"
   },
   "dependencies": {
     "next": "15.4.4",

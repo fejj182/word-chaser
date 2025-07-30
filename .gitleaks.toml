@@ -1,0 +1,61 @@
+# Custom Gitleaks configuration for word-chaser project
+# This file adds custom rules to detect database secrets and JWT tokens
+
+[global]
+# Enable verbose output
+verbose = true
+
+# Scan all files in the repository
+source = "."
+
+# Exclude common directories that don't need scanning
+[[global.exclude]]
+path = "node_modules"
+reason = "Dependencies directory"
+
+[[global.exclude]]
+path = ".git"
+reason = "Git directory"
+
+[[global.exclude]]
+path = "dist"
+reason = "Build output directory"
+
+[[global.exclude]]
+path = ".next"
+reason = "Next.js build directory"
+
+[[global.exclude]]
+path = "coverage"
+reason = "Test coverage directory"
+
+# Custom rules for database connection strings
+[[rules]]
+id = "database-connection-string"
+description = "Database connection strings with passwords"
+regex = '''(?i)(postgresql?|mysql|mongodb|redis)://[^:]+:([^@]+)@'''
+tags = ["database", "connection", "password"]
+
+# Custom rule for JWT secrets
+[[rules]]
+id = "jwt-secret"
+description = "JWT secret keys"
+regex = '''(?i)(jwt[_-]?secret|secret[_-]?key)\s*[:=]\s*["']([a-zA-Z0-9\-_]{16,})["']'''
+tags = ["jwt", "secret", "token"]
+
+# Custom rule for generic secrets with "secret" in the name
+[[rules]]
+id = "generic-secret"
+description = "Generic secret patterns"
+regex = '''(?i)(secret|password|token)\s*[:=]\s*["']([a-zA-Z0-9\-_]{8,})["']'''
+tags = ["secret", "password", "token"]
+
+# Custom rule for database passwords in connection strings
+[[rules]]
+id = "database-password"
+description = "Database passwords in connection strings"
+regex = '''(?i):([a-zA-Z0-9\-_]{6,})@'''
+tags = ["database", "password"]
+
+# Enable all built-in rules
+enable = true 
