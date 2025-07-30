@@ -57,5 +57,33 @@ description = "Database passwords in connection strings"
 regex = '''(?i):([a-zA-Z0-9\-_]{6,})@'''
 tags = ["database", "password"]
 
+# Custom rule for OpenAI API keys (sk- pattern)
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI API keys"
+regex = '''(?i)(api[_-]?key|apikey)\s*[:=]\s*["'](sk-[a-zA-Z0-9]{48})["']'''
+tags = ["openai", "api", "key"]
+
+# Custom rule for AWS access keys
+[[rules]]
+id = "aws-access-key"
+description = "AWS access keys"
+regex = '''(?i)(access[_-]?key[_-]?id|aws[_-]?access[_-]?key)\s*[:=]\s*["'](AKIA[0-9A-Z]{16})["']'''
+tags = ["aws", "access", "key"]
+
+# Custom rule for AWS secret keys
+[[rules]]
+id = "aws-secret-key"
+description = "AWS secret keys"
+regex = '''(?i)(secret[_-]?access[_-]?key|aws[_-]?secret[_-]?key)\s*[:=]\s*["']([a-zA-Z0-9]{40})["']'''
+tags = ["aws", "secret", "key"]
+
+# Custom rule for GitHub tokens
+[[rules]]
+id = "github-token"
+description = "GitHub tokens"
+regex = '''(?i)(token|personal[_-]?access[_-]?token)\s*[:=]\s*["'](gh[po]_[a-zA-Z0-9]{36})["']'''
+tags = ["github", "token"]
+
 # Enable all built-in rules
 enable = true 
