@@ -4,6 +4,12 @@ import userEvent from '@testing-library/user-event'
 import { GuestSignIn } from './GuestSignIn'
 import { signInAsGuest } from '@/lib/firebase-utils'
 import { useAuth } from '@/hooks/useAuth'
+import { useUser } from '@/contexts/UserContext'
+
+// Mock the useUser hook
+jest.mock('@/contexts/UserContext', () => ({
+  useUser: jest.fn(),
+}));
 
 // Mock the firebase-utils module
 jest.mock('@/lib/firebase-utils', () => ({
@@ -17,12 +23,18 @@ jest.mock('@/hooks/useAuth', () => ({
 
 const mockSignInAsGuest = signInAsGuest as jest.MockedFunction<typeof signInAsGuest>
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 
 describe('GuestSignIn Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     // Default mock: user is not signed in
     mockUseAuth.mockReturnValue({ user: null, loading: false })
+    mockUseUser.mockReturnValue({
+      userId: 'user123',
+      displayName: 'Guest-abc123',
+      setUser: jest.fn(),
+    });
   })
 
   describe('Component Rendering', () => {
