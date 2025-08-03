@@ -4,6 +4,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  signInAnonymously,
   User
 } from 'firebase/auth';
 import { 
@@ -50,6 +51,15 @@ export const signOutUser = async () => {
 
 export const getCurrentUser = (): User | null => {
   return auth.currentUser;
+};
+
+export const signInAsGuest = async () => {
+  try {
+    const userCredential = await signInAnonymously(auth);
+    return { user: userCredential.user, error: null };
+  } catch (error) {
+    return { user: null, error: error as Error };
+  }
 };
 
 // Firestore utilities
