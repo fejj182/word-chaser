@@ -1,8 +1,10 @@
 import { GuestSignIn } from '@/components/GuestSignIn';
+import { UserDisplay } from '@/components/UserDisplay';
 
 export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <UserDisplay />
       <div className="text-center p-8">
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Word Chaser
