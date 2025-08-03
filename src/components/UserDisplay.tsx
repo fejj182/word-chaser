@@ -31,7 +31,6 @@ export const UserDisplay = () => {
             try {
               await navigator.clipboard.writeText(userId);
               // You could add a toast notification here
-              console.log('User ID copied to clipboard!');
             } catch (err) {
               console.error('Failed to copy:', err);
             }

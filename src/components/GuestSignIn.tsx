@@ -21,7 +21,6 @@ export const GuestSignIn = () => {
       if (error) {
         setError(error.message);
       } else if (guestUser) {
-        console.log('Signed in as guest:', guestUser.uid);
         // You can redirect or update UI state here
       }
     } catch (err) {
