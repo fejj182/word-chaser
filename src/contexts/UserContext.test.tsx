@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { UserProvider, useUser } from './UserContext';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -159,13 +160,14 @@ describe('UserContext', () => {
 
   describe('setUser Function', () => {
     it('should update user state when setUser is called', async () => {
+      const user = userEvent.setup();
       renderWithProvider(<TestComponent />);
       
       // Initially no user
       expect(screen.getByTestId('userId')).toHaveTextContent('no-user');
       
       // Click button to set user
-      screen.getByTestId('setUser').click();
+      await user.click(screen.getByTestId('setUser'));
       
       await waitFor(() => {
         expect(screen.getByTestId('userId')).toHaveTextContent('test-uid');
@@ -174,6 +176,7 @@ describe('UserContext', () => {
     });
 
     it('should clear user state when setUser is called with null', async () => {
+      const user = userEvent.setup();
       // Start with a user
       const mockUser = {
         uid: 'user123',
@@ -190,7 +193,7 @@ describe('UserContext', () => {
         expect(screen.getByTestId('userId')).toHaveTextContent('user123');
       });
       
-      screen.getByTestId('clearUser').click();
+      await user.click(screen.getByTestId('clearUser'));
       
       await waitFor(() => {
         expect(screen.getByTestId('userId')).toHaveTextContent('no-user');
