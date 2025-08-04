@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { GuestSignInUI } from './GuestSignInUI';
+import { GuestSignInUI } from '../components/GuestSignInUI';
 
 const meta: Meta<typeof GuestSignInUI> = {
-  title: 'Components/GuestSignInUI',
+  title: 'Component../components/GuestSignInUI',
   component: GuestSignInUI,
   parameters: {
     layout: 'centered',

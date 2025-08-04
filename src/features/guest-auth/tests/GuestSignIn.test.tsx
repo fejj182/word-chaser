@@ -1,23 +1,23 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GuestSignIn } from './GuestSignIn';
-import { signInAsGuest } from '@/lib/firebase-utils';
-import { useAuth } from '@/hooks/useAuth';
-import { useUser } from '@/contexts/UserContext';
+import { GuestSignIn } from '../components/GuestSignIn';
+import { signInAsGuest } from '@/lib/firebase/firebase-utils';
+import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
 // Mock the useUser hook
-jest.mock('@/contexts/UserContext', () => ({
+jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
   useUser: jest.fn(),
 }));
 
 // Mock the firebase-utils module
-jest.mock('@/lib/firebase-utils', () => ({
+jest.mock('@/lib/firebase/firebase-utils', () => ({
   signInAsGuest: jest.fn(),
 }));
 
 // Mock the useAuth hook
-jest.mock('@/hooks/useAuth', () => ({
+jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
