@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GuestSignInUI } from './GuestSignInUI';
+import { GuestSignInUI } from '../components/GuestSignInUI';
 
 describe('GuestSignInUI', () => {
   const mockOnSignIn = jest.fn();

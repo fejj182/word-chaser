@@ -1,5 +1,5 @@
-import { GuestSignIn } from '@/components/GuestSignIn';
-import { UserDisplay } from '@/components/UserDisplay';
+import { GuestSignIn } from '@/features/guest-auth/components/GuestSignIn';
+import { UserDisplay } from '@/features/guest-auth/components/UserDisplay';
 
 export default function Home() {
   return (

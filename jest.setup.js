@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 
 // Mock Firebase
-jest.mock('./src/lib/firebase', () => ({
+jest.mock('./src/lib/firebase/firebase', () => ({
   auth: {},
   db: {},
   storage: {},

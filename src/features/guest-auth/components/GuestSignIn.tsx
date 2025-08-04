@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { signInAsGuest } from '@/lib/firebase-utils';
-import { useAuth } from '@/hooks/useAuth';
-import { useUser } from '@/contexts/UserContext';
+import { signInAsGuest } from '@/lib/firebase/firebase-utils';
+import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useUser } from '@/features/guest-auth/contexts/UserContext';
 import { GuestSignInUI } from './GuestSignInUI';
 
 export const GuestSignIn = () => {

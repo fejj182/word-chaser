@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@/contexts/UserContext';
+import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
 export const UserDisplay = () => {
   const { displayName, userId } = useUser();
