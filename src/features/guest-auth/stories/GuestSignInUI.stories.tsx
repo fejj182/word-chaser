@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { GuestSignInUI } from '../components/GuestSignInUI';
 
 const meta: Meta<typeof GuestSignInUI> = {
-  title: 'Component../components/GuestSignInUI',
+  title: 'Components/GuestSignInUI',
   component: GuestSignInUI,
   parameters: {
     layout: 'centered',
@@ -63,31 +63,5 @@ export const SignedIn: Story = {
     error: null,
     isSignedIn: true,
     displayName: 'Guest-abc12345',
-  },
-};
-
-// Mobile viewport
-export const Mobile: Story = {
-  args: {
-    isLoading: false,
-    error: null,
-    isSignedIn: false,
-    displayName: null,
-  },
-  parameters: {
-    viewport: { defaultViewport: 'mobile1' },
-  },
-};
-
-// Dark mode
-export const DarkMode: Story = {
-  args: {
-    isLoading: false,
-    error: null,
-    isSignedIn: false,
-    displayName: null,
-  },
-  parameters: {
-    backgrounds: { default: 'dark' },
   },
 };
