@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CreateRoomParams, RoomSettings } from '@/features/shared/types/room';
+import { CreateRoomParams, RoomSettings } from '@/features/room-management/types/room';
 
 interface CreateRoomFormProps {
   onSubmit: (params: CreateRoomParams) => Promise<void>;

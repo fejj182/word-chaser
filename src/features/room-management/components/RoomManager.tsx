@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRoom } from '@/features/shared/contexts/RoomContext';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import CreateRoom from './CreateRoom';
 import JoinRoom from './JoinRoom';
 import RoomLobby from './RoomLobby';

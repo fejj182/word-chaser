@@ -1,10 +1,10 @@
 'use client';
 
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
-import { RoomProvider } from '@/features/shared/contexts/RoomContext';
+import { RoomProvider } from '@/features/room-management/contexts/RoomContext';
 import { GuestSignIn } from '@/features/guest-auth/components/GuestSignIn';
 import { UserDisplay } from '@/features/guest-auth/components/UserDisplay';
-import RoomManager from '@/features/shared/components/RoomManager';
+import RoomManager from '@/features/room-management/components/RoomManager';
 
 function AuthenticatedContent() {
   return (

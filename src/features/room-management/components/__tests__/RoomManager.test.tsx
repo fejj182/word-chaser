@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import RoomManager from '../RoomManager';
-import { useRoom } from '@/features/shared/contexts/RoomContext';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
 // Mock dependencies
-jest.mock('@/features/shared/contexts/RoomContext');
+jest.mock('@/features/room-management/contexts/RoomContext');
 jest.mock('../CreateRoom', () => {
   return function MockCreateRoom() {
     return <div data-testid="create-room">Create Room Component</div>;

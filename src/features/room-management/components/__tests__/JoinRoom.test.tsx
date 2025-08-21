@@ -8,12 +8,12 @@ const mockCreateRoom = jest.fn();
 const mockLeaveRoom = jest.fn();
 
 // Mock the useRoom hook at the top level
-jest.mock('@/features/shared/contexts/RoomContext', () => ({
+jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   useRoom: jest.fn(),
 }));
 
 // Import the mocked hook
-import { useRoom } from '@/features/shared/contexts/RoomContext';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
 const mockUseRoom = useRoom as jest.MockedFunction<typeof useRoom>;
 
 describe('JoinRoom', () => {
