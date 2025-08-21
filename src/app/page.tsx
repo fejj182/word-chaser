@@ -1,10 +1,25 @@
+'use client';
+
+import { useUser } from '@/features/guest-auth/contexts/UserContext';
+import { RoomProvider } from '@/features/shared/contexts/RoomContext';
 import { GuestSignIn } from '@/features/guest-auth/components/GuestSignIn';
 import { UserDisplay } from '@/features/guest-auth/components/UserDisplay';
+import RoomManager from '@/features/shared/components/RoomManager';
 
-export default function Home() {
+function AuthenticatedContent() {
+  return (
+    <RoomProvider>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <UserDisplay />
+        <RoomManager />
+      </div>
+    </RoomProvider>
+  );
+}
+
+function UnauthenticatedContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <UserDisplay />
       <div className="text-center p-8">
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Word Chaser
@@ -16,4 +31,14 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+export default function Home() {
+  const { displayName, userId } = useUser();
+
+  if (!displayName || !userId) {
+    return <UnauthenticatedContent />;
+  }
+
+  return <AuthenticatedContent />;
 }
