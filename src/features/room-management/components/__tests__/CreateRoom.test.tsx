@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CreateRoom from '../CreateRoom';
-import { useRoom } from '@/features/shared/contexts/RoomContext';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
 // Mock the room context
-jest.mock('@/features/shared/contexts/RoomContext', () => ({
+jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   useRoom: jest.fn(),
 }));
 

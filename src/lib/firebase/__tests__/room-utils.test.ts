@@ -1,7 +1,7 @@
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom, updatePlayerReady, startGame } from '../room-utils';
 import { ref, push, set, get, onValue, off, update } from 'firebase/database';
 import { db } from '../firebase';
-import { CreateRoomParams } from '@/features/shared/types/room';
+import { CreateRoomParams } from '@/features/room-management/types/room';
 
 // Mock Firebase database functions
 jest.mock('firebase/database', () => ({

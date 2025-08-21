@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useRoom } from '@/features/shared/contexts/RoomContext';
-import { CreateRoomParams } from '@/features/shared/types/room';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
+import { CreateRoomParams } from '@/features/room-management/types/room';
 import CreateRoomForm from './CreateRoomForm';
 
 const CreateRoom: React.FC = () => {

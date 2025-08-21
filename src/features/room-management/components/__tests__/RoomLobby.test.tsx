@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RoomLobby from '../RoomLobby';
-import { useRoom } from '@/features/shared/contexts/RoomContext';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
 
 // Mock dependencies
-jest.mock('@/features/shared/contexts/RoomContext');
+jest.mock('@/features/room-management/contexts/RoomContext');
 jest.mock('@/features/guest-auth/hooks/useAuth');
 jest.mock('@/lib/firebase/room-utils');
 

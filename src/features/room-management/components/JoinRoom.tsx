@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRoom } from '@/features/shared/contexts/RoomContext';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
 const JoinRoom: React.FC = () => {
   const { joinRoom, isLoading, error, clearError } = useRoom();

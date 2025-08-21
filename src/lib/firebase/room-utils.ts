@@ -1,6 +1,6 @@
 import { ref, push, set, get, onValue, off, update } from 'firebase/database';
 import { db } from './firebase';
-import { Room, Player, CreateRoomParams } from '@/features/shared/types/room';
+import { Room, Player, CreateRoomParams } from '@/features/room-management/types/room';
 
 const ROOMS_PATH = 'rooms';
 

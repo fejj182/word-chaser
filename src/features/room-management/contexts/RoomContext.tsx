@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
-import { Room, PartialRoom, RoomState, CreateRoomParams } from '@/features/shared/types/room';
+import { Room, PartialRoom, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom } from '@/lib/firebase/room-utils';
 
 type RoomAction =

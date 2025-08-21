@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useRoom } from '@/features/shared/contexts/RoomContext';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
-import { Room, PartialRoom } from '@/features/shared/types/room';
+import { Room, PartialRoom } from '@/features/room-management/types/room';
 
 // Type guard to check if we have a complete room object
 function isCompleteRoom(room: Room | PartialRoom): room is Room {
