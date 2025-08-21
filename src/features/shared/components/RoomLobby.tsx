@@ -144,14 +144,6 @@ const RoomLobby: React.FC = () => {
             <span className="text-gray-600">Max Rounds:</span>
             <span className="ml-2 font-medium">{currentRoom.settings.maxRounds}</span>
           </div>
-          <div>
-            <span className="text-gray-600">Word Length:</span>
-            <span className="ml-2 font-medium">{currentRoom.settings.wordLength} letters</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Allow Repeats:</span>
-            <span className="ml-2 font-medium">{currentRoom.settings.allowRepeats ? 'Yes' : 'No'}</span>
-          </div>
         </div>
       </div>
 

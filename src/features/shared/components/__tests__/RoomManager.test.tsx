@@ -123,8 +123,6 @@ describe('RoomManager', () => {
         settings: {
           roundDuration: 60,
           maxRounds: 5,
-          wordLength: 5,
-          allowRepeats: false,
         },
       };
 

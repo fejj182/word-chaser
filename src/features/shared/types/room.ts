@@ -25,8 +25,6 @@ export interface Player {
 export interface RoomSettings {
   roundDuration: number; // in seconds
   maxRounds: number;
-  wordLength: number;
-  allowRepeats: boolean;
 }
 
 export interface CreateRoomParams {
