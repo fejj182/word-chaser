@@ -134,6 +134,9 @@ describe('GuestSignIn Integration Tests', () => {
 
     it('displays generic error message for unknown errors', async () => {
       const user = userEvent.setup();
+      const originalConsoleError = console.error;
+      console.error = jest.fn(); // Suppress console.error for this test
+      
       mockSignInAsGuest.mockRejectedValue(new Error('Unexpected error'));
       
       render(<GuestSignIn />);
@@ -144,6 +147,9 @@ describe('GuestSignIn Integration Tests', () => {
       await waitFor(() => {
         expect(screen.getByText('Unexpected error')).toBeInTheDocument();
       });
+      
+      // Restore console.error
+      console.error = originalConsoleError;
     });
 
     it('clears previous error when retrying sign-in', async () => {
