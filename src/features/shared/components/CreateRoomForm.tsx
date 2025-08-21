@@ -15,8 +15,6 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({ onSubmit, isLoading }) 
     settings: {
       roundDuration: 60,
       maxRounds: 5,
-      wordLength: 5,
-      allowRepeats: false,
     },
   });
 
@@ -128,41 +126,6 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({ onSubmit, isLoading }) 
               <option value={7}>7 rounds</option>
               <option value={10}>10 rounds</option>
             </select>
-          </div>
-
-          {/* Word Length */}
-          <div>
-            <label htmlFor="wordLength" className="block text-sm font-medium text-gray-700 mb-2">
-              Word Length
-            </label>
-            <select
-              id="wordLength"
-              value={formData.settings.wordLength}
-              onChange={(e) => handleSettingsChange('wordLength', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={isLoading}
-            >
-              <option value={3}>3 letters</option>
-              <option value={4}>4 letters</option>
-              <option value={5}>5 letters</option>
-              <option value={6}>6 letters</option>
-              <option value={7}>7 letters</option>
-            </select>
-          </div>
-
-          {/* Allow Repeats */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="allowRepeats"
-              checked={formData.settings.allowRepeats}
-              onChange={(e) => handleSettingsChange('allowRepeats', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              disabled={isLoading}
-            />
-            <label htmlFor="allowRepeats" className="ml-2 block text-sm text-gray-700">
-              Allow repeated words
-            </label>
           </div>
         </div>
       </div>

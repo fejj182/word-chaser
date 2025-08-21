@@ -13,7 +13,7 @@ jest.mock('../CreateRoomForm', () => {
   return function MockCreateRoomForm({ onSubmit, isLoading }: any) {
     return (
       <div data-testid="create-room-form">
-        <button onClick={() => onSubmit({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5, wordLength: 5, allowRepeats: false } })}>
+        <button onClick={() => onSubmit({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } })}>
           Submit Form
         </button>
         <span data-testid="loading-state">{isLoading.toString()}</span>
@@ -62,7 +62,7 @@ describe('CreateRoom', () => {
         expect(mockCreateRoom).toHaveBeenCalledWith({
           name: 'Test Room',
           maxPlayers: 4,
-          settings: { roundDuration: 60, maxRounds: 5, wordLength: 5, allowRepeats: false }
+          settings: { roundDuration: 60, maxRounds: 5 }
         });
       });
     });

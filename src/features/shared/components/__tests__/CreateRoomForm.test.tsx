@@ -16,8 +16,6 @@ describe('CreateRoomForm', () => {
     expect(screen.getByLabelText(/maximum players/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/round duration \(seconds\)/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/number of rounds/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/word length/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/allow repeated words/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create room/i })).toBeInTheDocument();
   });
 
@@ -37,10 +35,6 @@ describe('CreateRoomForm', () => {
     fireEvent.change(screen.getByLabelText(/number of rounds/i), {
       target: { value: '5' },
     });
-    fireEvent.change(screen.getByLabelText(/word length/i), {
-      target: { value: '5' },
-    });
-    fireEvent.click(screen.getByLabelText(/allow repeated words/i));
 
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: /create room/i }));
@@ -52,8 +46,6 @@ describe('CreateRoomForm', () => {
         settings: {
           roundDuration: 60,
           maxRounds: 5,
-          wordLength: 5,
-          allowRepeats: true,
         },
       });
     });

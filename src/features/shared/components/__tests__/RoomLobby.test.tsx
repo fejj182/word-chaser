@@ -64,8 +64,6 @@ describe('RoomLobby', () => {
         settings: {
           roundDuration: 60,
           maxRounds: 5,
-          wordLength: 5,
-          allowRepeats: false,
         },
       };
 
@@ -106,8 +104,6 @@ describe('RoomLobby', () => {
         settings: {
           roundDuration: 60,
           maxRounds: 5,
-          wordLength: 5,
-          allowRepeats: false,
         },
       };
 
@@ -128,10 +124,6 @@ describe('RoomLobby', () => {
       expect(screen.getByText('60 seconds')).toBeInTheDocument();
       expect(screen.getByText('Max Rounds:')).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
-      expect(screen.getByText('Word Length:')).toBeInTheDocument();
-      expect(screen.getByText('5 letters')).toBeInTheDocument();
-      expect(screen.getByText('Allow Repeats:')).toBeInTheDocument();
-      expect(screen.getByText('No')).toBeInTheDocument();
     });
 
     it('calls leaveRoom when leave room button is clicked', async () => {
@@ -154,8 +146,6 @@ describe('RoomLobby', () => {
         settings: {
           roundDuration: 60,
           maxRounds: 5,
-          wordLength: 5,
-          allowRepeats: false,
         },
       };
 
@@ -200,8 +190,6 @@ describe('RoomLobby', () => {
         settings: {
           roundDuration: 60,
           maxRounds: 5,
-          wordLength: 5,
-          allowRepeats: false,
         },
       };
 
@@ -267,8 +255,6 @@ describe('RoomLobby', () => {
       settings: {
         roundDuration: 60,
         maxRounds: 5,
-        wordLength: 5,
-        allowRepeats: false,
       },
     };
 
@@ -359,8 +345,6 @@ describe('RoomLobby', () => {
       settings: {
         roundDuration: 60,
         maxRounds: 5,
-        wordLength: 5,
-        allowRepeats: false,
       },
     };
 

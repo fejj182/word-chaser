@@ -29,7 +29,7 @@ const TestComponent = () => {
   
   const handleCreateRoom = async () => {
     try {
-      await createRoom({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5, wordLength: 5, allowRepeats: false } });
+      await createRoom({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } });
     } catch (error) {
       // Error is handled by the context, we just need to catch it here to prevent test failures
     }
@@ -103,7 +103,7 @@ describe('RoomContext', () => {
       { id: 'user123', displayName: 'Test User', joinedAt: Date.now(), isHost: true, isReady: true }
     ],
     maxPlayers: 4,
-    settings: { roundDuration: 60, maxRounds: 5, wordLength: 5, allowRepeats: false }
+    settings: { roundDuration: 60, maxRounds: 5 }
   };
 
   beforeEach(() => {
@@ -132,7 +132,7 @@ describe('RoomContext', () => {
       
       await waitFor(() => {
         expect(mockCreateRoom).toHaveBeenCalledWith(
-          { name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5, wordLength: 5, allowRepeats: false } },
+          { name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } },
           'user123',
           'Test User'
         );
