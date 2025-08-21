@@ -24,8 +24,9 @@ export const GuestSignIn = () => {
       } else if (guestUser) {
         // You can redirect or update UI state here
       }
-    } catch (err) {
-      setError('Failed to sign in as guest. Please try again.');
+    } catch (error) {
+      console.error('Failed to sign in as guest:', error);
+      setError(error instanceof Error ? error.message : 'Failed to sign in as guest');
     } finally {
       setIsLoading(false);
     }

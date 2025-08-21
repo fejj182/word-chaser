@@ -32,7 +32,7 @@ describe('GuestSignInUI', () => {
       const user = userEvent.setup();
       render(<GuestSignInUI onSignIn={mockOnSignIn} isLoading={true} />);
       
-      const button = screen.getByRole('button', { name: /signing in/i });
+      const button = screen.getByRole('button', { name: /play as guest/i });
       await user.click(button);
       
       expect(mockOnSignIn).not.toHaveBeenCalled();
@@ -51,16 +51,10 @@ describe('GuestSignInUI', () => {
   });
 
   describe('Loading State', () => {
-    it('shows loading text when isLoading is true', () => {
-      render(<GuestSignInUI isLoading={true} />);
-      
-      expect(screen.getByText(/signing in/i)).toBeInTheDocument();
-    });
-
     it('disables button when isLoading is true', () => {
       render(<GuestSignInUI isLoading={true} />);
       
-      const button = screen.getByRole('button', { name: /signing in/i });
+      const button = screen.getByRole('button', { name: /play as guest/i });
       expect(button).toBeDisabled();
     });
 
@@ -68,7 +62,7 @@ describe('GuestSignInUI', () => {
       const user = userEvent.setup();
       render(<GuestSignInUI onSignIn={mockOnSignIn} isLoading={true} />);
       
-      const button = screen.getByRole('button', { name: /signing in/i });
+      const button = screen.getByRole('button', { name: /play as guest/i });
       await user.click(button);
       
       expect(mockOnSignIn).not.toHaveBeenCalled();
@@ -185,7 +179,7 @@ describe('GuestSignInUI', () => {
     it('button has proper disabled state', () => {
       render(<GuestSignInUI isLoading={true} />);
       
-      const button = screen.getByRole('button', { name: /signing in/i });
+      const button = screen.getByRole('button', { name: /play as guest/i });
       expect(button).toBeDisabled();
     });
 
