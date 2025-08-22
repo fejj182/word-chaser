@@ -15,6 +15,7 @@ const RoomLobby: React.FC = () => {
   const { currentRoom, leaveRoom, isLoading } = useRoom();
   const { user } = useAuth();
   const [startGameError, setStartGameError] = React.useState<string | null>(null);
+  const [copied, setCopied] = React.useState(false);
 
   if (!currentRoom || !user) {
     return null;
@@ -66,14 +67,44 @@ const RoomLobby: React.FC = () => {
     }
   };
 
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(currentRoom.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (error) {
+      console.error('Failed to copy room code:', error);
+    }
+  };
+
+  const readyCount = currentRoom.players.filter(p => p.isReady).length;
+
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg" aria-busy={isLoading}>
       {/* Room Header */}
       <div className="border-b pb-4 mb-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">{currentRoom.name}</h2>
-            <p className="text-gray-600">Room Code: <code className="bg-gray-100 px-2 py-1 rounded">{currentRoom.id}</code></p>
+        <div className="flex justify-between items-start gap-4">
+          <div className="min-w-0">
+            <h2 className="text-2xl font-bold text-gray-900 truncate">{currentRoom.name}</h2>
+            <div className="mt-1 flex items-center gap-2 flex-wrap text-gray-600">
+              <p className="text-gray-600">
+                Room Code: <code className="bg-gray-100 px-2 py-1 rounded">{currentRoom.id}</code>
+              </p>
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded transition-colors"
+                aria-label="Copy room code"
+                title="Copy room code"
+              >
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+              {isHost && (
+                <span className="ml-1 inline-flex items-center text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                  You are the host
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={handleLeaveRoom}
@@ -87,7 +118,19 @@ const RoomLobby: React.FC = () => {
 
       {/* Players List */}
       <div className="mb-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Players ({currentRoom.players.length}/{currentRoom.maxPlayers})</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Players ({currentRoom.players.length}/{currentRoom.maxPlayers})</h3>
+        <div className="mb-4">
+          <div className="flex justify-between text-xs text-gray-600 mb-1">
+            <span>{readyCount}/{currentRoom.players.length} ready</span>
+            {!allPlayersReady && <span>Waiting for players…</span>}
+          </div>
+          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden" aria-hidden="true">
+            <div
+              className={`h-full bg-green-500 transition-all`}
+              style={{ width: `${(readyCount / currentRoom.players.length) * 100}%` }}
+            />
+          </div>
+        </div>
         <div className="space-y-2">
           {currentRoom.players.map((player) => (
             <div
@@ -117,10 +160,11 @@ const RoomLobby: React.FC = () => {
                   <button
                     onClick={handleReadyToggle}
                     disabled={isLoading}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                    aria-pressed={player.isReady}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                       player.isReady
-                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                        ? 'bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-500'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200 focus:ring-green-500'
                     }`}
                   >
                     {player.isReady ? 'Not Ready' : 'Ready'}
@@ -151,7 +195,7 @@ const RoomLobby: React.FC = () => {
       {isHost && (
         <div className="border-t pt-4">
           {startGameError && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded" role="alert" aria-live="assertive">
               {startGameError}
             </div>
           )}
