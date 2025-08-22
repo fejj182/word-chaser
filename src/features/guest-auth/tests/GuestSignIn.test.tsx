@@ -44,7 +44,8 @@ describe('GuestSignIn Integration Tests', () => {
       expect(screen.getByRole('button', { name: /play as guest/i })).toBeInTheDocument();
     });
 
-    it('renders welcome message and "Start Game" button when user is signed in', () => {
+    it('only renders sign-in button regardless of auth state in this component', () => {
+      // This component now only handles the sign-in flow, not the signed-in state
       mockUseAuth.mockReturnValue({ 
         user: { uid: 'test-uid' } as any, 
         loading: false 
@@ -57,9 +58,8 @@ describe('GuestSignIn Integration Tests', () => {
       
       render(<GuestSignIn />);
       
-      expect(screen.getByText('Welcome!')).toBeInTheDocument();
-      expect(screen.getByText('Guest-abc123')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /start game/i })).toBeInTheDocument();
+      // Should only show the sign-in button, signed-in state is handled by page routing
+      expect(screen.getByRole('button', { name: /play as guest/i })).toBeInTheDocument();
     });
   });
 
@@ -186,14 +186,14 @@ describe('GuestSignIn Integration Tests', () => {
   });
 
   describe('Real Component Integration', () => {
-    it('properly integrates with GuestSignInUI component', () => {
+    it('renders the guest sign-in interface', () => {
       render(<GuestSignIn />);
       
-      // Should render the actual UI component with correct text
+      // Should render the sign-in button
       expect(screen.getByRole('button', { name: /play as guest/i })).toBeInTheDocument();
     });
 
-    it('shows correct UI state when signed in', () => {
+    it('maintains consistent UI regardless of auth state', () => {
       mockUseAuth.mockReturnValue({ 
         user: { uid: 'test-uid' } as any, 
         loading: false 
@@ -206,10 +206,8 @@ describe('GuestSignIn Integration Tests', () => {
       
       render(<GuestSignIn />);
       
-      // Should show the actual signed-in UI
-      expect(screen.getByText('Welcome!')).toBeInTheDocument();
-      expect(screen.getByText('Guest-abc123')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /start game/i })).toBeInTheDocument();
+      // Should only show sign-in UI since signed-in state is handled by page routing
+      expect(screen.getByRole('button', { name: /play as guest/i })).toBeInTheDocument();
     });
 
     it('handles loading state correctly', async () => {

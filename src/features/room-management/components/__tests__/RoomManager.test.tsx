@@ -41,7 +41,6 @@ describe('RoomManager', () => {
     it('shows main menu when no room is active', () => {
       render(<RoomManager />);
 
-      expect(screen.getByText('Word Chaser')).toBeInTheDocument();
       expect(screen.getByText('Create a New Room')).toBeInTheDocument();
       expect(screen.getByText('Join Existing Room')).toBeInTheDocument();
     });
@@ -75,7 +74,8 @@ describe('RoomManager', () => {
 
       // Go back to menu
       fireEvent.click(screen.getByText('← Back to Menu'));
-      expect(screen.getByText('Word Chaser')).toBeInTheDocument();
+      expect(screen.getByText('Create a New Room')).toBeInTheDocument();
+      expect(screen.getByText('Join Existing Room')).toBeInTheDocument();
       expect(screen.queryByTestId('create-room')).not.toBeInTheDocument();
     });
 
@@ -88,7 +88,8 @@ describe('RoomManager', () => {
 
       // Go back to menu
       fireEvent.click(screen.getByText('← Back to Menu'));
-      expect(screen.getByText('Word Chaser')).toBeInTheDocument();
+      expect(screen.getByText('Create a New Room')).toBeInTheDocument();
+      expect(screen.getByText('Join Existing Room')).toBeInTheDocument();
       expect(screen.queryByTestId('join-room')).not.toBeInTheDocument();
     });
   });
@@ -108,7 +109,6 @@ describe('RoomManager', () => {
       render(<RoomManager />);
 
       expect(screen.getByTestId('room-lobby')).toBeInTheDocument();
-      expect(screen.queryByText('Word Chaser')).not.toBeInTheDocument();
     });
 
     it('shows room lobby when user has complete room data', () => {
@@ -139,7 +139,6 @@ describe('RoomManager', () => {
       render(<RoomManager />);
 
       expect(screen.getByTestId('room-lobby')).toBeInTheDocument();
-      expect(screen.queryByText('Word Chaser')).not.toBeInTheDocument();
     });
   });
 

@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { CreateRoomParams, RoomSettings } from '@/features/room-management/types/room';
 
-interface CreateRoomFormProps {
+interface CreateRoomUIProps {
   onSubmit: (params: CreateRoomParams) => Promise<void>;
   isLoading: boolean;
+  error?: string | null;
 }
 
-const CreateRoomForm: React.FC<CreateRoomFormProps> = ({ onSubmit, isLoading }) => {
+const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error = null }) => {
   const [formData, setFormData] = useState<CreateRoomParams>({
     name: '',
     maxPlayers: 4,
@@ -47,6 +48,12 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({ onSubmit, isLoading }) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+      
       {/* Room Name */}
       <div>
         <label htmlFor="roomName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -142,4 +149,4 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({ onSubmit, isLoading }) 
   );
 };
 
-export default CreateRoomForm;
+export default CreateRoomUI;

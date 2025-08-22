@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { CreateRoomParams } from '@/features/room-management/types/room';
-import CreateRoomForm from './CreateRoomForm';
+import CreateRoomUI from './CreateRoomUI';
 
 const CreateRoom: React.FC = () => {
   const { createRoom, isLoading, error, clearError } = useRoom();
@@ -25,13 +25,7 @@ const CreateRoom: React.FC = () => {
         Create a New Room
       </h2>
       
-      {error && (
-        <div data-testid="error" className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
-      
-      <CreateRoomForm onSubmit={handleCreateRoom} isLoading={isLoading} />
+      <CreateRoomUI onSubmit={handleCreateRoom} isLoading={isLoading} error={error} />
     </div>
   );
 };

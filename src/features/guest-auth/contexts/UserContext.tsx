@@ -12,6 +12,9 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+// Export the context for stories and testing
+export { UserContext };
+
 export const useUser = () => {
   const context = useContext(UserContext);
   if (context === undefined) {

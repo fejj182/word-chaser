@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import CreateRoom from './CreateRoom';
 import JoinRoom from './JoinRoom';
+import RoomMenuUI from './RoomMenuUI';
 import RoomLobby from './RoomLobby';
 
 type RoomView = 'menu' | 'create' | 'join';
@@ -20,27 +21,10 @@ const RoomManager: React.FC = () => {
   // Show the main menu
   if (view === 'menu') {
     return (
-      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          Word Chaser
-        </h2>
-        
-        <div className="space-y-4">
-          <button
-            onClick={() => setView('create')}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
-            Create a New Room
-          </button>
-          
-          <button
-            onClick={() => setView('join')}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
-          >
-            Join Existing Room
-          </button>
-        </div>
-      </div>
+      <RoomMenuUI
+        onCreate={() => setView('create')}
+        onJoin={() => setView('join')}
+      />
     );
   }
 
