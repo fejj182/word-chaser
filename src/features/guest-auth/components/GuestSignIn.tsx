@@ -2,17 +2,15 @@
 
 import { useState } from 'react';
 import { signInAsGuest } from '@/lib/firebase/firebase-utils';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
-import { GuestSignInUI } from './GuestSignInUI';
 
 export const GuestSignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-  const { displayName } = useUser();
+
 
   const handleGuestSignIn = async () => {
+    if (isLoading) return;
+    
     setIsLoading(true);
     setError(null);
 
@@ -32,18 +30,19 @@ export const GuestSignIn = () => {
     }
   };
 
-  const handleStartGame = () => {
-    window.location.reload();
-  };
-
   return (
-    <GuestSignInUI
-      isLoading={isLoading}
-      error={error}
-      isSignedIn={!!(user && displayName)}
-      displayName={displayName}
-      onSignIn={handleGuestSignIn}
-      onStartGame={handleStartGame}
-    />
+    <div className="flex flex-col items-center space-y-4">
+      <button
+        onClick={handleGuestSignIn}
+        disabled={isLoading}
+        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Play as Guest
+      </button>
+      
+      {error && (
+        <p className="text-red-600 text-sm">{error}</p>
+      )}
+    </div>
   );
 };

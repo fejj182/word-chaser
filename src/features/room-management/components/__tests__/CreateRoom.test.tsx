@@ -9,14 +9,15 @@ jest.mock('@/features/room-management/contexts/RoomContext', () => ({
 }));
 
 // Mock child components
-jest.mock('../CreateRoomForm', () => {
-  return function MockCreateRoomForm({ onSubmit, isLoading }: any) {
+jest.mock('../CreateRoomUI', () => {
+  return function MockCreateRoomUI({ onSubmit, isLoading, error }: any) {
     return (
       <div data-testid="create-room-form">
         <button onClick={() => onSubmit({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } })}>
           Submit Form
         </button>
         <span data-testid="loading-state">{isLoading.toString()}</span>
+        {error && <div data-testid="error-message">{error}</div>}
       </div>
     );
   };
@@ -94,7 +95,7 @@ describe('CreateRoom', () => {
 
       render(<CreateRoom />);
 
-      expect(screen.getByText('Failed to create room')).toBeInTheDocument();
+      expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to create room');
     });
 
     it('should handle createRoom throwing an error', async () => {
@@ -132,7 +133,7 @@ describe('CreateRoom', () => {
   });
 
   describe('Component Integration', () => {
-    it('should properly integrate with CreateRoomForm component', () => {
+    it('should properly integrate with CreateRoomUI component', () => {
       render(<CreateRoom />);
 
       expect(screen.getByTestId('create-room-form')).toBeInTheDocument();

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import CreateRoomForm from '../CreateRoomForm';
+import CreateRoomUI from '../CreateRoomUI';
 
-describe('CreateRoomForm', () => {
+describe('CreateRoomUI', () => {
   const mockOnSubmit = jest.fn();
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('CreateRoomForm', () => {
   });
 
   it('renders form fields correctly', () => {
-    render(<CreateRoomForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
 
     expect(screen.getByLabelText(/room name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/maximum players/i)).toBeInTheDocument();
@@ -20,7 +20,7 @@ describe('CreateRoomForm', () => {
   });
 
   it('submits form with correct data', async () => {
-    render(<CreateRoomForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
 
     // Fill out the form
     fireEvent.change(screen.getByLabelText(/room name/i), {
@@ -52,14 +52,33 @@ describe('CreateRoomForm', () => {
   });
 
   it('disables submit button when loading', () => {
-    render(<CreateRoomForm onSubmit={mockOnSubmit} isLoading={true} />);
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={true} />);
 
     const submitButton = screen.getByRole('button', { name: /create room/i });
     expect(submitButton).toBeDisabled();
   });
 
+  it('displays error message when error prop is provided', () => {
+    const errorMessage = 'Failed to create room';
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} error={errorMessage} />);
+
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  });
+
+  it('does not display error message when error prop is null', () => {
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} error={null} />);
+
+    expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
+  });
+
+  it('does not display error message when error prop is undefined', () => {
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
+
+    expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
+  });
+
   it('prevents submission with empty room name', async () => {
-    render(<CreateRoomForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
 
     // Try to submit with empty room name
     fireEvent.click(screen.getByRole('button', { name: /create room/i }));
