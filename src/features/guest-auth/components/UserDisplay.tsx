@@ -10,19 +10,19 @@ export const UserDisplay = () => {
   }
 
   return (
-    <div className="fixed top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700">
+    <div className="md:fixed md:top-4 md:right-4 md:z-20 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 md:p-4 border border-gray-200 dark:border-gray-700 max-w-md md:max-w-sm mx-auto md:mx-0">
       <div className="text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
           Playing as:
         </p>
-        <p className="font-bold text-lg text-blue-600 dark:text-blue-400 mb-2">
+        <p className="font-bold text-base md:text-lg text-blue-600 dark:text-blue-400 mb-2">
           {displayName}
         </p>
-        <div className="bg-gray-100 dark:bg-gray-700 rounded px-3 py-2">
+        <div className="bg-gray-100 dark:bg-gray-700 rounded px-3 py-2 text-left">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
             Share this ID:
           </p>
-          <p className="font-mono text-sm text-gray-800 dark:text-gray-200 break-all">
+          <p className="font-mono text-xs md:text-sm text-gray-800 dark:text-gray-200 break-all">
             {userId}
           </p>
         </div>
