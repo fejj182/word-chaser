@@ -140,6 +140,43 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     }
   }, [state.currentRoom]);
 
+  // Cleanup logic to prevent orphaned rooms
+  useEffect(() => {
+    if (!state.currentRoom?.id || !user?.uid) {
+      return;
+    }
+
+    const handleBeforeUnload = () => {
+      if (state.currentRoom?.id && user?.uid) {
+        // Use sendBeacon for reliable cleanup on page unload
+        const data = JSON.stringify({
+          roomId: state.currentRoom.id,
+          userId: user.uid
+        });
+        
+        try {
+          navigator.sendBeacon('/api/leave-room', data);
+        } catch (error) {
+          console.warn('Failed to send cleanup request:', error);
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && state.currentRoom?.id && user?.uid) {
+        console.log('Page hidden - user may have navigated away');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [state.currentRoom?.id, user?.uid]);
+
   const value: RoomContextType = {
     ...state,
     createRoom: handleCreateRoom,

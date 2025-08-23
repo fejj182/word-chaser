@@ -356,4 +356,141 @@ describe('RoomContext', () => {
       });
     });
   });
+
+  describe('Cleanup Logic', () => {
+    beforeEach(() => {
+      // Mock navigator.sendBeacon
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: jest.fn(),
+        writable: true,
+      });
+      
+      // Mock document.visibilityState
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        writable: true,
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should set up cleanup event listeners when user is in a room', async () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+      const documentAddEventListenerSpy = jest.spyOn(document, 'addEventListener');
+      
+      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Trigger room creation to set up cleanup listeners
+      await act(async () => {
+        fireEvent.click(screen.getByText('Create Room'));
+      });
+      
+      await waitFor(() => {
+        expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+        expect(documentAddEventListenerSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
+      });
+    });
+
+    it('should not set up cleanup listeners when user is not in a room', () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+      
+      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Don't create a room, so no cleanup listeners should be set up
+      // The cleanup effect should not run because currentRoom is null
+      expect(addEventListenerSpy).not.toHaveBeenCalled();
+    });
+
+    it('should send cleanup request on beforeunload', async () => {
+      const sendBeaconSpy = jest.spyOn(navigator, 'sendBeacon');
+      
+      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create a room to set up cleanup listeners
+      await act(async () => {
+        fireEvent.click(screen.getByText('Create Room'));
+      });
+      
+      // Wait for the room to be set up
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toContainHTML('room123');
+      });
+      
+      // Simulate beforeunload event
+      const beforeUnloadEvent = new Event('beforeunload');
+      window.dispatchEvent(beforeUnloadEvent);
+      
+      expect(sendBeaconSpy).toHaveBeenCalledWith(
+        '/api/leave-room',
+        JSON.stringify({
+          roomId: 'room123',
+          userId: 'user123'
+        })
+      );
+    });
+
+    it('should handle visibility change events', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
+      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create a room to set up cleanup listeners
+      await act(async () => {
+        fireEvent.click(screen.getByText('Create Room'));
+      });
+      
+      // Wait for the room to be set up
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toContainHTML('room123');
+      });
+      
+      // Simulate page becoming hidden
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden' });
+      const visibilityChangeEvent = new Event('visibilitychange');
+      document.dispatchEvent(visibilityChangeEvent);
+      
+      expect(consoleSpy).toHaveBeenCalledWith('Page hidden - user may have navigated away');
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('should clean up event listeners on unmount', async () => {
+      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+      const documentRemoveEventListenerSpy = jest.spyOn(document, 'removeEventListener');
+      
+      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      const { unmount } = renderWithProvider(<TestComponent />);
+      
+      // Create a room to set up cleanup listeners
+      await act(async () => {
+        fireEvent.click(screen.getByText('Create Room'));
+      });
+      
+      // Wait for the room to be set up
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toContainHTML('room123');
+      });
+      
+      // Unmount the component
+      unmount();
+      
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+      expect(documentRemoveEventListenerSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
+    });
+  });
 });
