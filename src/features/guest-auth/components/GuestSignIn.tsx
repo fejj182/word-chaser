@@ -35,13 +35,13 @@ export const GuestSignIn = () => {
       <button
         onClick={handleGuestSignIn}
         disabled={isLoading}
-        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="btn btn--primary btn--large btn--disabled"
       >
         Play as Guest
       </button>
       
       {error && (
-        <p className="text-red-600 text-sm">{error}</p>
+        <p className="text--error">{error}</p>
       )}
     </div>
   );
