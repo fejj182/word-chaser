@@ -208,7 +208,7 @@ describe('RoomLobby', () => {
       expect(screen.getByText('Leave Room')).toBeDisabled();
     });
 
-    it('shows loading spinner when room data is incomplete', () => {
+    it('returns null when room data is incomplete', () => {
       const partialRoom = { id: 'room123' };
 
       mockUseRoom.mockReturnValue({
@@ -221,9 +221,9 @@ describe('RoomLobby', () => {
         clearError: jest.fn(),
       });
 
-      render(<RoomLobby />);
+      const { container } = render(<RoomLobby />);
 
-      expect(screen.getByText('Loading room data...')).toBeInTheDocument();
+      expect(container.firstChild).toBeNull();
     });
 
     it('returns null when no user or room', () => {

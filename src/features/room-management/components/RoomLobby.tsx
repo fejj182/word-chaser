@@ -21,16 +21,9 @@ const RoomLobby: React.FC = () => {
     return null;
   }
 
-  // Check if we have complete room data (not just the ID)
+  // Wait for complete room data before rendering
   if (!isCompleteRoom(currentRoom)) {
-    return (
-      <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading room data...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const currentPlayer = currentRoom.players.find(p => p.id === user.uid);
