@@ -10,19 +10,19 @@ export const UserDisplay = () => {
   }
 
   return (
-    <div className="md:fixed md:top-4 md:right-4 md:z-20 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 md:p-4 border border-gray-200 dark:border-gray-700 max-w-md md:max-w-sm mx-auto md:mx-0">
-      <div className="text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+    <div className="card card--user card--user-desktop">
+      <div className="container--centered">
+        <p className="text--label">
           Playing as:
         </p>
-        <p className="font-bold text-base md:text-lg text-blue-600 dark:text-blue-400 mb-2">
+        <p className="text--heading">
           {displayName}
         </p>
-        <div className="bg-gray-100 dark:bg-gray-700 rounded px-3 py-2 text-left">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+        <div className="container--id-display">
+          <p className="text--subtitle">
             Share this ID:
           </p>
-          <p className="font-mono text-xs md:text-sm text-gray-800 dark:text-gray-200 break-all">
+          <p className="text--mono">
             {userId}
           </p>
         </div>
@@ -35,7 +35,7 @@ export const UserDisplay = () => {
               console.error('Failed to copy:', err);
             }
           }}
-          className="mt-2 w-full px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+          className="btn btn--primary btn--full btn--small spacing--button-top"
         >
           Copy ID
         </button>

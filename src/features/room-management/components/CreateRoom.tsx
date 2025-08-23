@@ -20,8 +20,8 @@ const CreateRoom: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+    <div className="card card--form">
+      <h2 className="text--card-title">
         Create a New Room
       </h2>
       

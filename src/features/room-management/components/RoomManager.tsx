@@ -34,7 +34,7 @@ const RoomManager: React.FC = () => {
       <div>
         <button
           onClick={() => setView('menu')}
-          className="mb-4 text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="btn btn--back"
         >
           ← Back to Menu
         </button>
@@ -49,7 +49,7 @@ const RoomManager: React.FC = () => {
       <div>
         <button
           onClick={() => setView('menu')}
-          className="mb-4 text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="btn btn--back"
         >
           ← Back to Menu
         </button>

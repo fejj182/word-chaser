@@ -47,16 +47,16 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="spacing--form">
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="form-error">
           {error}
         </div>
       )}
       
       {/* Room Name */}
       <div>
-        <label htmlFor="roomName" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="roomName" className="form-label">
           Room Name
         </label>
         <input
@@ -64,7 +64,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
           id="roomName"
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="form-input"
           placeholder="Enter room name..."
           required
           disabled={isLoading}
@@ -73,14 +73,14 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
 
       {/* Max Players */}
       <div>
-        <label htmlFor="maxPlayers" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="maxPlayers" className="form-label">
           Maximum Players
         </label>
         <select
           id="maxPlayers"
           value={formData.maxPlayers}
           onChange={(e) => handleInputChange('maxPlayers', parseInt(e.target.value))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="form-input"
           disabled={isLoading}
         >
           <option value={2}>2 Players</option>
@@ -92,20 +92,20 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
       </div>
 
       {/* Game Settings */}
-      <div className="border-t pt-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Game Settings</h3>
+      <div className="section--divider-settings">
+        <h3 className="text--section-title">Game Settings</h3>
         
-        <div className="space-y-4">
+        <div className="spacing--settings">
           {/* Round Duration */}
           <div>
-            <label htmlFor="roundDuration" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="roundDuration" className="form-label">
               Round Duration (seconds)
             </label>
             <select
               id="roundDuration"
               value={formData.settings.roundDuration}
               onChange={(e) => handleSettingsChange('roundDuration', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="form-input"
               disabled={isLoading}
             >
               <option value={30}>30 seconds</option>
@@ -118,14 +118,14 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
 
           {/* Max Rounds */}
           <div>
-            <label htmlFor="maxRounds" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="maxRounds" className="form-label">
               Number of Rounds
             </label>
             <select
               id="maxRounds"
               value={formData.settings.maxRounds}
               onChange={(e) => handleSettingsChange('maxRounds', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="form-input"
               disabled={isLoading}
             >
               <option value={3}>3 rounds</option>
@@ -141,7 +141,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
       <button
         type="submit"
         disabled={isLoading || !formData.name.trim()}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="btn btn--primary btn--full btn--medium btn--disabled"
       >
         Create Room
       </button>
