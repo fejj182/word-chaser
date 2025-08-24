@@ -13,12 +13,10 @@ const RoomManager: React.FC = () => {
   const { currentRoom } = useRoom();
   const [view, setView] = useState<RoomView>('menu');
 
-  // If user is in a room, show the lobby
   if (currentRoom) {
     return <RoomLobby />;
   }
 
-  // Show the main menu
   if (view === 'menu') {
     return (
       <RoomMenuUI
@@ -28,7 +26,6 @@ const RoomManager: React.FC = () => {
     );
   }
 
-  // Show create room form
   if (view === 'create') {
     return (
       <div>
@@ -43,7 +40,6 @@ const RoomManager: React.FC = () => {
     );
   }
 
-  // Show join room form
   if (view === 'join') {
     return (
       <div>

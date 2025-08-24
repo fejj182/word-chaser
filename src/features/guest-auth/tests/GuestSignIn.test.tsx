@@ -6,17 +6,14 @@ import { signInAsGuest } from '@/lib/firebase/firebase-utils';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
-// Mock the useUser hook
 jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
   useUser: jest.fn(),
 }));
 
-// Mock the firebase-utils module
 jest.mock('@/lib/firebase/firebase-utils', () => ({
   signInAsGuest: jest.fn(),
 }));
 
-// Mock the useAuth hook
 jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
@@ -28,7 +25,6 @@ const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 describe('GuestSignIn Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default mock: user is not signed in
     mockUseAuth.mockReturnValue({ user: null, loading: false });
     mockUseUser.mockReturnValue({
       userId: null,
@@ -45,7 +41,6 @@ describe('GuestSignIn Integration Tests', () => {
     });
 
     it('only renders sign-in button regardless of auth state in this component', () => {
-      // This component now only handles the sign-in flow, not the signed-in state
       mockUseAuth.mockReturnValue({ 
         user: { uid: 'test-uid' } as any, 
         loading: false 
@@ -58,7 +53,6 @@ describe('GuestSignIn Integration Tests', () => {
       
       render(<GuestSignIn />);
       
-      // Should only show the sign-in button, signed-in state is handled by page routing
       expect(screen.getByRole('button', { name: /play as guest/i })).toBeInTheDocument();
     });
   });
@@ -81,7 +75,6 @@ describe('GuestSignIn Integration Tests', () => {
 
     it('shows loading state during sign-in process', async () => {
       const user = userEvent.setup();
-      // Mock a delayed response to test loading state
       mockSignInAsGuest.mockImplementation(() => 
         new Promise(resolve => 
           setTimeout(() => resolve({ user: { uid: 'guest-uid' } as any, error: null }), 100)
@@ -93,7 +86,6 @@ describe('GuestSignIn Integration Tests', () => {
       const button = screen.getByRole('button', { name: /play as guest/i });
       await user.click(button);
       
-      // Should show button is disabled during loading
       expect(button).toBeDisabled();
     });
 
@@ -155,13 +147,11 @@ describe('GuestSignIn Integration Tests', () => {
     it('clears previous error when retrying sign-in', async () => {
       const user = userEvent.setup();
       
-      // First attempt fails
       mockSignInAsGuest.mockResolvedValueOnce({ 
         user: null, 
         error: new Error('First error') 
       });
       
-      // Second attempt succeeds
       mockSignInAsGuest.mockResolvedValueOnce({ 
         user: { uid: 'guest-uid' } as any, 
         error: null 
@@ -171,13 +161,11 @@ describe('GuestSignIn Integration Tests', () => {
       
       const button = screen.getByRole('button', { name: /play as guest/i });
       
-      // First click - should show error
       await user.click(button);
       await waitFor(() => {
         expect(screen.getByText('First error')).toBeInTheDocument();
       });
       
-      // Second click - error should be cleared
       await user.click(button);
       await waitFor(() => {
         expect(screen.queryByText('First error')).not.toBeInTheDocument();
@@ -189,7 +177,6 @@ describe('GuestSignIn Integration Tests', () => {
     it('renders the guest sign-in interface', () => {
       render(<GuestSignIn />);
       
-      // Should render the sign-in button
       expect(screen.getByRole('button', { name: /play as guest/i })).toBeInTheDocument();
     });
 
@@ -206,7 +193,6 @@ describe('GuestSignIn Integration Tests', () => {
       
       render(<GuestSignIn />);
       
-      // Should only show sign-in UI since signed-in state is handled by page routing
       expect(screen.getByRole('button', { name: /play as guest/i })).toBeInTheDocument();
     });
 
@@ -223,7 +209,6 @@ describe('GuestSignIn Integration Tests', () => {
       const button = screen.getByRole('button', { name: /play as guest/i });
       await user.click(button);
       
-      // Should show button is disabled during loading
       expect(button).toBeDisabled();
     });
   });

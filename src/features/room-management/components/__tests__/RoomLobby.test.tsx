@@ -5,7 +5,6 @@ import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
 
-// Mock dependencies
 jest.mock('@/features/room-management/contexts/RoomContext');
 jest.mock('@/features/guest-auth/hooks/useAuth');
 jest.mock('@/lib/firebase/room-utils');
@@ -371,7 +370,7 @@ describe('RoomLobby', () => {
       expect(screen.getByText('Another User')).toBeInTheDocument();
       expect(screen.getByText('Host')).toBeInTheDocument();
       expect(screen.getByText('Ready')).toBeInTheDocument();
-      expect(screen.getAllByText('Not Ready')).toHaveLength(2); // Button and span
+      expect(screen.getAllByText('Not Ready')).toHaveLength(2);
     });
 
     it('does not show ready toggle button for other users', () => {

@@ -4,14 +4,12 @@ import userEvent from '@testing-library/user-event';
 import { UserDisplay } from '../components/UserDisplay';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
-// Mock the useUser hook
 jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
   useUser: jest.fn(),
 }));
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 
-// Mock clipboard API
 Object.assign(navigator, {
   clipboard: {
     writeText: jest.fn(),
@@ -21,7 +19,6 @@ Object.assign(navigator, {
 describe('UserDisplay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default mock: no user
     mockUseUser.mockReturnValue({
       userId: null,
       displayName: null,
@@ -65,7 +62,7 @@ describe('UserDisplay', () => {
     });
   });
 
-  // Copy ID functionality removed from UI
+  
 
   describe('UI Elements', () => {
     it('should render only alias when user is signed in', () => {
@@ -77,7 +74,6 @@ describe('UserDisplay', () => {
       
       render(<UserDisplay />);
       
-      // Check that all important content is rendered
       expect(screen.getByText('Playing as:')).toBeInTheDocument();
       expect(screen.getByText('Alias-abc123')).toBeInTheDocument();
       expect(screen.queryByText('Share this ID:')).not.toBeInTheDocument();
@@ -85,12 +81,5 @@ describe('UserDisplay', () => {
       expect(screen.queryByRole('button', { name: /copy id/i })).not.toBeInTheDocument();
     });
 
-    // UID should no longer be displayed
-
-    // copy button removed
-  });
-
-  describe('Accessibility', () => {
-    // copy button removed
   });
 }); 

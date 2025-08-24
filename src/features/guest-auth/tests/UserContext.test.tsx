@@ -4,14 +4,12 @@ import userEvent from '@testing-library/user-event';
 import { UserProvider, useUser } from '../contexts/UserContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 
-// Mock the useAuth hook
 jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
-// Test component to access context
 const TestComponent = () => {
   const { userId, displayName, setUser } = useUser();
   return (
@@ -45,7 +43,6 @@ const renderWithProvider = (component: React.ReactElement) => {
 describe('UserContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default mock: no user
     mockUseAuth.mockReturnValue({ user: null, loading: false });
   });
 
@@ -85,7 +82,6 @@ describe('UserContext', () => {
         expect(screen.getByTestId('displayName')).toHaveTextContent('no-display');
       });
     });
-    // No auto-generation based on UID anymore
   });
 
   describe('Authenticated User Handling', () => {
@@ -106,7 +102,6 @@ describe('UserContext', () => {
         expect(screen.getByTestId('displayName')).toHaveTextContent('John Doe');
       });
     });
-    // No fallback to email or generic User label now; remains null
   });
 
   describe('setUser Function', () => {
@@ -114,10 +109,8 @@ describe('UserContext', () => {
       const user = userEvent.setup();
       renderWithProvider(<TestComponent />);
       
-      // Initially no user
       expect(screen.getByTestId('userId')).toHaveTextContent('no-user');
       
-      // Click button to set user
       await user.click(screen.getByTestId('setUser'));
       
       await waitFor(() => {
@@ -128,7 +121,6 @@ describe('UserContext', () => {
 
     it('should clear user state when setUser is called with null', async () => {
       const user = userEvent.setup();
-      // Start with a user
       const mockUser = {
         uid: 'user123',
         isAnonymous: true,
@@ -169,10 +161,8 @@ describe('UserContext', () => {
     it('should update when auth state changes from null to user', async () => {
       const { rerender } = renderWithProvider(<TestComponent />);
       
-      // Initially no user
       expect(screen.getByTestId('userId')).toHaveTextContent('no-user');
       
-      // Simulate auth state change
       const mockUser = {
         uid: 'newuser123',
         isAnonymous: true,

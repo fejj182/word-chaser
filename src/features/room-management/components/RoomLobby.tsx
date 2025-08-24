@@ -6,7 +6,6 @@ import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
 import { Room, PartialRoom } from '@/features/room-management/types/room';
 
-// Type guard to check if we have a complete room object
 function isCompleteRoom(room: Room | PartialRoom): room is Room {
   return 'players' in room && 'name' in room;
 }
@@ -21,7 +20,6 @@ const RoomLobby: React.FC = () => {
     return null;
   }
 
-  // Wait for complete room data before rendering
   if (!isCompleteRoom(currentRoom)) {
     return null;
   }

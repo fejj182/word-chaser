@@ -22,7 +22,6 @@ describe('CreateRoomUI', () => {
   it('submits form with correct data', async () => {
     render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
 
-    // Fill out the form
     fireEvent.change(screen.getByLabelText(/alias/i), {
       target: { value: 'Tester' },
     });
@@ -36,7 +35,6 @@ describe('CreateRoomUI', () => {
       target: { value: '5' },
     });
 
-    // Submit the form
     fireEvent.click(screen.getByRole('button', { name: /create room/i }));
 
     await waitFor(() => {
@@ -82,10 +80,8 @@ describe('CreateRoomUI', () => {
   it('prevents submission with empty room name', async () => {
     render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
 
-    // Try to submit with empty room name
     fireEvent.click(screen.getByRole('button', { name: /create room/i }));
 
-    // The form should not call onSubmit when room name is empty
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 

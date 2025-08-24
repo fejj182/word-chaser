@@ -25,5 +25,4 @@ const meta: Meta<typeof UnauthenticatedContent> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Default state - shows the sign-in interface
 export const Default: Story = {};

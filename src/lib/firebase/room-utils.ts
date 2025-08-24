@@ -134,10 +134,9 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
     } else {
       // If the host left, make the first remaining player the host
       if (room.players.find(p => p.id === userId)?.isHost && updatedPlayers.length > 0) {
-        updatedPlayers[0].isHost = true;  // ← Fix: Update the array directly
+        updatedPlayers[0].isHost = true;
       }
       
-      // Update players array
       const updates: Record<string, any> = {};
       updates[`${ROOMS_PATH}/${roomId}/players`] = updatedPlayers;
       

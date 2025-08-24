@@ -75,7 +75,6 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
       const displayName = alias.trim() || ensuredUser.displayName || 'Anonymous';
       const roomId = await createRoom(params, ensuredUser.uid, displayName);
       
-      // Defensive check for empty or invalid room ID
       if (!roomId || roomId.trim() === '') {
         throw new Error('Invalid room ID received from server');
       }

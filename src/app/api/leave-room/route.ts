@@ -6,7 +6,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { roomId, userId } = body;
 
-    // Validate required fields
     if (!roomId || !userId) {
       return NextResponse.json(
         { error: 'Missing required fields: roomId and userId' },
@@ -14,7 +13,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call the existing leaveRoom function
     await leaveRoom(roomId, userId);
 
     return NextResponse.json({ success: true });
