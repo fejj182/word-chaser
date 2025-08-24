@@ -53,7 +53,7 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
         </div>
         <div>
           <label htmlFor="roomId" className="form-label">
-            Room Name
+            Room Code
           </label>
           <input
             type="text"
@@ -61,7 +61,7 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
             value={roomId}
             onChange={(e) => onRoomIdChange(e.target.value)}
             className="form-input"
-            placeholder="Enter room name..."
+            placeholder="Enter room code..."
             required
             disabled={isLoading}
           />

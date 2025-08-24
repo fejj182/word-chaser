@@ -312,4 +312,158 @@ describe('room-utils', () => {
       await expect(startGame('test-room-id')).rejects.toThrow('Not all players are ready');
     });
   });
+
+  describe('slug generation', () => {
+    it('generates Glaswegian-style slugs with correct format', async () => {
+      const mockRoomRef = { key: 'test-room-id' };
+      const mockPushRef = {};
+      
+      mockRef.mockReturnValue(mockPushRef);
+      mockPush.mockReturnValue(mockRoomRef);
+      mockSet.mockResolvedValue(undefined);
+      mockGet.mockResolvedValueOnce({ exists: () => false } as any);
+
+      const params: CreateRoomParams = {
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
+      await createRoom(params, 'user-id', 'Test User');
+
+      // Check that set was called with a room object
+      const setCall = mockSet.mock.calls.find(call => 
+        call[0] === mockRoomRef && typeof call[1] === 'object' && call[1].name
+      );
+      expect(setCall).toBeDefined();
+      
+      const roomData = setCall![1] as any;
+      const { name, slug } = roomData;
+      
+      // Verify the format: word-word-number
+      expect(name).toMatch(/^[a-z]+-[a-z]+-\d{3}$/);
+      expect(slug).toMatch(/^[a-z]+-[a-z]+-\d{3}$/);
+      expect(name).toBe(slug); // Name and slug should be the same
+      
+      // Verify it uses Glaswegian words
+      const glaswegianWords = [
+        'wee', 'daftie', 'bampot', 'heid', 'bawbag', 'gallus', 'pure', 'dead', 'manky', 'scunner',
+        'boggin', 'mingin', 'braw', 'bonnie', 'crabbit', 'dreich', 'fankle', 'glaikit', 'guddle', 'keek',
+        'malky', 'numpty', 'peely', 'plooky', 'scunner', 'shoogly', 'skelf', 'smirr', 'stoater', 'wabbit'
+      ];
+      
+      const [word1, word2] = name.split('-');
+      expect(glaswegianWords).toContain(word1);
+      expect(glaswegianWords).toContain(word2);
+      
+      // Verify the number is 3 digits
+      const number = name.split('-')[2];
+      expect(parseInt(number)).toBeGreaterThanOrEqual(100);
+      expect(parseInt(number)).toBeLessThanOrEqual(999);
+    });
+
+    it('handles slug conflicts by generating new slugs', async () => {
+      const mockRoomRef = { key: 'test-room-id' };
+      const mockPushRef = {};
+      
+      mockRef.mockReturnValue(mockPushRef);
+      mockPush.mockReturnValue(mockRoomRef);
+      mockSet.mockResolvedValue(undefined);
+      
+      // First two attempts return existing slugs, third attempt succeeds
+      mockGet
+        .mockResolvedValueOnce({ exists: () => true } as any) // First slug exists
+        .mockResolvedValueOnce({ exists: () => true } as any) // Second slug exists
+        .mockResolvedValueOnce({ exists: () => false } as any); // Third slug is unique
+
+      const params: CreateRoomParams = {
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
+      await createRoom(params, 'user-id', 'Test User');
+
+      // Should have checked for slug availability multiple times
+      expect(mockGet).toHaveBeenCalledTimes(3);
+      
+      // Verify the final slug was stored
+      const setCall = mockSet.mock.calls.find(call => 
+        call[0] === mockRoomRef && typeof call[1] === 'object' && call[1].name
+      );
+      expect(setCall).toBeDefined();
+      
+      const roomData = setCall![1] as any;
+      expect(roomData.name).toMatch(/^[a-z]+-[a-z]+-\d{3}$/);
+    });
+
+    it('uses fallback with timestamp when all attempts fail', async () => {
+      const mockRoomRef = { key: 'test-room-id' };
+      const mockPushRef = {};
+      
+      mockRef.mockReturnValue(mockPushRef);
+      mockPush.mockReturnValue(mockRoomRef);
+      mockSet.mockResolvedValue(undefined);
+      
+      // All attempts return existing slugs
+      mockGet.mockResolvedValue({ exists: () => true } as any);
+
+      const params: CreateRoomParams = {
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
+      await createRoom(params, 'user-id', 'Test User');
+
+      // Should have checked for slug availability 20 times (max attempts)
+      expect(mockGet).toHaveBeenCalledTimes(20);
+      
+      // Verify the fallback slug was stored
+      const setCall = mockSet.mock.calls.find(call => 
+        call[0] === mockRoomRef && typeof call[1] === 'object' && call[1].name
+      );
+      expect(setCall).toBeDefined();
+      
+      const roomData = setCall![1] as any;
+      // Fallback should include timestamp
+      expect(roomData.name).toMatch(/^[a-z]+-[a-z]+-\d{3}-\d+$/);
+    });
+
+    it('stores slug mapping in slugs path', async () => {
+      const mockRoomRef = { key: 'test-room-id' };
+      const mockPushRef = {};
+      
+      mockRef.mockReturnValue(mockPushRef);
+      mockPush.mockReturnValue(mockRoomRef);
+      mockSet.mockResolvedValue(undefined);
+      mockGet.mockResolvedValueOnce({ exists: () => false } as any);
+
+      const params: CreateRoomParams = {
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
+      await createRoom(params, 'user-id', 'Test User');
+
+      // Should have called set twice: once for room, once for slug mapping
+      expect(mockSet).toHaveBeenCalledTimes(2);
+      
+      // Find the slug mapping call
+      const slugMappingCall = mockSet.mock.calls.find(call => 
+        call[0] !== mockRoomRef && typeof call[1] === 'string'
+      );
+      expect(slugMappingCall).toBeDefined();
+      expect(slugMappingCall![1]).toBe('test-room-id');
+    });
+  });
 });

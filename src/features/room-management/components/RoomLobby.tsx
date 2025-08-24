@@ -76,24 +76,29 @@ const RoomLobby: React.FC = () => {
     <div className="card card--lobby" aria-busy={isLoading}>
       {/* Room Header */}
       <div className="section--divider">
-        <div className="layout--flex-between">
-          <div className="min-w-0">
-            <h2 className="text--room-title">{currentRoom.name}</h2>
-            <div className="layout--flex-wrap">
-              <p className="text-gray-600">
-                Room Name: <code className="code-display">{currentRoom.name}</code>
-              </p>
+        <div className="layout--flex-between items-start">
+          <div className="min-w-0 flex-1">
+            <h2 className="text--room-title mb-3">Lobby</h2>
+            <div className="flex items-center space-x-3 mb-2">
+              <code className="text-lg font-mono bg-gray-100 px-3 py-2 rounded border flex-1">
+                {currentRoom.name}
+              </code>
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="badge badge--copy"
-                aria-label="Copy room name"
-                title="Copy room name"
+                className="btn btn--secondary btn--small whitespace-nowrap"
+                aria-label="Copy room code"
+                title="Copy room code to share with friends"
               >
-                {copied ? 'Copied' : 'Copy'}
+                {copied ? 'Copied!' : 'Copy'}
               </button>
+            </div>
+            <div className="flex items-center space-x-3">
+              <p className="text-sm text-gray-600">
+                Share this code with friends to invite them to your room
+              </p>
               {isHost && (
-                <span className="ml-1 inline-flex items-center badge badge--host">
+                <span className="inline-flex items-center badge badge--host">
                   You are the host
                 </span>
               )}
@@ -102,7 +107,7 @@ const RoomLobby: React.FC = () => {
           <button
             onClick={handleLeaveRoom}
             disabled={isLoading}
-            className="btn btn--danger btn--medium btn--disabled"
+            className="btn btn--danger btn--medium ml-4 opacity-75 hover:opacity-100"
           >
             Leave Room
           </button>
