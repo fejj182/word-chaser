@@ -3,7 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import RoomManager from '../RoomManager';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
-// Mock dependencies
 jest.mock('@/features/room-management/contexts/RoomContext');
 jest.mock('../CreateRoom', () => {
   return function MockCreateRoom() {
@@ -68,11 +67,9 @@ describe('RoomManager', () => {
     it('returns to main menu when back button is clicked from create room', () => {
       render(<RoomManager />);
 
-      // Navigate to create room
       fireEvent.click(screen.getByText('Create a New Room'));
       expect(screen.getByTestId('create-room')).toBeInTheDocument();
 
-      // Go back to menu
       fireEvent.click(screen.getByText('← Back to Menu'));
       expect(screen.getByText('Create a New Room')).toBeInTheDocument();
       expect(screen.getByText('Join Existing Room')).toBeInTheDocument();
@@ -82,11 +79,9 @@ describe('RoomManager', () => {
     it('returns to main menu when back button is clicked from join room', () => {
       render(<RoomManager />);
 
-      // Navigate to join room
       fireEvent.click(screen.getByText('Join Existing Room'));
       expect(screen.getByTestId('join-room')).toBeInTheDocument();
 
-      // Go back to menu
       fireEvent.click(screen.getByText('← Back to Menu'));
       expect(screen.getByText('Create a New Room')).toBeInTheDocument();
       expect(screen.getByText('Join Existing Room')).toBeInTheDocument();
@@ -178,7 +173,6 @@ describe('RoomManager', () => {
 
   describe('State Transitions', () => {
     it('transitions from create room to lobby when room is created', () => {
-      // Start with no room
       mockUseRoom.mockReturnValue({
         currentRoom: null,
         isLoading: false,
@@ -191,11 +185,9 @@ describe('RoomManager', () => {
 
       const { rerender } = render(<RoomManager />);
 
-      // Navigate to create room
       fireEvent.click(screen.getByText('Create a New Room'));
       expect(screen.getByTestId('create-room')).toBeInTheDocument();
 
-      // Simulate room being created
       mockUseRoom.mockReturnValue({
         currentRoom: { id: 'room123' },
         isLoading: false,
@@ -213,7 +205,6 @@ describe('RoomManager', () => {
     });
 
     it('transitions from join room to lobby when room is joined', () => {
-      // Start with no room
       mockUseRoom.mockReturnValue({
         currentRoom: null,
         isLoading: false,
@@ -226,11 +217,9 @@ describe('RoomManager', () => {
 
       const { rerender } = render(<RoomManager />);
 
-      // Navigate to join room
       fireEvent.click(screen.getByText('Join Existing Room'));
       expect(screen.getByTestId('join-room')).toBeInTheDocument();
 
-      // Simulate room being joined
       mockUseRoom.mockReturnValue({
         currentRoom: { id: 'room123' },
         isLoading: false,

@@ -36,7 +36,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     if (user) {
       setUserId(user.uid);
-      // Prefer explicit displayName if present (even for anonymous). Do not auto-generate.
       if (user.displayName && user.displayName.trim().length > 0) {
         setDisplayName(user.displayName);
       } else {

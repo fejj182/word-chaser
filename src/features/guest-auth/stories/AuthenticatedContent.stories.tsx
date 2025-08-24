@@ -32,10 +32,8 @@ const meta: Meta<typeof AuthenticatedContent> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Default state - shows the authenticated interface
 export const Default: Story = {};
 
-// With different user name
 export const WithLongDisplayName: Story = {
   decorators: [
     (Story: any) => (

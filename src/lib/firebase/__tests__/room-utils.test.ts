@@ -3,7 +3,6 @@ import { ref, push, set, get, onValue, off, update } from 'firebase/database';
 import { db } from '../firebase';
 import { CreateRoomParams } from '@/features/room-management/types/room';
 
-// Mock Firebase database functions
 jest.mock('firebase/database', () => ({
   ref: jest.fn(),
   push: jest.fn(),
@@ -14,7 +13,6 @@ jest.mock('firebase/database', () => ({
   update: jest.fn(),
 }));
 
-// Mock the Firebase db instance
 jest.mock('../firebase', () => ({
   db: {},
 }));
@@ -342,12 +340,10 @@ describe('room-utils', () => {
       const roomData = setCall![1] as any;
       const { name, slug } = roomData;
       
-      // Verify the format: word-word-number
       expect(name).toMatch(/^[a-z]+-[a-z]+-\d{3}$/);
       expect(slug).toMatch(/^[a-z]+-[a-z]+-\d{3}$/);
-      expect(name).toBe(slug); // Name and slug should be the same
+      expect(name).toBe(slug);
       
-      // Verify it uses Glaswegian words
       const glaswegianWords = [
         'wee', 'daftie', 'bampot', 'heid', 'bawbag', 'gallus', 'pure', 'dead', 'manky', 'scunner',
         'boggin', 'mingin', 'braw', 'bonnie', 'crabbit', 'dreich', 'fankle', 'glaikit', 'guddle', 'keek',
@@ -358,7 +354,6 @@ describe('room-utils', () => {
       expect(glaswegianWords).toContain(word1);
       expect(glaswegianWords).toContain(word2);
       
-      // Verify the number is 3 digits
       const number = name.split('-')[2];
       expect(parseInt(number)).toBeGreaterThanOrEqual(100);
       expect(parseInt(number)).toBeLessThanOrEqual(999);

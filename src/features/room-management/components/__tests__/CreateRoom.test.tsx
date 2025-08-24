@@ -7,12 +7,10 @@ jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
 import CreateRoom from '../CreateRoom';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
-// Mock the room context
 jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   useRoom: jest.fn(),
 }));
 
-// Mock child components
 jest.mock('../CreateRoomUI', () => {
   return function MockCreateRoomUI({ onSubmit, isLoading, error }: any) {
     return (

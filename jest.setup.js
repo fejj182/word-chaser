@@ -1,13 +1,11 @@
 import '@testing-library/jest-dom'
 
-// Mock Firebase
 jest.mock('./src/lib/firebase/firebase', () => ({
   auth: {},
   db: {},
   storage: {},
 }))
 
-// Mock Firebase Auth
 jest.mock('firebase/auth', () => ({
   signInAnonymously: jest.fn(),
   onAuthStateChanged: jest.fn(),
@@ -16,7 +14,6 @@ jest.mock('firebase/auth', () => ({
   createUserWithEmailAndPassword: jest.fn(),
 }))
 
-// Mock Firebase Firestore
 jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
   setDoc: jest.fn(),
@@ -30,7 +27,6 @@ jest.mock('firebase/firestore', () => ({
   getDocs: jest.fn(),
 }))
 
-// Mock Firebase Storage
 jest.mock('firebase/storage', () => ({
   ref: jest.fn(),
   uploadBytes: jest.fn(),

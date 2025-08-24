@@ -18,5 +18,4 @@ const meta: Meta<typeof GameHeader> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Default header
 export const Default: Story = {};

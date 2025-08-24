@@ -11,12 +11,10 @@ const mockClearError = jest.fn();
 const mockCreateRoom = jest.fn();
 const mockLeaveRoom = jest.fn();
 
-// Mock the useRoom hook at the top level
 jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   useRoom: jest.fn(),
 }));
 
-// Import the mocked hook
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 const mockUseRoom = useRoom as jest.MockedFunction<typeof useRoom>;
 
@@ -27,7 +25,6 @@ describe('JoinRoom', () => {
     mockCreateRoom.mockClear();
     mockLeaveRoom.mockClear();
     
-    // Set up default mock return value
     mockUseRoom.mockReturnValue({
       joinRoom: mockJoinRoom,
       createRoom: mockCreateRoom,
@@ -120,7 +117,6 @@ describe('JoinRoom', () => {
   });
 
   it('shows error message when error is present', () => {
-    // Update the mock to return an error
     mockUseRoom.mockReturnValue({
       joinRoom: mockJoinRoom,
       createRoom: mockCreateRoom,
@@ -141,7 +137,6 @@ describe('JoinRoom', () => {
   });
 
   it('disables form fields when loading', () => {
-    // Update the mock to return loading state
     mockUseRoom.mockReturnValue({
       joinRoom: mockJoinRoom,
       createRoom: mockCreateRoom,
