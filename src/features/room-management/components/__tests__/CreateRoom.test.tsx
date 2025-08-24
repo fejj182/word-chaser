@@ -1,5 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
+jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, loading: false })
+}));
 import CreateRoom from '../CreateRoom';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
@@ -13,7 +17,7 @@ jest.mock('../CreateRoomUI', () => {
   return function MockCreateRoomUI({ onSubmit, isLoading, error }: any) {
     return (
       <div data-testid="create-room-form">
-        <button onClick={() => onSubmit({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } })}>
+        <button onClick={() => onSubmit({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } }, 'Alias') }>
           Submit Form
         </button>
         <span data-testid="loading-state">{isLoading.toString()}</span>
@@ -44,7 +48,11 @@ describe('CreateRoom', () => {
 
   describe('Initial State', () => {
     it('should show create room form initially', () => {
-      render(<CreateRoom />);
+      render(
+        <UserProvider>
+          <CreateRoom />
+        </UserProvider>
+      );
 
       expect(screen.getByText('Create a New Room')).toBeInTheDocument();
       expect(screen.getByTestId('create-room-form')).toBeInTheDocument();
@@ -55,7 +63,11 @@ describe('CreateRoom', () => {
     it('should call createRoom when form is submitted', async () => {
       mockCreateRoom.mockResolvedValue('room123');
 
-      render(<CreateRoom />);
+      render(
+        <UserProvider>
+          <CreateRoom />
+        </UserProvider>
+      );
 
       fireEvent.click(screen.getByText('Submit Form'));
 
@@ -64,14 +76,18 @@ describe('CreateRoom', () => {
           name: 'Test Room',
           maxPlayers: 4,
           settings: { roundDuration: 60, maxRounds: 5 }
-        });
+        }, 'Alias');
       });
     });
 
     it('should clear error before creating room', async () => {
       mockCreateRoom.mockResolvedValue('room123');
 
-      render(<CreateRoom />);
+      render(
+        <UserProvider>
+          <CreateRoom />
+        </UserProvider>
+      );
 
       fireEvent.click(screen.getByText('Submit Form'));
 
@@ -93,7 +109,11 @@ describe('CreateRoom', () => {
         clearError: mockClearError,
       });
 
-      render(<CreateRoom />);
+      render(
+        <UserProvider>
+          <CreateRoom />
+        </UserProvider>
+      );
 
       expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to create room');
     });
@@ -102,7 +122,11 @@ describe('CreateRoom', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockCreateRoom.mockRejectedValue(new Error('Network error'));
 
-      render(<CreateRoom />);
+      render(
+        <UserProvider>
+          <CreateRoom />
+        </UserProvider>
+      );
 
       fireEvent.click(screen.getByText('Submit Form'));
 
@@ -126,7 +150,11 @@ describe('CreateRoom', () => {
         clearError: mockClearError,
       });
 
-      render(<CreateRoom />);
+      render(
+        <UserProvider>
+          <CreateRoom />
+        </UserProvider>
+      );
 
       expect(screen.getByTestId('loading-state')).toHaveTextContent('true');
     });
@@ -134,7 +162,11 @@ describe('CreateRoom', () => {
 
   describe('Component Integration', () => {
     it('should properly integrate with CreateRoomUI component', () => {
-      render(<CreateRoom />);
+      render(
+        <UserProvider>
+          <CreateRoom />
+        </UserProvider>
+      );
 
       expect(screen.getByTestId('create-room-form')).toBeInTheDocument();
     });

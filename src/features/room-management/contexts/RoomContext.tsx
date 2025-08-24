@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 import { Room, PartialRoom, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom } from '@/lib/firebase/room-utils';
 
@@ -36,8 +37,8 @@ const roomReducer = (state: RoomState, action: RoomAction): RoomState => {
 };
 
 interface RoomContextType extends RoomState {
-  createRoom: (params: CreateRoomParams) => Promise<string>;
-  joinRoom: (roomId: string) => Promise<void>;
+  createRoom: (params: CreateRoomParams, alias: string) => Promise<string>;
+  joinRoom: (roomId: string, alias: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
   clearError: () => void;
 }
@@ -62,16 +63,14 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
 
   const clearError = () => dispatch({ type: 'SET_ERROR', payload: null });
 
-  const handleCreateRoom = async (params: CreateRoomParams): Promise<string> => {
+  const handleCreateRoom = async (params: CreateRoomParams, alias: string): Promise<string> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      if (!user) {
-        throw new Error('User must be authenticated to create a room');
-      }
-
-      const roomId = await createRoom(params, user.uid, user.displayName || 'Anonymous');
+      const activeUser = user ?? await ensureAnonymousWithAlias(alias);
+      const displayName = alias.trim() || activeUser.displayName || 'Anonymous';
+      const roomId = await createRoom(params, activeUser.uid, displayName);
       
       // Defensive check for empty or invalid room ID
       if (!roomId || roomId.trim() === '') {
@@ -90,16 +89,14 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     }
   };
 
-  const handleJoinRoom = async (roomId: string): Promise<void> => {
+  const handleJoinRoom = async (roomId: string, alias: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      if (!user) {
-        throw new Error('User must be authenticated to join a room');
-      }
-
-      await joinRoom(roomId, user.uid, user.displayName || 'Anonymous');
+      const activeUser = user ?? await ensureAnonymousWithAlias(alias);
+      const displayName = alias.trim() || activeUser.displayName || 'Anonymous';
+      await joinRoom(roomId, activeUser.uid, displayName);
       // Set the room ID to trigger the subscription
       dispatch({ type: 'SET_ROOM_ID', payload: roomId });
     } catch (error) {
