@@ -3,14 +3,58 @@ import { db } from './firebase';
 import { Room, Player, CreateRoomParams } from '@/features/room-management/types/room';
 
 const ROOMS_PATH = 'rooms';
+const SLUGS_PATH = 'slugs';
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+function generateFunnyName(): string {
+  const adjectives = [
+    'Witty', 'Gleeful', 'Zany', 'Cheeky', 'Silly', 'Snazzy', 'Goofy', 'Peppy', 'Brisk', 'Breezy',
+    'Quirky', 'Bubbly', 'Nifty', 'Spunky', 'Jaunty', 'Dandy', 'Perky', 'Chirpy', 'Zesty', 'Jolly'
+  ];
+  const nouns = [
+    'Walrus', 'Muffin', 'Pickle', 'Llama', 'Penguin', 'Taco', 'Noodle', 'Cupcake', 'Badger', 'Pancake',
+    'Otter', 'Turnip', 'Yeti', 'Donut', 'Koala', 'Cactus', 'Bagel', 'Marshmallow', 'Raccoon', 'Wombat'
+  ];
+  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const number = Math.floor(100 + Math.random() * 900); // 3 digits
+  return `${adjective} ${noun} ${number}`;
+}
+
+async function generateUniqueNameAndSlug(): Promise<{ name: string; slug: string }> {
+  let attempts = 0;
+  while (attempts < 20) {
+    attempts += 1;
+    const candidate = generateFunnyName();
+    const slug = slugify(candidate);
+    const slugRef = ref(db, `${SLUGS_PATH}/${slug}`);
+    const existing = await get(slugRef);
+    if (!existing.exists()) {
+      return { name: candidate, slug };
+    }
+  }
+  // Fallback with timestamp to avoid infinite loop
+  const fallback = `${generateFunnyName()} ${Date.now()}`;
+  return { name: fallback, slug: slugify(fallback) };
+}
 
 export const createRoom = async (params: CreateRoomParams, userId: string, displayName: string): Promise<string> => {
   const roomsRef = ref(db, ROOMS_PATH);
   const newRoomRef = push(roomsRef);
+  const { name, slug } = await generateUniqueNameAndSlug();
   
   const room: Room = {
     id: newRoomRef.key!,
-    name: params.name,
+    name,
+    slug,
     createdBy: userId,
     createdAt: Date.now(),
     status: 'waiting',
@@ -26,6 +70,7 @@ export const createRoom = async (params: CreateRoomParams, userId: string, displ
   };
 
   await set(newRoomRef, room);
+  await set(ref(db, `${SLUGS_PATH}/${slug}`), room.id);
   return room.id;
 };
 
@@ -59,6 +104,21 @@ export const joinRoom = async (roomId: string, userId: string, displayName: stri
   updates[`${ROOMS_PATH}/${roomId}/players/${room.players.length}`] = newPlayer;
   
   await update(ref(db), updates);
+};
+
+export const resolveRoomId = async (roomKey: string): Promise<string> => {
+  const trimmed = roomKey.trim();
+  if (!trimmed) throw new Error('Room not found');
+
+  const roomRef = ref(db, `${ROOMS_PATH}/${trimmed}`);
+  const byId = await get(roomRef);
+  if (byId.exists()) return trimmed;
+
+  const slugRef = ref(db, `${SLUGS_PATH}/${slugify(trimmed)}`);
+  const bySlug = await get(slugRef);
+  if (bySlug.exists()) return bySlug.val();
+
+  throw new Error('Room not found');
 };
 
 export const leaveRoom = async (roomId: string, userId: string): Promise<void> => {

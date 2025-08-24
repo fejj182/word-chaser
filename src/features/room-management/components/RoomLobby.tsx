@@ -62,7 +62,7 @@ const RoomLobby: React.FC = () => {
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(currentRoom.id);
+      await navigator.clipboard.writeText(currentRoom.name);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (error) {
@@ -81,14 +81,14 @@ const RoomLobby: React.FC = () => {
             <h2 className="text--room-title">{currentRoom.name}</h2>
             <div className="layout--flex-wrap">
               <p className="text-gray-600">
-                Room Code: <code className="code-display">{currentRoom.id}</code>
+                Room Name: <code className="code-display">{currentRoom.name}</code>
               </p>
               <button
                 type="button"
                 onClick={handleCopyCode}
                 className="badge badge--copy"
-                aria-label="Copy room code"
-                title="Copy room code"
+                aria-label="Copy room name"
+                title="Copy room name"
               >
                 {copied ? 'Copied' : 'Copy'}
               </button>

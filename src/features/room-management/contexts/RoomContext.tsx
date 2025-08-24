@@ -5,7 +5,7 @@ import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 import { Room, PartialRoom, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
-import { createRoom, joinRoom, leaveRoom, subscribeToRoom } from '@/lib/firebase/room-utils';
+import { createRoom, joinRoom, leaveRoom, subscribeToRoom, resolveRoomId } from '@/lib/firebase/room-utils';
 
 type RoomAction =
   | { type: 'SET_LOADING'; payload: boolean }
@@ -70,9 +70,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      // Ensure we have an authenticated user and that their profile displayName matches alias
       const ensuredUser = await ensureAnonymousWithAlias(alias);
-      // Propagate to UserContext so UI reflects alias immediately
       setUser(ensuredUser as any);
       const displayName = alias.trim() || ensuredUser.displayName || 'Anonymous';
       const roomId = await createRoom(params, ensuredUser.uid, displayName);
@@ -99,14 +97,13 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      // Ensure we have an authenticated user and that their profile displayName matches alias
       const ensuredUser = await ensureAnonymousWithAlias(alias);
-      // Propagate to UserContext so UI reflects alias immediately
       setUser(ensuredUser as any);
       const displayName = alias.trim() || ensuredUser.displayName || 'Anonymous';
-      await joinRoom(roomId, ensuredUser.uid, displayName);
+      const resolvedRoomId = await resolveRoomId(roomId);
+      await joinRoom(resolvedRoomId, ensuredUser.uid, displayName);
       // Set the room ID to trigger the subscription
-      dispatch({ type: 'SET_ROOM_ID', payload: roomId });
+      dispatch({ type: 'SET_ROOM_ID', payload: resolvedRoomId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to join room';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
