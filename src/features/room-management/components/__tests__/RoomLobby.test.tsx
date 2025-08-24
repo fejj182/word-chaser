@@ -44,7 +44,7 @@ describe('RoomLobby', () => {
   });
 
   describe('General Functionality', () => {
-    it('displays room name and code', () => {
+    it('displays room name and copy hint', () => {
       const singlePlayerRoom = {
         id: 'room123',
         name: 'Test Room',
@@ -79,9 +79,8 @@ describe('RoomLobby', () => {
 
       render(<RoomLobby />);
 
-      expect(screen.getByText('Test Room')).toBeInTheDocument();
-      expect(screen.getByText('Room Code:')).toBeInTheDocument();
-      expect(screen.getByText('room123')).toBeInTheDocument();
+      expect(screen.getAllByText('Test Room').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('Room Name:')).toBeInTheDocument();
     });
 
     it('displays game settings', () => {

@@ -1,6 +1,7 @@
 export interface Room {
   id: string;
   name: string;
+  slug: string;
   createdBy: string;
   createdAt: number;
   status: 'waiting' | 'playing' | 'finished';
@@ -28,7 +29,6 @@ export interface RoomSettings {
 }
 
 export interface CreateRoomParams {
-  name: string;
   maxPlayers: number;
   settings: RoomSettings;
 }

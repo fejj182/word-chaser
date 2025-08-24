@@ -47,7 +47,7 @@ describe('JoinRoom', () => {
     );
 
     expect(screen.getByText(/join a room/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/room code/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/room name/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /join room/i })).toBeInTheDocument();
   });
 
@@ -58,7 +58,7 @@ describe('JoinRoom', () => {
       </UserProvider>
     );
 
-    const roomCodeInput = screen.getByLabelText(/room code/i);
+    const roomCodeInput = screen.getByLabelText(/room name/i);
     const aliasInput = screen.getByLabelText(/alias/i);
     const submitButton = screen.getByRole('button', { name: /join room/i });
 
@@ -91,7 +91,7 @@ describe('JoinRoom', () => {
     );
 
     const aliasInput = screen.getByLabelText(/alias/i);
-    const roomCodeInput = screen.getByLabelText(/room code/i);
+    const roomCodeInput = screen.getByLabelText(/room name/i);
     const submitButton = screen.getByRole('button', { name: /join room/i });
 
     fireEvent.change(aliasInput, { target: { value: 'Alias' } });
@@ -107,7 +107,7 @@ describe('JoinRoom', () => {
     );
 
     const aliasInput = screen.getByLabelText(/alias/i);
-    const roomCodeInput = screen.getByLabelText(/room code/i);
+    const roomCodeInput = screen.getByLabelText(/room name/i);
     const submitButton = screen.getByRole('button', { name: /join room/i });
 
     fireEvent.change(aliasInput, { target: { value: 'Alias' } });
@@ -158,7 +158,7 @@ describe('JoinRoom', () => {
       </UserProvider>
     );
 
-    const roomCodeInput = screen.getByLabelText(/room code/i);
+    const roomCodeInput = screen.getByLabelText(/room name/i);
     expect(roomCodeInput).toBeDisabled();
   });
 });

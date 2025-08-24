@@ -40,9 +40,10 @@ describe('room-utils', () => {
       mockRef.mockReturnValue(mockPushRef);
       mockPush.mockReturnValue(mockRoomRef);
       mockSet.mockResolvedValue(undefined);
+      // First get() call for slug availability check
+      mockGet.mockResolvedValueOnce({ exists: () => false } as any);
 
       const params: CreateRoomParams = {
-        name: 'Test Room',
         maxPlayers: 4,
         settings: {
           roundDuration: 60,
@@ -56,7 +57,8 @@ describe('room-utils', () => {
       expect(mockPush).toHaveBeenCalledWith(mockPushRef);
       expect(mockSet).toHaveBeenCalledWith(mockRoomRef, {
         id: 'test-room-id',
-        name: 'Test Room',
+        name: expect.any(String),
+        slug: expect.any(String),
         createdBy: 'user-id',
         createdAt: expect.any(Number),
         status: 'waiting',

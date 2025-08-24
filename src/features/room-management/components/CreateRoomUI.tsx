@@ -12,7 +12,6 @@ interface CreateRoomUIProps {
 
 const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error = null, initialAlias }) => {
   const [formData, setFormData] = useState<CreateRoomParams>({
-    name: '',
     maxPlayers: 4,
     settings: {
       roundDuration: 60,
@@ -40,7 +39,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !alias.trim()) {
+    if (!alias.trim()) {
       return;
     }
     await onSubmit(formData, alias.trim());
@@ -73,22 +72,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
         />
       </div>
 
-      {/* Room Name */}
-      <div>
-        <label htmlFor="roomName" className="form-label">
-          Room Name
-        </label>
-        <input
-          type="text"
-          id="roomName"
-          value={formData.name}
-          onChange={(e) => handleInputChange('name', e.target.value)}
-          className="form-input"
-          placeholder="Enter room name..."
-          required
-          disabled={isLoading}
-        />
-      </div>
+      
 
       {/* Max Players */}
       <div>
@@ -159,7 +143,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={isLoading || !formData.name.trim() || !alias.trim()}
+        disabled={isLoading || !alias.trim()}
         className="btn btn--primary btn--full btn--medium btn--disabled"
       >
         Create Room

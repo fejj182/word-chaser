@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { RoomProvider, useRoom } from '../RoomContext';
 import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
-import { createRoom, joinRoom, leaveRoom, subscribeToRoom } from '@/lib/firebase/room-utils';
+import { createRoom, joinRoom, leaveRoom, subscribeToRoom, resolveRoomId } from '@/lib/firebase/room-utils';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 
@@ -12,6 +12,7 @@ jest.mock('@/lib/firebase/room-utils', () => ({
   joinRoom: jest.fn(),
   leaveRoom: jest.fn(),
   subscribeToRoom: jest.fn(),
+  resolveRoomId: jest.fn(),
 }));
 
 // Mock useAuth hook
@@ -27,6 +28,7 @@ const mockCreateRoom = createRoom as jest.MockedFunction<typeof createRoom>;
 const mockJoinRoom = joinRoom as jest.MockedFunction<typeof joinRoom>;
 const mockLeaveRoom = leaveRoom as jest.MockedFunction<typeof leaveRoom>;
 const mockSubscribeToRoom = subscribeToRoom as jest.MockedFunction<typeof subscribeToRoom>;
+const mockResolveRoomId = resolveRoomId as jest.MockedFunction<typeof resolveRoomId>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockEnsureAnon = ensureAnonymousWithAlias as jest.MockedFunction<typeof ensureAnonymousWithAlias>;
 
@@ -120,6 +122,7 @@ describe('RoomContext', () => {
     mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
     mockSubscribeToRoom.mockReturnValue(() => {});
     mockEnsureAnon.mockResolvedValue(mockUser as any);
+    mockResolveRoomId.mockResolvedValue('test-room-id');
   });
 
   describe('Initial State', () => {
