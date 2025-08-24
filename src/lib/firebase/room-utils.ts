@@ -14,42 +14,38 @@ function slugify(input: string): string {
     .replace(/-+/g, '-');
 }
 
-function generateFunnyName(): string {
-  const adjectives = [
-    'Witty', 'Gleeful', 'Zany', 'Cheeky', 'Silly', 'Snazzy', 'Goofy', 'Peppy', 'Brisk', 'Breezy',
-    'Quirky', 'Bubbly', 'Nifty', 'Spunky', 'Jaunty', 'Dandy', 'Perky', 'Chirpy', 'Zesty', 'Jolly'
+function generateGlaswegianSlug(): string {
+  const glaswegianWords = [
+    'wee', 'daftie', 'bampot', 'heid', 'bawbag', 'gallus', 'pure', 'dead', 'manky', 'scunner',
+    'boggin', 'mingin', 'braw', 'bonnie', 'crabbit', 'dreich', 'fankle', 'glaikit', 'guddle', 'keek',
+    'malky', 'numpty', 'peely', 'plooky', 'scunner', 'shoogly', 'skelf', 'smirr', 'stoater', 'wabbit'
   ];
-  const nouns = [
-    'Walrus', 'Muffin', 'Pickle', 'Llama', 'Penguin', 'Taco', 'Noodle', 'Cupcake', 'Badger', 'Pancake',
-    'Otter', 'Turnip', 'Yeti', 'Donut', 'Koala', 'Cactus', 'Bagel', 'Marshmallow', 'Raccoon', 'Wombat'
-  ];
-  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const word1 = glaswegianWords[Math.floor(Math.random() * glaswegianWords.length)];
+  const word2 = glaswegianWords[Math.floor(Math.random() * glaswegianWords.length)];
   const number = Math.floor(100 + Math.random() * 900); // 3 digits
-  return `${adjective} ${noun} ${number}`;
+  return `${word1}-${word2}-${number}`;
 }
 
-async function generateUniqueNameAndSlug(): Promise<{ name: string; slug: string }> {
+async function generateUniqueGlaswegianSlug(): Promise<{ name: string; slug: string }> {
   let attempts = 0;
   while (attempts < 20) {
     attempts += 1;
-    const candidate = generateFunnyName();
-    const slug = slugify(candidate);
+    const slug = generateGlaswegianSlug();
     const slugRef = ref(db, `${SLUGS_PATH}/${slug}`);
     const existing = await get(slugRef);
     if (!existing.exists()) {
-      return { name: candidate, slug };
+      return { name: slug, slug };
     }
   }
   // Fallback with timestamp to avoid infinite loop
-  const fallback = `${generateFunnyName()} ${Date.now()}`;
-  return { name: fallback, slug: slugify(fallback) };
+  const fallback = `${generateGlaswegianSlug()}-${Date.now()}`;
+  return { name: fallback, slug: fallback };
 }
 
 export const createRoom = async (params: CreateRoomParams, userId: string, displayName: string): Promise<string> => {
   const roomsRef = ref(db, ROOMS_PATH);
   const newRoomRef = push(roomsRef);
-  const { name, slug } = await generateUniqueNameAndSlug();
+  const { name, slug } = await generateUniqueGlaswegianSlug();
   
   const room: Room = {
     id: newRoomRef.key!,

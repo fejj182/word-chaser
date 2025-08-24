@@ -216,7 +216,7 @@ body {
 }
 
 .text--room-title {
-  @apply text-2xl font-bold text-gray-900 truncate;
+  @apply text-2xl text-left font-bold text-gray-900 truncate;
 }
 
 .text--player-name {

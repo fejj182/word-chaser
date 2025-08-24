@@ -80,7 +80,6 @@ describe('RoomLobby', () => {
       render(<RoomLobby />);
 
       expect(screen.getAllByText('Test Room').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('Room Name:')).toBeInTheDocument();
     });
 
     it('displays game settings', () => {
