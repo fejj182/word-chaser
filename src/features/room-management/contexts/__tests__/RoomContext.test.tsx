@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { RoomProvider, useRoom } from '../RoomContext';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom } from '@/lib/firebase/room-utils';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 
 // Mock Firebase utilities
 jest.mock('@/lib/firebase/room-utils', () => ({
@@ -17,11 +18,16 @@ jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock('@/lib/firebase/firebase-utils', () => ({
+  ensureAnonymousWithAlias: jest.fn(),
+}));
+
 const mockCreateRoom = createRoom as jest.MockedFunction<typeof createRoom>;
 const mockJoinRoom = joinRoom as jest.MockedFunction<typeof joinRoom>;
 const mockLeaveRoom = leaveRoom as jest.MockedFunction<typeof leaveRoom>;
 const mockSubscribeToRoom = subscribeToRoom as jest.MockedFunction<typeof subscribeToRoom>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockEnsureAnon = ensureAnonymousWithAlias as jest.MockedFunction<typeof ensureAnonymousWithAlias>;
 
 // Test component to access room context
 const TestComponent = () => {
@@ -29,7 +35,7 @@ const TestComponent = () => {
   
   const handleCreateRoom = async () => {
     try {
-      await createRoom({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } });
+      await createRoom({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } }, 'Test User');
     } catch (error) {
       // Error is handled by the context, we just need to catch it here to prevent test failures
     }
@@ -37,7 +43,7 @@ const TestComponent = () => {
   
   const handleJoinRoom = async () => {
     try {
-      await joinRoom('test-room-id');
+      await joinRoom('test-room-id', 'Test User');
     } catch (error) {
       // Error is handled by the context, we just need to catch it here to prevent test failures
     }
@@ -110,6 +116,7 @@ describe('RoomContext', () => {
     jest.clearAllMocks();
     mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
     mockSubscribeToRoom.mockReturnValue(() => {});
+    mockEnsureAnon.mockResolvedValue(mockUser as any);
   });
 
   describe('Initial State', () => {
@@ -316,15 +323,17 @@ describe('RoomContext', () => {
       expect(screen.getByTestId('error')).toHaveTextContent('null');
     });
 
-    it('should handle authentication errors', async () => {
+    it('should create room even when unauthenticated by ensuring alias sign-in', async () => {
       mockUseAuth.mockReturnValue({ user: null, loading: false });
-      
+      mockCreateRoom.mockResolvedValue('room123');
+
       renderWithProvider(<TestComponent />);
-      
+
       fireEvent.click(screen.getByText('Create Room'));
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('error')).toHaveTextContent('User must be authenticated');
+        expect(mockEnsureAnon).toHaveBeenCalledWith('Test User');
+        expect(screen.getByTestId('error')).toHaveTextContent('null');
       });
     });
 

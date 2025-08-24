@@ -36,13 +36,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     if (user) {
       setUserId(user.uid);
-      
-      // Create display name for anonymous users
-      if (user.isAnonymous) {
+      // Prefer explicit displayName if present (even for anonymous)
+      if (user.displayName && user.displayName.trim().length > 0) {
+        setDisplayName(user.displayName);
+      } else if (user.isAnonymous) {
         const shortId = user.uid.substring(0, 8);
         setDisplayName(`Guest-${shortId}`);
       } else {
-        setDisplayName(user.displayName || user.email || 'User');
+        setDisplayName(user.email || 'User');
       }
     } else {
       setUserId(null);
@@ -53,11 +54,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const setUser = (user: User | null) => {
     if (user) {
       setUserId(user.uid);
-      if (user.isAnonymous) {
+      if (user.displayName && user.displayName.trim().length > 0) {
+        setDisplayName(user.displayName);
+      } else if (user.isAnonymous) {
         const shortId = user.uid.substring(0, 8);
         setDisplayName(`Guest-${shortId}`);
       } else {
-        setDisplayName(user.displayName || user.email || 'User');
+        setDisplayName(user.email || 'User');
       }
     } else {
       setUserId(null);

@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { CreateRoomParams, RoomSettings } from '@/features/room-management/types/room';
 
 interface CreateRoomUIProps {
-  onSubmit: (params: CreateRoomParams) => Promise<void>;
+  onSubmit: (params: CreateRoomParams, alias: string) => Promise<void>;
   isLoading: boolean;
   error?: string | null;
+  initialAlias?: string;
 }
 
-const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error = null }) => {
+const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error = null, initialAlias }) => {
   const [formData, setFormData] = useState<CreateRoomParams>({
     name: '',
     maxPlayers: 4,
@@ -18,6 +19,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
       maxRounds: 5,
     },
   });
+  const [alias, setAlias] = useState<string>(initialAlias || '');
 
   const handleInputChange = (field: keyof CreateRoomParams, value: string | number) => {
     setFormData(prev => ({
@@ -38,12 +40,10 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name.trim()) {
+    if (!formData.name.trim() || !alias.trim()) {
       return;
     }
-
-    await onSubmit(formData);
+    await onSubmit(formData, alias.trim());
   };
 
   return (
@@ -54,6 +54,25 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
         </div>
       )}
       
+      {/* Alias */}
+      <div>
+        <label htmlFor="alias" className="form-label">
+          Alias
+        </label>
+        <input
+          type="text"
+          id="alias"
+          value={alias}
+          onChange={(e) => setAlias(e.target.value)}
+          className="form-input"
+          placeholder="Choose a name to play as…"
+          required
+          minLength={2}
+          maxLength={20}
+          disabled={isLoading}
+        />
+      </div>
+
       {/* Room Name */}
       <div>
         <label htmlFor="roomName" className="form-label">
@@ -140,7 +159,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={isLoading || !formData.name.trim()}
+        disabled={isLoading || !formData.name.trim() || !alias.trim()}
         className="btn btn--primary btn--full btn--medium btn--disabled"
       >
         Create Room

@@ -1,5 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
+jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, loading: false })
+}));
 import JoinRoom from '../JoinRoom';
 
 const mockJoinRoom = jest.fn();
@@ -36,7 +40,11 @@ describe('JoinRoom', () => {
   });
 
   it('renders join room form', () => {
-    render(<JoinRoom />);
+    render(
+      <UserProvider>
+        <JoinRoom />
+      </UserProvider>
+    );
 
     expect(screen.getByText(/join a room/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/room code/i)).toBeInTheDocument();
@@ -44,48 +52,70 @@ describe('JoinRoom', () => {
   });
 
   it('submits form with room code', async () => {
-    render(<JoinRoom />);
+    render(
+      <UserProvider>
+        <JoinRoom />
+      </UserProvider>
+    );
 
     const roomCodeInput = screen.getByLabelText(/room code/i);
+    const aliasInput = screen.getByLabelText(/alias/i);
     const submitButton = screen.getByRole('button', { name: /join room/i });
 
+    fireEvent.change(aliasInput, { target: { value: 'Alias' } });
     fireEvent.change(roomCodeInput, { target: { value: 'ABC123' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(mockClearError).toHaveBeenCalled();
-      expect(mockJoinRoom).toHaveBeenCalledWith('ABC123');
+      expect(mockJoinRoom).toHaveBeenCalledWith('ABC123', 'Alias');
     });
   });
 
   it('disables submit button when room code is empty', () => {
-    render(<JoinRoom />);
+    render(
+      <UserProvider>
+        <JoinRoom />
+      </UserProvider>
+    );
 
     const submitButton = screen.getByRole('button', { name: /join room/i });
     expect(submitButton).toBeDisabled();
   });
 
   it('enables submit button when room code is provided', () => {
-    render(<JoinRoom />);
+    render(
+      <UserProvider>
+        <JoinRoom />
+      </UserProvider>
+    );
 
+    const aliasInput = screen.getByLabelText(/alias/i);
     const roomCodeInput = screen.getByLabelText(/room code/i);
     const submitButton = screen.getByRole('button', { name: /join room/i });
 
+    fireEvent.change(aliasInput, { target: { value: 'Alias' } });
     fireEvent.change(roomCodeInput, { target: { value: 'ABC123' } });
     expect(submitButton).not.toBeDisabled();
   });
 
   it('trims whitespace from room code', async () => {
-    render(<JoinRoom />);
+    render(
+      <UserProvider>
+        <JoinRoom />
+      </UserProvider>
+    );
 
+    const aliasInput = screen.getByLabelText(/alias/i);
     const roomCodeInput = screen.getByLabelText(/room code/i);
     const submitButton = screen.getByRole('button', { name: /join room/i });
 
+    fireEvent.change(aliasInput, { target: { value: 'Alias' } });
     fireEvent.change(roomCodeInput, { target: { value: '  ABC123  ' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockJoinRoom).toHaveBeenCalledWith('ABC123');
+      expect(mockJoinRoom).toHaveBeenCalledWith('ABC123', 'Alias');
     });
   });
 
@@ -101,7 +131,11 @@ describe('JoinRoom', () => {
       error: 'Room not found',
     });
 
-    render(<JoinRoom />);
+    render(
+      <UserProvider>
+        <JoinRoom />
+      </UserProvider>
+    );
 
     expect(screen.getByText('Room not found')).toBeInTheDocument();
   });
@@ -118,7 +152,11 @@ describe('JoinRoom', () => {
       error: null,
     });
 
-    render(<JoinRoom />);
+    render(
+      <UserProvider>
+        <JoinRoom />
+      </UserProvider>
+    );
 
     const roomCodeInput = screen.getByLabelText(/room code/i);
     expect(roomCodeInput).toBeDisabled();

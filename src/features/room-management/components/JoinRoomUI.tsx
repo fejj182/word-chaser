@@ -4,17 +4,21 @@ import React from 'react';
 
 interface JoinRoomUIProps {
   roomId: string;
+  alias: string;
   isLoading: boolean;
   error?: string | null;
   onRoomIdChange: (value: string) => void;
+  onAliasChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
 const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
   roomId,
+  alias,
   isLoading,
   error = null,
   onRoomIdChange,
+  onAliasChange,
   onSubmit,
 }) => {
   return (
@@ -30,6 +34,23 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
       )}
       
       <form onSubmit={onSubmit} className="spacing--form">
+        <div>
+          <label htmlFor="alias" className="form-label">
+            Alias
+          </label>
+          <input
+            type="text"
+            id="alias"
+            value={alias}
+            onChange={(e) => onAliasChange(e.target.value)}
+            className="form-input"
+            placeholder="Choose a name to play as…"
+            required
+            minLength={2}
+            maxLength={20}
+            disabled={isLoading}
+          />
+        </div>
         <div>
           <label htmlFor="roomId" className="form-label">
             Room Code
@@ -48,7 +69,7 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
 
         <button
           type="submit"
-          disabled={isLoading || !roomId.trim()}
+          disabled={isLoading || !roomId.trim() || !alias.trim()}
           className="btn btn--primary btn--full btn--medium btn--disabled"
         >
           Join Room

@@ -12,6 +12,7 @@ describe('CreateRoomUI', () => {
   it('renders form fields correctly', () => {
     render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
 
+    expect(screen.getByLabelText(/alias/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/room name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/maximum players/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/round duration \(seconds\)/i)).toBeInTheDocument();
@@ -23,6 +24,9 @@ describe('CreateRoomUI', () => {
     render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
 
     // Fill out the form
+    fireEvent.change(screen.getByLabelText(/alias/i), {
+      target: { value: 'Tester' },
+    });
     fireEvent.change(screen.getByLabelText(/room name/i), {
       target: { value: 'Test Room' },
     });
@@ -40,14 +44,17 @@ describe('CreateRoomUI', () => {
     fireEvent.click(screen.getByRole('button', { name: /create room/i }));
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith({
-        name: 'Test Room',
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        {
+          name: 'Test Room',
+          maxPlayers: 4,
+          settings: {
+            roundDuration: 60,
+            maxRounds: 5,
+          },
         },
-      });
+        'Tester'
+      );
     });
   });
 
