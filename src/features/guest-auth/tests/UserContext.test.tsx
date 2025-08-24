@@ -68,7 +68,7 @@ describe('UserContext', () => {
   });
 
   describe('Anonymous User Handling', () => {
-    it('should generate display name for anonymous users', async () => {
+    it('should not auto-generate display name for anonymous users', async () => {
       const mockUser = {
         uid: 'abc123def456',
         isAnonymous: true,
@@ -82,26 +82,10 @@ describe('UserContext', () => {
       
       await waitFor(() => {
         expect(screen.getByTestId('userId')).toHaveTextContent('abc123def456');
-        expect(screen.getByTestId('displayName')).toHaveTextContent('Guest-abc123de');
+        expect(screen.getByTestId('displayName')).toHaveTextContent('no-display');
       });
     });
-
-    it('should use first 8 characters of UID for anonymous display name', async () => {
-      const mockUser = {
-        uid: 'verylonguserid123456789',
-        isAnonymous: true,
-        email: null,
-        displayName: null
-      } as any;
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
-      
-      renderWithProvider(<TestComponent />);
-      
-      await waitFor(() => {
-        expect(screen.getByTestId('displayName')).toHaveTextContent('Guest-verylong');
-      });
-    });
+    // No auto-generation based on UID anymore
   });
 
   describe('Authenticated User Handling', () => {
@@ -122,40 +106,7 @@ describe('UserContext', () => {
         expect(screen.getByTestId('displayName')).toHaveTextContent('John Doe');
       });
     });
-
-    it('should fallback to email if displayName is null', async () => {
-      const mockUser = {
-        uid: 'user123',
-        isAnonymous: false,
-        email: 'user@example.com',
-        displayName: null
-      } as any;
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
-      
-      renderWithProvider(<TestComponent />);
-      
-      await waitFor(() => {
-        expect(screen.getByTestId('displayName')).toHaveTextContent('user@example.com');
-      });
-    });
-
-    it('should fallback to "User" if both displayName and email are null', async () => {
-      const mockUser = {
-        uid: 'user123',
-        isAnonymous: false,
-        email: null,
-        displayName: null
-      } as any;
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
-      
-      renderWithProvider(<TestComponent />);
-      
-      await waitFor(() => {
-        expect(screen.getByTestId('displayName')).toHaveTextContent('User');
-      });
-    });
+    // No fallback to email or generic User label now; remains null
   });
 
   describe('setUser Function', () => {
@@ -171,7 +122,7 @@ describe('UserContext', () => {
       
       await waitFor(() => {
         expect(screen.getByTestId('userId')).toHaveTextContent('test-uid');
-        expect(screen.getByTestId('displayName')).toHaveTextContent('Guest-test-ui');
+        expect(screen.getByTestId('displayName')).toHaveTextContent('no-display');
       });
     });
 
@@ -239,7 +190,7 @@ describe('UserContext', () => {
       
       await waitFor(() => {
         expect(screen.getByTestId('userId')).toHaveTextContent('newuser123');
-        expect(screen.getByTestId('displayName')).toHaveTextContent('Guest-newuser');
+        expect(screen.getByTestId('displayName')).toHaveTextContent('no-display');
       });
     });
 

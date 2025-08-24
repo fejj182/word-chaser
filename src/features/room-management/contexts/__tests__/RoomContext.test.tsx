@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { RoomProvider, useRoom } from '../RoomContext';
+import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom } from '@/lib/firebase/room-utils';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
@@ -72,9 +73,11 @@ const TestComponent = () => {
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
-    <RoomProvider>
-      {component}
-    </RoomProvider>
+    <UserProvider>
+      <RoomProvider>
+        {component}
+      </RoomProvider>
+    </UserProvider>
   );
 };
 

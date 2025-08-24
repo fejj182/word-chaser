@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useUser } from '@/features/guest-auth/contexts/UserContext';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 import { Room, PartialRoom, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom } from '@/lib/firebase/room-utils';
@@ -60,6 +61,7 @@ interface RoomProviderProps {
 export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(roomReducer, initialState);
   const { user } = useAuth();
+  const { setUser } = useUser();
 
   const clearError = () => dispatch({ type: 'SET_ERROR', payload: null });
 
@@ -68,9 +70,12 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      const activeUser = user ?? await ensureAnonymousWithAlias(alias);
-      const displayName = alias.trim() || activeUser.displayName || 'Anonymous';
-      const roomId = await createRoom(params, activeUser.uid, displayName);
+      // Ensure we have an authenticated user and that their profile displayName matches alias
+      const ensuredUser = await ensureAnonymousWithAlias(alias);
+      // Propagate to UserContext so UI reflects alias immediately
+      setUser(ensuredUser as any);
+      const displayName = alias.trim() || ensuredUser.displayName || 'Anonymous';
+      const roomId = await createRoom(params, ensuredUser.uid, displayName);
       
       // Defensive check for empty or invalid room ID
       if (!roomId || roomId.trim() === '') {
@@ -94,9 +99,12 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      const activeUser = user ?? await ensureAnonymousWithAlias(alias);
-      const displayName = alias.trim() || activeUser.displayName || 'Anonymous';
-      await joinRoom(roomId, activeUser.uid, displayName);
+      // Ensure we have an authenticated user and that their profile displayName matches alias
+      const ensuredUser = await ensureAnonymousWithAlias(alias);
+      // Propagate to UserContext so UI reflects alias immediately
+      setUser(ensuredUser as any);
+      const displayName = alias.trim() || ensuredUser.displayName || 'Anonymous';
+      await joinRoom(roomId, ensuredUser.uid, displayName);
       // Set the room ID to trigger the subscription
       dispatch({ type: 'SET_ROOM_ID', payload: roomId });
     } catch (error) {
