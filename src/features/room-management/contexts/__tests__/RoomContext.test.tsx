@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { RoomProvider, useRoom } from '../RoomContext';
+import { SessionProvider } from '@/features/session-management/contexts/SessionContext';
 import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom, resolveRoomId } from '@/lib/firebase/room-utils';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
@@ -78,9 +79,11 @@ const TestComponent = () => {
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
     <UserProvider>
-      <RoomProvider>
-        {component}
-      </RoomProvider>
+      <SessionProvider>
+        <RoomProvider>
+          {component}
+        </RoomProvider>
+      </SessionProvider>
     </UserProvider>
   );
 };
@@ -354,7 +357,7 @@ describe('RoomContext', () => {
       fireEvent.click(screen.getByText('Create Room'));
       
       await waitFor(() => {
-        expect(screen.getByTestId('error')).toHaveTextContent('Invalid room ID received from server');
+        expect(screen.getByTestId('error')).toHaveTextContent('Invalid session ID received from server');
       });
     });
   });
