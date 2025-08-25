@@ -71,7 +71,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
 
     try {
       const ensuredUser = await ensureAnonymousWithAlias(alias);
-      setUser(ensuredUser as any);
+      setUser(ensuredUser);
       const displayName = alias.trim() || ensuredUser.displayName || 'Anonymous';
       const roomId = await createRoom(params, ensuredUser.uid, displayName);
       
@@ -97,7 +97,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
 
     try {
       const ensuredUser = await ensureAnonymousWithAlias(alias);
-      setUser(ensuredUser as any);
+      setUser(ensuredUser);
       const displayName = alias.trim() || ensuredUser.displayName || 'Anonymous';
       const resolvedRoomId = await resolveRoomId(roomId);
       await joinRoom(resolvedRoomId, ensuredUser.uid, displayName);

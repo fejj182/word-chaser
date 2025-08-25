@@ -5,6 +5,8 @@ import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom, resolveRoomId } from '@/lib/firebase/room-utils';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
+import { User } from 'firebase/auth';
+import { Room } from '@/features/room-management/types/room';
 
 // Mock Firebase utilities
 jest.mock('@/lib/firebase/room-utils', () => ({
@@ -38,8 +40,8 @@ const TestComponent = () => {
   
   const handleCreateRoom = async () => {
     try {
-      await createRoom({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } }, 'Test User');
-    } catch (error) {
+      await createRoom({ maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } }, 'Test User');
+    } catch {
       // Error is handled by the context, we just need to catch it here to prevent test failures
     }
   };
@@ -47,7 +49,7 @@ const TestComponent = () => {
   const handleJoinRoom = async () => {
     try {
       await joinRoom('test-room-id', 'Test User');
-    } catch (error) {
+    } catch {
       // Error is handled by the context, we just need to catch it here to prevent test failures
     }
   };
@@ -55,7 +57,7 @@ const TestComponent = () => {
   const handleLeaveRoom = async () => {
     try {
       await leaveRoom();
-    } catch (error) {
+    } catch {
       // Error is handled by the context, we just need to catch it here to prevent test failures
     }
   };
@@ -107,6 +109,7 @@ describe('RoomContext', () => {
   const mockRoom = {
     id: 'room123',
     name: 'Test Room',
+    slug: 'test-room',
     createdBy: 'user123',
     createdAt: Date.now(),
     status: 'waiting' as const,
@@ -121,7 +124,7 @@ describe('RoomContext', () => {
     jest.clearAllMocks();
     mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
     mockSubscribeToRoom.mockReturnValue(() => {});
-    mockEnsureAnon.mockResolvedValue(mockUser as any);
+    mockEnsureAnon.mockResolvedValue(mockUser as User);
     mockResolveRoomId.mockResolvedValue('test-room-id');
   });
 
@@ -145,7 +148,7 @@ describe('RoomContext', () => {
       
       await waitFor(() => {
         expect(mockCreateRoom).toHaveBeenCalledWith(
-          { name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } },
+          { maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } },
           'user123',
           'Test User'
         );
@@ -249,7 +252,7 @@ describe('RoomContext', () => {
     });
 
     it('should update room state when subscription receives data', async () => {
-      let subscriptionCallback: (room: any) => void;
+      let subscriptionCallback: (room: Room | null) => void;
       mockSubscribeToRoom.mockImplementation((roomId, callback) => {
         subscriptionCallback = callback;
         return () => {};
@@ -276,7 +279,7 @@ describe('RoomContext', () => {
     });
 
     it('should handle room deletion via subscription', async () => {
-      let subscriptionCallback: (room: any) => void;
+      let subscriptionCallback: (room: Room | null) => void;
       mockSubscribeToRoom.mockImplementation((roomId, callback) => {
         subscriptionCallback = callback;
         return () => {};

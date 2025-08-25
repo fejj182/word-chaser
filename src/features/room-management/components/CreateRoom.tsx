@@ -22,13 +22,7 @@ const CreateRoom: React.FC = () => {
   };
 
   return (
-    <div className="card card--form">
-      <h2 className="text--card-title">
-        Create a New Room
-      </h2>
-      
-      <CreateRoomUI onSubmit={handleCreateRoom} isLoading={isLoading} error={error} initialAlias={displayName || ''} />
-    </div>
+    <CreateRoomUI onSubmit={handleCreateRoom} isLoading={isLoading} error={error} initialAlias={displayName || ''} />
   );
 };
 

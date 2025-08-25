@@ -96,7 +96,7 @@ export const joinRoom = async (roomId: string, userId: string, displayName: stri
     isReady: false,
   };
 
-  const updates: Record<string, any> = {};
+  const updates: Record<string, Player> = {};
   updates[`${ROOMS_PATH}/${roomId}/players/${room.players.length}`] = newPlayer;
   
   await update(ref(db), updates);
@@ -137,7 +137,7 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
         updatedPlayers[0].isHost = true;
       }
       
-      const updates: Record<string, any> = {};
+      const updates: Record<string, Player[]> = {};
       updates[`${ROOMS_PATH}/${roomId}/players`] = updatedPlayers;
       
       await update(ref(db), updates);
@@ -176,7 +176,7 @@ export const updatePlayerReady = async (roomId: string, userId: string, isReady:
     throw new Error('Player not found in room');
   }
 
-  const updates: Record<string, any> = {};
+  const updates: Record<string, boolean> = {};
   updates[`${ROOMS_PATH}/${roomId}/players/${playerIndex}/isReady`] = isReady;
   
   await update(ref(db), updates);
@@ -201,7 +201,7 @@ export const startGame = async (roomId: string): Promise<void> => {
     throw new Error('Not all players are ready');
   }
 
-  const updates: Record<string, any> = {};
+  const updates: Record<string, 'playing' | string> = {};
   updates[`${ROOMS_PATH}/${roomId}/status`] = 'playing';
   
   await update(ref(db), updates);

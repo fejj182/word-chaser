@@ -1,29 +1,17 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
+
 jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, loading: false })
 }));
+
 import CreateRoom from '../CreateRoom';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
 jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   useRoom: jest.fn(),
 }));
-
-jest.mock('../CreateRoomUI', () => {
-  return function MockCreateRoomUI({ onSubmit, isLoading, error }: any) {
-    return (
-      <div data-testid="create-room-form">
-        <button onClick={() => onSubmit({ name: 'Test Room', maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } }, 'Alias') }>
-          Submit Form
-        </button>
-        <span data-testid="loading-state">{isLoading.toString()}</span>
-        {error && <div data-testid="error-message">{error}</div>}
-      </div>
-    );
-  };
-});
 
 const mockUseRoom = useRoom as jest.MockedFunction<typeof useRoom>;
 
@@ -53,7 +41,9 @@ describe('CreateRoom', () => {
       );
 
       expect(screen.getByText('Create a New Room')).toBeInTheDocument();
-      expect(screen.getByTestId('create-room-form')).toBeInTheDocument();
+      expect(screen.getByLabelText('Alias')).toBeInTheDocument();
+      expect(screen.getByLabelText('Maximum Players')).toBeInTheDocument();
+      expect(screen.getByText('Create Room')).toBeInTheDocument();
     });
   });
 
@@ -67,14 +57,17 @@ describe('CreateRoom', () => {
         </UserProvider>
       );
 
-      fireEvent.click(screen.getByText('Submit Form'));
+      // Fill out the form
+      fireEvent.change(screen.getByLabelText('Alias'), { target: { value: 'Test User' } });
+      
+      // Submit the form
+      fireEvent.click(screen.getByText('Create Room'));
 
       await waitFor(() => {
         expect(mockCreateRoom).toHaveBeenCalledWith({
-          name: 'Test Room',
           maxPlayers: 4,
           settings: { roundDuration: 60, maxRounds: 5 }
-        }, 'Alias');
+        }, 'Test User');
       });
     });
 
@@ -87,7 +80,11 @@ describe('CreateRoom', () => {
         </UserProvider>
       );
 
-      fireEvent.click(screen.getByText('Submit Form'));
+      // Fill out the form
+      fireEvent.change(screen.getByLabelText('Alias'), { target: { value: 'Test User' } });
+      
+      // Submit the form
+      fireEvent.click(screen.getByText('Create Room'));
 
       await waitFor(() => {
         expect(mockClearError).toHaveBeenCalled();
@@ -113,7 +110,7 @@ describe('CreateRoom', () => {
         </UserProvider>
       );
 
-      expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to create room');
+      expect(screen.getByText('Failed to create room')).toBeInTheDocument();
     });
 
     it('should handle createRoom throwing an error', async () => {
@@ -126,7 +123,11 @@ describe('CreateRoom', () => {
         </UserProvider>
       );
 
-      fireEvent.click(screen.getByText('Submit Form'));
+      // Fill out the form
+      fireEvent.change(screen.getByLabelText('Alias'), { target: { value: 'Test User' } });
+      
+      // Submit the form
+      fireEvent.click(screen.getByText('Create Room'));
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith('Failed to create room:', expect.any(Error));
@@ -154,7 +155,10 @@ describe('CreateRoom', () => {
         </UserProvider>
       );
 
-      expect(screen.getByTestId('loading-state')).toHaveTextContent('true');
+      // Check that form elements are disabled when loading
+      expect(screen.getByLabelText('Alias')).toBeDisabled();
+      expect(screen.getByLabelText('Maximum Players')).toBeDisabled();
+      expect(screen.getByText('Create Room')).toBeDisabled();
     });
   });
 
@@ -166,7 +170,14 @@ describe('CreateRoom', () => {
         </UserProvider>
       );
 
-      expect(screen.getByTestId('create-room-form')).toBeInTheDocument();
+      // Check that the real CreateRoomUI component is rendered with all its elements
+      expect(screen.getByText('Create a New Room')).toBeInTheDocument();
+      expect(screen.getByLabelText('Alias')).toBeInTheDocument();
+      expect(screen.getByLabelText('Maximum Players')).toBeInTheDocument();
+      expect(screen.getByText('Game Settings')).toBeInTheDocument();
+      expect(screen.getByLabelText('Round Duration (seconds)')).toBeInTheDocument();
+      expect(screen.getByLabelText('Number of Rounds')).toBeInTheDocument();
+      expect(screen.getByText('Create Room')).toBeInTheDocument();
     });
   });
 

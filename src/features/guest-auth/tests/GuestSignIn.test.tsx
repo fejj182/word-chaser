@@ -1,10 +1,10 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { User } from 'firebase/auth';
 import { GuestSignIn } from '../components/GuestSignIn';
+import { useAuth } from '../hooks/useAuth';
+import { useUser } from '../contexts/UserContext';
 import { signInAsGuest } from '@/lib/firebase/firebase-utils';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
 jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
   useUser: jest.fn(),
@@ -42,7 +42,7 @@ describe('GuestSignIn Integration Tests', () => {
 
     it('only renders sign-in button regardless of auth state in this component', () => {
       mockUseAuth.mockReturnValue({ 
-        user: { uid: 'test-uid' } as any, 
+        user: { uid: 'test-uid' } as User, 
         loading: false 
       });
       mockUseUser.mockReturnValue({
@@ -61,7 +61,7 @@ describe('GuestSignIn Integration Tests', () => {
     it('calls signInAsGuest when "Play as Guest" button is clicked', async () => {
       const user = userEvent.setup();
       mockSignInAsGuest.mockResolvedValue({ 
-        user: { uid: 'guest-uid' } as any, 
+        user: { uid: 'guest-uid' } as User, 
         error: null 
       });
       
@@ -77,7 +77,7 @@ describe('GuestSignIn Integration Tests', () => {
       const user = userEvent.setup();
       mockSignInAsGuest.mockImplementation(() => 
         new Promise(resolve => 
-          setTimeout(() => resolve({ user: { uid: 'guest-uid' } as any, error: null }), 100)
+          setTimeout(() => resolve({ user: { uid: 'guest-uid' } as User, error: null }), 100)
         )
       );
       
@@ -91,7 +91,7 @@ describe('GuestSignIn Integration Tests', () => {
 
     it('handles successful sign-in', async () => {
       const user = userEvent.setup();
-      const mockUser = { uid: 'guest-uid', isAnonymous: true } as any;
+      const mockUser = { uid: 'guest-uid', isAnonymous: true } as User;
       mockSignInAsGuest.mockResolvedValue({ user: mockUser, error: null });
       
       render(<GuestSignIn />);
@@ -153,7 +153,7 @@ describe('GuestSignIn Integration Tests', () => {
       });
       
       mockSignInAsGuest.mockResolvedValueOnce({ 
-        user: { uid: 'guest-uid' } as any, 
+        user: { uid: 'guest-uid' } as User, 
         error: null 
       });
       
@@ -182,7 +182,7 @@ describe('GuestSignIn Integration Tests', () => {
 
     it('maintains consistent UI regardless of auth state', () => {
       mockUseAuth.mockReturnValue({ 
-        user: { uid: 'test-uid' } as any, 
+        user: { uid: 'test-uid' } as User, 
         loading: false 
       });
       mockUseUser.mockReturnValue({
@@ -200,7 +200,7 @@ describe('GuestSignIn Integration Tests', () => {
       const user = userEvent.setup();
       mockSignInAsGuest.mockImplementation(() => 
         new Promise(resolve => 
-          setTimeout(() => resolve({ user: { uid: 'guest-uid' } as any, error: null }), 100)
+          setTimeout(() => resolve({ user: { uid: 'guest-uid' } as User, error: null }), 100)
         )
       );
       
