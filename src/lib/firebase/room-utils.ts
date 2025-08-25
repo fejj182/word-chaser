@@ -131,6 +131,12 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
     if (updatedPlayers.length === 0) {
       // Delete room if no players left
       await set(roomRef, null);
+      
+      // Also delete the corresponding slug entry
+      if (room.slug) {
+        const slugRef = ref(db, `${SLUGS_PATH}/${room.slug}`);
+        await set(slugRef, null);
+      }
     } else {
       // If the host left, make the first remaining player the host
       if (room.players.find(p => p.id === userId)?.isHost && updatedPlayers.length > 0) {

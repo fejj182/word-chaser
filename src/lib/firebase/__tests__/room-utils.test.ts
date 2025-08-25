@@ -199,18 +199,55 @@ describe('room-utils', () => {
 
     it('deletes room when last player leaves', async () => {
       const mockRoomRef = createMockRef();
+      const mockSlugRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
+        slug: 'test-slug',
         players: [{ id: 'user1', displayName: 'User 1' }],
       });
 
-      mockRef.mockReturnValue(mockRoomRef);
+      mockRef.mockImplementation((database, path) => {
+        if (path === 'rooms/test-room-id') {
+          return mockRoomRef;
+        }
+        if (path === 'slugs/test-slug') {
+          return mockSlugRef;
+        }
+        return mockRoomRef;
+      });
       mockGet.mockResolvedValue(mockSnapshot);
       mockSet.mockResolvedValue(undefined);
 
       await leaveRoom('test-room-id', 'user1');
 
       expect(mockSet).toHaveBeenCalledWith(mockRoomRef, null);
+      expect(mockSet).toHaveBeenCalledWith(mockSlugRef, null);
+    });
+
+    it('does not delete slug when players remain in room', async () => {
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        slug: 'test-slug',
+        players: [
+          { id: 'user1', displayName: 'User 1', isHost: true },
+          { id: 'user2', displayName: 'User 2', isHost: false },
+        ],
+      });
+
+      mockRef.mockReturnValue(mockRoomRef);
+      mockGet.mockResolvedValue(mockSnapshot);
+      mockUpdate.mockResolvedValue(undefined);
+
+      await leaveRoom('test-room-id', 'user1');
+
+      expect(mockUpdate).toHaveBeenCalledWith(ref(db), {
+        'rooms/test-room-id/players': [
+          { id: 'user2', displayName: 'User 2', isHost: true },
+        ],
+      });
+      // Should not call set() for slug deletion
+      expect(mockSet).not.toHaveBeenCalled();
     });
   });
 
