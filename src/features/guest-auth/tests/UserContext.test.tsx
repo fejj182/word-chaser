@@ -1,8 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { User } from 'firebase/auth';
 import { UserProvider, useUser } from '../contexts/UserContext';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 
 jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
   useAuth: jest.fn(),
@@ -18,7 +19,7 @@ const TestComponent = () => {
       <div data-testid="displayName">{displayName || 'no-display'}</div>
       <button 
         data-testid="setUser"
-        onClick={() => setUser({ uid: 'test-uid', isAnonymous: true } as any)}
+        onClick={() => setUser({ uid: 'test-uid', isAnonymous: true } as User)}
       >
         Set User
       </button>
@@ -71,7 +72,7 @@ describe('UserContext', () => {
         isAnonymous: true,
         email: null,
         displayName: null
-      } as any;
+      } as User;
       
       mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
       
@@ -91,7 +92,7 @@ describe('UserContext', () => {
         isAnonymous: false,
         email: 'user@example.com',
         displayName: 'John Doe'
-      } as any;
+      } as User;
       
       mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
       
@@ -126,7 +127,7 @@ describe('UserContext', () => {
         isAnonymous: true,
         email: null,
         displayName: null
-      } as any;
+      } as User;
       
       mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
       
@@ -168,7 +169,7 @@ describe('UserContext', () => {
         isAnonymous: true,
         email: null,
         displayName: null
-      } as any;
+      } as User;
       
       mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
       
@@ -190,7 +191,7 @@ describe('UserContext', () => {
         isAnonymous: true,
         email: null,
         displayName: null
-      } as any;
+      } as User;
       
       mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
       

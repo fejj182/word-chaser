@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { AuthenticatedContent } from '../components/AuthenticatedContent';
 import { UserContext } from '../contexts/UserContext';
 
@@ -15,7 +15,7 @@ const meta: Meta<typeof AuthenticatedContent> = {
   },
   tags: ['autodocs'],
   decorators: [
-    (Story: any) => (
+    (Story) => (
       <UserContext.Provider value={{
         userId: 'guest-12345',
         displayName: 'Guest-Player-001',
@@ -36,7 +36,7 @@ export const Default: Story = {};
 
 export const WithLongDisplayName: Story = {
   decorators: [
-    (Story: any) => (
+    (Story) => (
       <UserContext.Provider value={{
         userId: 'guest-12345-very-long-id',
         displayName: 'Guest-Player-With-Very-Long-Name-001',

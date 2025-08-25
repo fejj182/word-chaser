@@ -1,6 +1,4 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { UserDisplay } from '../components/UserDisplay';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
 

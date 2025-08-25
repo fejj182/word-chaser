@@ -46,7 +46,12 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="spacing--form">
+    <div className="card card--form">
+      <h2 className="text--card-title">
+        Create a New Room
+      </h2>
+      
+      <form onSubmit={handleSubmit} className="spacing--form">
       {error && (
         <div className="form-error">
           {error}
@@ -148,7 +153,8 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
       >
         Create Room
       </button>
-    </form>
+      </form>
+    </div>
   );
 };
 

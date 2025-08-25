@@ -1,5 +1,5 @@
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom, updatePlayerReady, startGame } from '../room-utils';
-import { ref, push, set, get, onValue, off, update } from 'firebase/database';
+import { ref, push, set, get, onValue, update, DatabaseReference, DataSnapshot } from 'firebase/database';
 import { db } from '../firebase';
 import { CreateRoomParams } from '@/features/room-management/types/room';
 
@@ -22,8 +22,34 @@ const mockPush = push as jest.MockedFunction<typeof push>;
 const mockSet = set as jest.MockedFunction<typeof set>;
 const mockGet = get as jest.MockedFunction<typeof get>;
 const mockOnValue = onValue as jest.MockedFunction<typeof onValue>;
-const mockOff = off as jest.MockedFunction<typeof off>;
 const mockUpdate = update as jest.MockedFunction<typeof update>;
+
+// Create properly typed mock objects
+const createMockRef = (key: string | null = null): DatabaseReference => ({
+  key,
+  parent: null,
+  root: null as unknown as DatabaseReference,
+  ref: jest.fn() as unknown as DatabaseReference,
+  isEqual: jest.fn(),
+  toString: jest.fn(),
+  toJSON: jest.fn()
+});
+
+const createMockSnapshot = (exists: boolean, data: unknown = null): DataSnapshot => ({
+  ref: createMockRef(),
+  priority: null,
+  key: 'test-key',
+  size: 0,
+  exists: () => exists,
+  val: () => data,
+  child: jest.fn(),
+  forEach: jest.fn(),
+  hasChild: jest.fn(),
+  hasChildren: jest.fn(),
+  numChildren: jest.fn(),
+  toJSON: jest.fn(),
+  exportVal: jest.fn()
+} as unknown as DataSnapshot);
 
 describe('room-utils', () => {
   beforeEach(() => {
@@ -32,14 +58,14 @@ describe('room-utils', () => {
 
   describe('createRoom', () => {
     it('creates a room successfully', async () => {
-      const mockRoomRef = { key: 'test-room-id' };
-      const mockPushRef = {};
+      const mockRoomRef = createMockRef('test-room-id');
+      const mockPushRef = createMockRef();
       
       mockRef.mockReturnValue(mockPushRef);
-      mockPush.mockReturnValue(mockRoomRef);
+      mockPush.mockReturnValue(mockRoomRef as ReturnType<typeof push>);
       mockSet.mockResolvedValue(undefined);
       // First get() call for slug availability check
-      mockGet.mockResolvedValueOnce({ exists: () => false } as any);
+      mockGet.mockResolvedValueOnce(createMockSnapshot(false));
 
       const params: CreateRoomParams = {
         maxPlayers: 4,
@@ -76,16 +102,13 @@ describe('room-utils', () => {
 
   describe('joinRoom', () => {
     it('joins a room successfully', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          players: [{ id: 'existing-user', displayName: 'Existing User' }],
-          maxPlayers: 4,
-          status: 'waiting',
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        players: [{ id: 'existing-user', displayName: 'Existing User' }],
+        maxPlayers: 4,
+        status: 'waiting',
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -107,10 +130,8 @@ describe('room-utils', () => {
     });
 
     it('throws error when room does not exist', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => false,
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(false);
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -119,19 +140,16 @@ describe('room-utils', () => {
     });
 
     it('throws error when room is full', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          players: [
-            { id: 'user1', displayName: 'User 1' },
-            { id: 'user2', displayName: 'User 2' },
-          ],
-          maxPlayers: 2,
-          status: 'waiting',
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        players: [
+          { id: 'user1', displayName: 'User 1' },
+          { id: 'user2', displayName: 'User 2' },
+        ],
+        maxPlayers: 2,
+        status: 'waiting',
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -140,16 +158,13 @@ describe('room-utils', () => {
     });
 
     it('throws error when game has already started', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          players: [{ id: 'user1', displayName: 'User 1' }],
-          maxPlayers: 4,
-          status: 'playing',
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        players: [{ id: 'user1', displayName: 'User 1' }],
+        maxPlayers: 4,
+        status: 'playing',
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -160,17 +175,14 @@ describe('room-utils', () => {
 
   describe('leaveRoom', () => {
     it('removes player from room', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          players: [
-            { id: 'user1', displayName: 'User 1', isHost: true },
-            { id: 'user2', displayName: 'User 2', isHost: false },
-          ],
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        players: [
+          { id: 'user1', displayName: 'User 1', isHost: true },
+          { id: 'user2', displayName: 'User 2', isHost: false },
+        ],
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -186,14 +198,11 @@ describe('room-utils', () => {
     });
 
     it('deletes room when last player leaves', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          players: [{ id: 'user1', displayName: 'User 1' }],
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        players: [{ id: 'user1', displayName: 'User 1' }],
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -207,7 +216,7 @@ describe('room-utils', () => {
 
   describe('subscribeToRoom', () => {
     it('subscribes to room updates', () => {
-      const mockRoomRef = {};
+      const mockRoomRef = createMockRef();
       const mockUnsubscribe = jest.fn();
       const mockCallback = jest.fn();
 
@@ -224,17 +233,14 @@ describe('room-utils', () => {
 
   describe('updatePlayerReady', () => {
     it('updates player ready status', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          players: [
-            { id: 'user1', displayName: 'User 1' },
-            { id: 'user2', displayName: 'User 2' },
-          ],
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        players: [
+          { id: 'user1', displayName: 'User 1' },
+          { id: 'user2', displayName: 'User 2' },
+        ],
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -248,14 +254,11 @@ describe('room-utils', () => {
     });
 
     it('throws error when player not found', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          players: [{ id: 'user1', displayName: 'User 1' }],
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        players: [{ id: 'user1', displayName: 'User 1' }],
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -266,18 +269,15 @@ describe('room-utils', () => {
 
   describe('startGame', () => {
     it('starts game when all players are ready', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          status: 'waiting',
-          players: [
-            { id: 'user1', displayName: 'User 1', isReady: true },
-            { id: 'user2', displayName: 'User 2', isReady: true },
-          ],
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        status: 'waiting',
+        players: [
+          { id: 'user1', displayName: 'User 1', isReady: true },
+          { id: 'user2', displayName: 'User 2', isReady: true },
+        ],
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -291,18 +291,15 @@ describe('room-utils', () => {
     });
 
     it('throws error when not all players are ready', async () => {
-      const mockRoomRef = {};
-      const mockSnapshot = {
-        exists: () => true,
-        val: () => ({
-          id: 'test-room-id',
-          status: 'waiting',
-          players: [
-            { id: 'user1', displayName: 'User 1', isReady: true },
-            { id: 'user2', displayName: 'User 2', isReady: false },
-          ],
-        }),
-      };
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        status: 'waiting',
+        players: [
+          { id: 'user1', displayName: 'User 1', isReady: true },
+          { id: 'user2', displayName: 'User 2', isReady: false },
+        ],
+      });
 
       mockRef.mockReturnValue(mockRoomRef);
       mockGet.mockResolvedValue(mockSnapshot);
@@ -313,13 +310,13 @@ describe('room-utils', () => {
 
   describe('slug generation', () => {
     it('generates Glaswegian-style slugs with correct format', async () => {
-      const mockRoomRef = { key: 'test-room-id' };
-      const mockPushRef = {};
+      const mockRoomRef = createMockRef('test-room-id');
+      const mockPushRef = createMockRef();
       
       mockRef.mockReturnValue(mockPushRef);
-      mockPush.mockReturnValue(mockRoomRef);
+      mockPush.mockReturnValue(mockRoomRef as ReturnType<typeof push>);
       mockSet.mockResolvedValue(undefined);
-      mockGet.mockResolvedValueOnce({ exists: () => false } as any);
+      mockGet.mockResolvedValueOnce(createMockSnapshot(false));
 
       const params: CreateRoomParams = {
         maxPlayers: 4,
@@ -333,11 +330,11 @@ describe('room-utils', () => {
 
       // Check that set was called with a room object
       const setCall = mockSet.mock.calls.find(call => 
-        call[0] === mockRoomRef && typeof call[1] === 'object' && call[1].name
+        call[0] === mockRoomRef && typeof call[1] === 'object' && (call[1] as Record<string, unknown>)?.name
       );
       expect(setCall).toBeDefined();
       
-      const roomData = setCall![1] as any;
+      const roomData = setCall![1] as Record<string, unknown>;
       const { name, slug } = roomData;
       
       expect(name).toMatch(/^[a-z]+-[a-z]+-\d{3}$/);
@@ -350,28 +347,28 @@ describe('room-utils', () => {
         'malky', 'numpty', 'peely', 'plooky', 'scunner', 'shoogly', 'skelf', 'smirr', 'stoater', 'wabbit'
       ];
       
-      const [word1, word2] = name.split('-');
+      const [word1, word2] = (name as string).split('-');
       expect(glaswegianWords).toContain(word1);
       expect(glaswegianWords).toContain(word2);
       
-      const number = name.split('-')[2];
+      const number = (name as string).split('-')[2];
       expect(parseInt(number)).toBeGreaterThanOrEqual(100);
       expect(parseInt(number)).toBeLessThanOrEqual(999);
     });
 
     it('handles slug conflicts by generating new slugs', async () => {
-      const mockRoomRef = { key: 'test-room-id' };
-      const mockPushRef = {};
+      const mockRoomRef = createMockRef('test-room-id');
+      const mockPushRef = createMockRef();
       
       mockRef.mockReturnValue(mockPushRef);
-      mockPush.mockReturnValue(mockRoomRef);
+      mockPush.mockReturnValue(mockRoomRef as ReturnType<typeof push>);
       mockSet.mockResolvedValue(undefined);
       
       // First two attempts return existing slugs, third attempt succeeds
       mockGet
-        .mockResolvedValueOnce({ exists: () => true } as any) // First slug exists
-        .mockResolvedValueOnce({ exists: () => true } as any) // Second slug exists
-        .mockResolvedValueOnce({ exists: () => false } as any); // Third slug is unique
+        .mockResolvedValueOnce(createMockSnapshot(true)) // First slug exists
+        .mockResolvedValueOnce(createMockSnapshot(true)) // Second slug exists
+        .mockResolvedValueOnce(createMockSnapshot(false)); // Third slug is unique
 
       const params: CreateRoomParams = {
         maxPlayers: 4,
@@ -388,24 +385,24 @@ describe('room-utils', () => {
       
       // Verify the final slug was stored
       const setCall = mockSet.mock.calls.find(call => 
-        call[0] === mockRoomRef && typeof call[1] === 'object' && call[1].name
+        call[0] === mockRoomRef && typeof call[1] === 'object' && (call[1] as Record<string, unknown>)?.name
       );
       expect(setCall).toBeDefined();
       
-      const roomData = setCall![1] as any;
+      const roomData = setCall![1] as Record<string, unknown>;
       expect(roomData.name).toMatch(/^[a-z]+-[a-z]+-\d{3}$/);
     });
 
     it('uses fallback with timestamp when all attempts fail', async () => {
-      const mockRoomRef = { key: 'test-room-id' };
-      const mockPushRef = {};
+      const mockRoomRef = createMockRef('test-room-id');
+      const mockPushRef = createMockRef();
       
       mockRef.mockReturnValue(mockPushRef);
-      mockPush.mockReturnValue(mockRoomRef);
+      mockPush.mockReturnValue(mockRoomRef as ReturnType<typeof push>);
       mockSet.mockResolvedValue(undefined);
       
       // All attempts return existing slugs
-      mockGet.mockResolvedValue({ exists: () => true } as any);
+      mockGet.mockResolvedValue(createMockSnapshot(true));
 
       const params: CreateRoomParams = {
         maxPlayers: 4,
@@ -422,23 +419,23 @@ describe('room-utils', () => {
       
       // Verify the fallback slug was stored
       const setCall = mockSet.mock.calls.find(call => 
-        call[0] === mockRoomRef && typeof call[1] === 'object' && call[1].name
+        call[0] === mockRoomRef && typeof call[1] === 'object' && (call[1] as Record<string, unknown>)?.name
       );
       expect(setCall).toBeDefined();
       
-      const roomData = setCall![1] as any;
+      const roomData = setCall![1] as Record<string, unknown>;
       // Fallback should include timestamp
       expect(roomData.name).toMatch(/^[a-z]+-[a-z]+-\d{3}-\d+$/);
     });
 
     it('stores slug mapping in slugs path', async () => {
-      const mockRoomRef = { key: 'test-room-id' };
-      const mockPushRef = {};
+      const mockRoomRef = createMockRef('test-room-id');
+      const mockPushRef = createMockRef();
       
       mockRef.mockReturnValue(mockPushRef);
-      mockPush.mockReturnValue(mockRoomRef);
+      mockPush.mockReturnValue(mockRoomRef as ReturnType<typeof push>);
       mockSet.mockResolvedValue(undefined);
-      mockGet.mockResolvedValueOnce({ exists: () => false } as any);
+      mockGet.mockResolvedValueOnce(createMockSnapshot(false));
 
       const params: CreateRoomParams = {
         maxPlayers: 4,
