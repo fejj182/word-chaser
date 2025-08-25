@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
@@ -159,12 +159,8 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   };
 
-  const subscribeToSession = (callback: (session: Session | null) => void): () => void => {
-    if (!state.currentSession) {
-      return () => {};
-    }
-    
-    return subscribeToRoom(state.currentSession.id, (room) => {
+  const subscribeToSession = useCallback((sessionId: string, callback: (session: Session | null) => void): () => void => {
+    return subscribeToRoom(sessionId, (room) => {
       // Transform room data to session data
       if (room) {
         const session: Session = {
@@ -185,18 +181,18 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
         callback(null);
       }
     });
-  };
+  }, []);
 
   // Subscribe to session updates when currentSession changes
   useEffect(() => {
     if (state.currentSession && state.currentSession.id) {
-      const unsubscribe = subscribeToSession((session) => {
+      const unsubscribe = subscribeToSession(state.currentSession.id, (session) => {
         dispatch({ type: 'SET_SESSION', payload: session });
       });
       
       return unsubscribe;
     }
-  }, [state.currentSession]);
+  }, [state.currentSession?.id, subscribeToSession]);
 
   // Cleanup logic to prevent orphaned sessions
   useEffect(() => {

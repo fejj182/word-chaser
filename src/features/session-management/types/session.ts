@@ -9,7 +9,7 @@ export interface SessionManager {
   startSession(): Promise<void>;
   
   // Real-time subscriptions
-  subscribeToSession(callback: (session: Session | null) => void): () => void;
+  subscribeToSession(sessionId: string, callback: (session: Session | null) => void): () => void;
 }
 
 export interface Session {
@@ -20,7 +20,7 @@ export interface Session {
   maxPlayers: number;
   settings: SessionSettings;
   // Game-specific data will be added here
-  gameState?: any;
+  gameState?: Record<string, unknown>;
 }
 
 export interface SessionPlayer {
@@ -29,7 +29,7 @@ export interface SessionPlayer {
   isHost: boolean;
   isReady: boolean;
   // Game-specific player data
-  gameData?: any;
+  gameData?: Record<string, unknown>;
 }
 
 export interface SessionSettings {

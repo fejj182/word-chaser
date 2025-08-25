@@ -117,7 +117,7 @@ export const resolveRoomId = async (roomKey: string): Promise<string> => {
   throw new Error('Room not found');
 };
 
-const deleteRoomAndSlug = async (roomRef: any, room: Room): Promise<void> => {
+const deleteRoomAndSlug = async (roomRef: ReturnType<typeof ref>, room: Room): Promise<void> => {
   await set(roomRef, null);
   
   if (room.slug) {

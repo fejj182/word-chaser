@@ -3,7 +3,6 @@
 import React from 'react';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
-import { updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
 import { Room, PartialRoom } from '@/features/room-management/types/room';
 
 function isCompleteRoom(room: Room | PartialRoom): room is Room {
@@ -11,7 +10,7 @@ function isCompleteRoom(room: Room | PartialRoom): room is Room {
 }
 
 const RoomLobby: React.FC = () => {
-  const { currentRoom, leaveRoom, isLoading } = useRoom();
+  const { currentRoom, leaveRoom, isLoading, updatePlayerReady, startGame } = useRoom();
   const { user } = useAuth();
   const [startGameError, setStartGameError] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
@@ -33,7 +32,7 @@ const RoomLobby: React.FC = () => {
     if (!currentPlayer) return;
     
     try {
-      await updatePlayerReady(currentRoom.id, user.uid, !currentPlayer.isReady);
+      await updatePlayerReady(!currentPlayer.isReady);
     } catch (error) {
       console.error('Failed to update ready status:', error);
     }
@@ -42,7 +41,7 @@ const RoomLobby: React.FC = () => {
   const handleStartGame = async () => {
     try {
       setStartGameError(null);
-      await startGame(currentRoom.id);
+      await startGame();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to start game';
       console.error('Failed to start game:', error);
