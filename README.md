@@ -74,6 +74,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 - `npm test` - Run tests
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:coverage` - Run tests with coverage
+- `npm run test:integration` - Run only integration tests (files matching `.integration.test.(ts|tsx|js)`)
 - `npm run storybook` - Start Storybook development server
 - `npm run build-storybook` - Build Storybook for production
 
@@ -97,6 +98,41 @@ The project uses Jest with React Testing Library for comprehensive testing:
 - Unit tests for components and utilities
 - Integration tests for Firebase operations
 - Storybook for component development and visual testing
+
+#### Running Firebase RTDB Emulator Integration Tests
+
+These backend‑level tests run against the Firebase Realtime Database emulator and are skipped by default when no emulator is detected.
+
+1) Start the RTDB emulator (using npx):
+
+```bash
+npx firebase emulators:start --only database --project demo-word-chaser
+```
+
+Optionally customize via environment variables (defaults shown):
+
+```bash
+export RTD_EMULATOR_HOST=127.0.0.1
+export RTD_EMULATOR_PORT=9000
+export RTD_EMULATOR_PROJECT=demo-word-chaser
+```
+
+2) Run tests as usual:
+
+```bash
+npm test
+```
+
+Run only the integration tests:
+
+```bash
+npm run test:integration
+```
+
+Notes:
+- The suite lives at `src/lib/firebase/__tests__/rtdb.integration.test.ts`.
+- When the emulator is running, the suite validates: minimal rules allow/deny, join caps, all‑ready → playing, host transfer/room delete, slug uniqueness/mapping, and a subscription sanity check.
+- When the emulator is not running, the suite exits early and does not fail CI/local runs.
 
 ### Code Quality
 
