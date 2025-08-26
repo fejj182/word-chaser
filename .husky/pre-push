@@ -20,10 +20,14 @@ else
   CHANGED_FILES=$(git diff --name-only)
 fi
 
-echo "$CHANGED_FILES" | grep -E '^src/lib/firebase/' >/dev/null 2>&1
-if [ $? -eq 0 ]; then
+if echo "$CHANGED_FILES" | grep -E '^src/lib/firebase/' >/dev/null 2>&1; then
   echo "🔌 Firebase changes detected. Running RTDB emulator integration tests..."
-  npx firebase emulators:exec --only database "npm run -s test:integration"
+  # Load env vars if present
+  if [ -f .env.local ]; then
+    # shellcheck disable=SC2046
+    export $(grep -v '^#' .env.local | xargs) >/dev/null 2>&1
+  fi
+  ./node_modules/.bin/firebase emulators:exec --only database "npm run -s test:integration"
   if [ $? -ne 0 ]; then
     echo "❌ Firebase integration tests failed."
     exit 1

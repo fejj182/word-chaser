@@ -134,6 +134,13 @@ Notes:
 - When the emulator is running, the suite validates: minimal rules allow/deny, join caps, all‑ready → playing, host transfer/room delete, slug uniqueness/mapping, and a subscription sanity check.
 - When the emulator is not running, the suite exits early and does not fail CI/local runs.
 
+Silencing emulator warnings:
+- A minimal `firebase.json` and `database.rules.json` are included to avoid config/rules warnings.
+- To silence the auth warning without interactive login, add a Firebase CI token to your environment:
+  1. Generate once: `npx firebase login:ci`
+  2. Add to your local `.env.local` as `FIREBASE_TOKEN=...`
+  3. The pre-push one-shot emulator run will use the token automatically.
+
 ### Code Quality
 
 - ESLint for code linting
