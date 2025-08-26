@@ -141,6 +141,57 @@ Silencing emulator warnings:
   2. Add to your local `.env.local` as `FIREBASE_TOKEN=...`
   3. The pre-push one-shot emulator run will use the token automatically.
 
+#### Running Playwright E2E Tests
+
+The project includes automated end-to-end tests using Playwright that test the full multiplayer flows:
+
+**Prerequisites:**
+- Firebase emulator must be running for E2E tests
+- Development server should be running
+
+**Setup:**
+1) Start the Firebase emulator:
+```bash
+npx firebase emulators:start --only database,auth --project demo-word-chaser
+```
+
+2) In another terminal, start the development server:
+```bash
+npm run dev
+```
+
+**Running E2E Tests:**
+
+Run all E2E tests:
+```bash
+npm run e2e
+```
+
+Run E2E tests with browser visible (headed mode):
+```bash
+npm run e2e:headed
+```
+
+Run E2E tests with Playwright UI for debugging:
+```bash
+npm run e2e:ui
+```
+
+**Available E2E Test Files:**
+- `tests/e2e/lobby.multiplayer.e2e.ts` - Multiplayer lobby flows (room creation, joining, ready up, host transfer)
+
+**E2E Test Features:**
+- Tests run against the Firebase emulator for consistent state
+- Each test resets the database before running
+- Uses isolated browser contexts to simulate multiple players
+- Validates real-time multiplayer interactions
+
+**Debugging E2E Tests:**
+- Use `npm run e2e:headed` to see the browser during test execution
+- Use `npm run e2e:ui` for interactive debugging with Playwright's UI
+- Check test reports in `/playwright-report/` after test runs
+- Review test traces in `/test-results/` for detailed execution logs
+
 ### Code Quality
 
 - ESLint for code linting
