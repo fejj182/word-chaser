@@ -33,8 +33,7 @@ We will use **Client Components** for all interactive room management components
 ### Components that already had `'use client'`:
 
 1. **`src/features/guest-auth/contexts/UserContext.tsx`** - Already properly configured
-2. **`src/features/guest-auth/components/GuestSignIn.tsx`** - Already properly configured
-3. **`src/features/guest-auth/components/UserDisplay.tsx`** - Already properly configured
+2. **`src/features/guest-auth/components/UserDisplay.tsx`** - Already properly configured
 
 ## Consequences
 

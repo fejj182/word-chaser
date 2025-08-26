@@ -9,9 +9,6 @@ jest.mock('./src/lib/firebase/firebase', () => ({
 jest.mock('firebase/auth', () => ({
   signInAnonymously: jest.fn(),
   onAuthStateChanged: jest.fn(),
-  signOut: jest.fn(),
-  signInWithEmailAndPassword: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
 }))
 
 jest.mock('firebase/firestore', () => ({
