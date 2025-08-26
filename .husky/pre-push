@@ -9,4 +9,25 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "✅ All tests passed! Proceeding with push." 
+# Conditionally run Firebase RTDB integration tests if Firebase-related code changed
+# Detect upstream (fallback to origin/main)
+UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo origin/main)
+BASE=$(git merge-base HEAD "$UPSTREAM" 2>/dev/null)
+
+if [ -n "$BASE" ]; then
+  CHANGED_FILES=$(git diff --name-only "$BASE"...HEAD)
+else
+  CHANGED_FILES=$(git diff --name-only)
+fi
+
+echo "$CHANGED_FILES" | grep -E '^src/lib/firebase/' >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo "🔌 Firebase changes detected. Running RTDB emulator integration tests..."
+  npx firebase emulators:exec --only database "npm run -s test:integration"
+  if [ $? -ne 0 ]; then
+    echo "❌ Firebase integration tests failed."
+    exit 1
+  fi
+fi
+
+echo "✅ All tests passed! Proceeding with push."
