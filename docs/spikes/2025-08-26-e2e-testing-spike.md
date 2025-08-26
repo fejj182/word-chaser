@@ -44,8 +44,8 @@ if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
 ## Test Scenarios (Lean, High Value)
 
 ### Core Flows
-1. **Guest sign-in → Create room → Lobby visible → Toggle ready**
-2. **Multiplayer join flow**: Second user joins existing room → Both visible → Host sees start disabled → All ready → Start enabled → Status changes to playing
+1. **Create room with alias → Lobby visible → Toggle ready**
+2. **Multiplayer join flow**: Second user joins existing room with alias → Both visible → Host sees start disabled → All ready → Start enabled → Status changes to playing
 3. **Host transfer**: Host leaves → Host transfer to next player
 4. **Room cleanup**: Last player leaves → Room deleted
 5. **Join guardrails**: Joining full room or playing room blocked with user-facing message
@@ -68,8 +68,8 @@ test('host creates room, second player joins, all-ready -> playing', async ({ br
   await host.request.put('http://127.0.0.1:9000/.json?ns=demo-word-chaser', { data: null });
   
   await host.goto('http://localhost:3000');
-  await host.getByRole('button', { name: /play as guest/i }).click();
   await host.getByRole('button', { name: /create a new room/i }).click();
+  await host.getByLabel(/alias/i).fill('Host Player');
   await host.getByRole('button', { name: /^create room$/i }).click();
   
   const roomCode = await host.getByTestId('room-code').innerText();
@@ -78,6 +78,7 @@ test('host creates room, second player joins, all-ready -> playing', async ({ br
   await p2.goto('http://localhost:3000');
   await p2.getByRole('button', { name: /join existing room/i }).click();
   await p2.getByLabel(/room code/i).fill(roomCode);
+  await p2.getByLabel(/alias/i).fill('Second Player');
   await p2.getByRole('button', { name: /^join room$/i }).click();
   
   await expect(host.getByText(/players \(2\/\d+\)/i)).toBeVisible();
@@ -193,5 +194,5 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 - [E2E Testing Anti-Patterns](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
 
 ---
-*Spike completed: 2025-08-26*
+*Spike completed: [Date]*
 *Decision: Proceed with Playwright + Firebase Emulator Suite for E2E testing*

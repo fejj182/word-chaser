@@ -77,7 +77,10 @@ const RoomLobby: React.FC = () => {
           <div className="min-w-0 flex-1">
             <h2 className="text--room-title mb-3">Lobby</h2>
             <div className="flex items-center space-x-3 mb-2">
-              <code className="text-lg font-mono bg-gray-100 px-3 py-2 rounded border flex-1">
+              <code 
+                data-testid="room-code"
+                className="text-lg font-mono bg-gray-100 px-3 py-2 rounded border flex-1"
+              >
                 {currentRoom.name}
               </code>
               <button
@@ -95,7 +98,10 @@ const RoomLobby: React.FC = () => {
                 Share this code with friends to invite them to your room
               </p>
               {isHost && (
-                <span className="inline-flex items-center badge badge--host">
+                <span 
+                  data-testid="host-badge"
+                  className="inline-flex items-center badge badge--host"
+                >
                   You are the host
                 </span>
               )}
@@ -113,7 +119,7 @@ const RoomLobby: React.FC = () => {
 
       {/* Players List */}
       <div className="spacing--section">
-        <h3 className="text--section-title mb-2">Players ({currentRoom.players.length}/{currentRoom.maxPlayers})</h3>
+        <h3 className="text--section-title mb-2" data-testid="players-count">Players ({currentRoom.players.length}/{currentRoom.maxPlayers})</h3>
         <div className="mb-4">
           <div className="flex justify-between text-xs text-gray-600 mb-1">
             <span>{readyCount}/{currentRoom.players.length} ready</span>

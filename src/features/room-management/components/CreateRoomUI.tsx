@@ -86,6 +86,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
         </label>
         <select
           id="maxPlayers"
+          data-testid="max-players-select"
           value={formData.maxPlayers}
           onChange={(e) => handleInputChange('maxPlayers', parseInt(e.target.value))}
           className="form-input"
