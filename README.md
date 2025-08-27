@@ -195,7 +195,10 @@ npm run e2e:ui
 ### Code Quality
 
 - ESLint for code linting
-- Husky pre-commit hooks for automated checks
+- Husky pre-push hooks for automated testing:
+  - Unit tests run on every push
+  - Integration tests run when Firebase code changes
+  - E2E tests run when UI components or E2E tests change
 - TypeScript for type safety
 - Feature-based directory structure
 
