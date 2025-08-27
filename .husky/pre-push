@@ -20,6 +20,7 @@ else
   CHANGED_FILES=$(git diff --name-only)
 fi
 
+# Run integration tests if Firebase code changed
 if echo "$CHANGED_FILES" | grep -E '^src/lib/firebase/' >/dev/null 2>&1; then
   echo "🔌 Firebase changes detected. Running RTDB emulator integration tests..."
   # Load env vars if present
@@ -30,6 +31,22 @@ if echo "$CHANGED_FILES" | grep -E '^src/lib/firebase/' >/dev/null 2>&1; then
   ./node_modules/.bin/firebase emulators:exec --only database "npm run -s test:integration"
   if [ $? -ne 0 ]; then
     echo "❌ Firebase integration tests failed."
+    exit 1
+  fi
+fi
+
+# Run E2E tests if UI components, features, or E2E tests changed
+if echo "$CHANGED_FILES" | grep -E '^(src/features|src/components|tests/e2e)/' >/dev/null 2>&1; then
+  echo "🎭 UI changes detected. Running E2E tests..."
+  # Load env vars if present
+  if [ -f .env.local ]; then
+    # shellcheck disable=SC2046
+    export $(grep -v '^#' .env.local | xargs) >/dev/null 2>&1
+  fi
+  # Start emulators and run E2E tests
+  ./node_modules/.bin/firebase emulators:exec --only database,auth --project demo-word-chaser "npm run -s e2e"
+  if [ $? -ne 0 ]; then
+    echo "❌ E2E tests failed."
     exit 1
   fi
 fi
