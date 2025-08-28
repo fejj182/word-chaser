@@ -100,7 +100,7 @@ const shouldUseEmulators = (() => {
 
 - Conditional integration tests when Firebase code changes
 - Conditional E2E tests when UI components change
-- Automatic emulator startup for test execution
+- Tests assume emulator is already running for local development
 
 ## Related ADRs
 
