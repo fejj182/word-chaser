@@ -177,7 +177,7 @@ npx firebase emulators:start --config src/lib/firebase/config/emulator.json --on
 npm run dev
 ```
 
-**Running E2E Tests:**
+**Running E2E Tests (requires emulator to be running):**
 
 Run all E2E tests:
 ```bash
@@ -316,10 +316,10 @@ npx firebase database:get / --project demo-word-chaser | jq .
 #### Emulator Usage in E2E Tests
 
 - Playwright starts the Next.js dev server with `NEXT_PUBLIC_USE_EMULATORS=true` to ensure the app talks to emulators.
-- The pre-push hook starts RTDB and Auth emulators via:
+- The pre-push hook runs E2E tests (requires emulator to be running):
 
 ```bash
-./node_modules/.bin/firebase emulators:exec --config src/lib/firebase/config/emulator.json --only database,auth --project demo-word-chaser "npm run -s e2e"
+npm run -s e2e
 ```
 
 - Each E2E test resets the RTDB emulator at the start of the test:
@@ -390,7 +390,7 @@ When switching to production but still connecting to emulator:
 - Husky pre-push hooks for automated testing:
   - Unit tests run on every push
   - Integration tests run when Firebase code changes
-  - E2E tests run when UI components or E2E tests change
+  - E2E tests run when UI components or E2E tests change (requires emulator to be running)
 - TypeScript for type safety
 - Feature-based directory structure
 
