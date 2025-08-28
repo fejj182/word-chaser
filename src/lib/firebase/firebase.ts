@@ -22,10 +22,31 @@ export const auth = getAuth(app);
 export const db = getDatabase(app);
 export const storage = getStorage(app);
 
-// Connect to emulators if enabled
-if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
-  connectDatabaseEmulator(db, '127.0.0.1', 9000);
-  connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+// Decide whether to use emulators:
+// - Defaults to true for non-production environments
+// - Can be forced on/off via NEXT_PUBLIC_USE_EMULATORS
+const shouldUseEmulators = (() => {
+  const explicit = process.env.NEXT_PUBLIC_USE_EMULATORS;
+  if (explicit === 'true') return true;
+  if (explicit === 'false') return false;
+  return process.env.NODE_ENV !== 'production';
+})();
+
+if (shouldUseEmulators) {
+  const rtdbHost = process.env.RTD_EMULATOR_HOST || '127.0.0.1';
+  const rtdbPort = Number(process.env.RTD_EMULATOR_PORT || 9000);
+  const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099';
+
+  try {
+    connectDatabaseEmulator(db, rtdbHost, rtdbPort);
+    connectAuthEmulator(auth, `http://${authHost}`);
+    console.log(`🔌 Connected to Firebase emulators (RTDB: ${rtdbHost}:${rtdbPort}, Auth: ${authHost})`);
+  } catch (error) {
+    console.warn('⚠️ Failed to connect to Firebase emulators:', error);
+    console.warn('Make sure emulators are running: npx firebase emulators:start --config src/lib/firebase/config/emulator.json --only database,auth --project demo-word-chaser');
+  }
+} else {
+  console.log('🌐 Using production Firebase services');
 }
 
 export default app; 

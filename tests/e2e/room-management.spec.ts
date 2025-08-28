@@ -1,6 +1,6 @@
 import { test, expect, BrowserContext, Page } from '@playwright/test';
 
-test.describe('Multiplayer Lobby', () => {
+test.describe('Room Management & Multiplayer Flows', () => {
   let hostCtx: BrowserContext;
   let host: Page;
   let p2Ctx: BrowserContext;
@@ -29,7 +29,22 @@ test.describe('Multiplayer Lobby', () => {
     await p2Ctx?.close();
   });
 
-  test('host creates room, second player joins, all-ready -> playing', async () => {
+  test.afterAll(async ({ browser }) => {
+    // Reset RTDB emulator after all tests complete
+    try {
+      const cleanupCtx = await browser.newContext();
+      const cleanupPage = await cleanupCtx.newPage();
+      await cleanupPage.request.put('http://127.0.0.1:9000/.json?ns=demo-word-chaser', {
+        data: null
+      });
+      await cleanupCtx.close();
+      console.log('✅ RTDB emulator cleaned up after all tests (worker cleanup)');
+    } catch (error) {
+      console.warn('Could not reset RTDB emulator after tests:', error);
+    }
+  });
+
+  test('should create room, join with second player, and start game when all ready', async () => {
     // Host creates room
     await host.goto('/');
     await host.getByRole('button', { name: /create a new room/i }).click();
@@ -73,7 +88,7 @@ test.describe('Multiplayer Lobby', () => {
     // TODO: Verify game started - waiting for game state implementation
   });
 
-  test('host transfer when host leaves', async () => {
+  test('should transfer host role when original host leaves room', async () => {
     // Create room and join
     await host.goto('/');
     await host.getByRole('button', { name: /create a new room/i }).click();
