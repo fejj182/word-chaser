@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { AuthenticatedContent } from '../components/AuthenticatedContent';
-import { UserContext } from '../contexts/UserContext';
+import { AuthenticatedContent } from '../AuthenticatedContent';
+import { UserContext } from '../../contexts/UserContext';
 
 const meta: Meta<typeof AuthenticatedContent> = {
   title: 'Features/Guest Auth/AuthenticatedContent',

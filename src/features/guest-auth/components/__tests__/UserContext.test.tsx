@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { User } from 'firebase/auth';
-import { UserProvider, useUser } from '../contexts/UserContext';
-import { useAuth } from '../hooks/useAuth';
+import { UserProvider, useUser } from '../../contexts/UserContext';
+import { useAuth } from '../../hooks/useAuth';
 
 jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
   useAuth: jest.fn(),

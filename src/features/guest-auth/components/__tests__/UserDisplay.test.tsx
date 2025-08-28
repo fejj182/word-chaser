@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { UserDisplay } from '../components/UserDisplay';
+import { UserDisplay } from '../UserDisplay';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
 jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
