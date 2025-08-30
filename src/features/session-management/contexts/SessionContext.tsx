@@ -93,6 +93,22 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   };
 
+  const loadSession = async (sessionId: string): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    try {
+      const resolvedSessionId = await resolveRoomId(sessionId);
+      dispatch({ type: 'SET_SESSION_ID', payload: resolvedSessionId });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load session';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }
+
   const joinSession = async (sessionId: string, alias: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -233,6 +249,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
   const value: SessionContextType = {
     ...state,
     createSession,
+    loadSession,
     joinSession,
     leaveSession,
     setPlayerReady,

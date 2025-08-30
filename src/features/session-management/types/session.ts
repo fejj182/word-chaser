@@ -1,6 +1,7 @@
 export interface SessionManager {
   // Core session operations
   createSession(params: CreateSessionParams, alias: string): Promise<string>;
+  loadSession(sessionId: string): Promise<void>;
   joinSession(sessionId: string, alias: string): Promise<void>;
   leaveSession(): Promise<void>;
   

@@ -381,7 +381,7 @@ describe('room-utils', () => {
       const glaswegianWords = [
         'wee', 'daftie', 'bampot', 'heid', 'bawbag', 'gallus', 'pure', 'dead', 'manky', 'scunner',
         'boggin', 'mingin', 'braw', 'bonnie', 'crabbit', 'dreich', 'fankle', 'glaikit', 'guddle', 'keek',
-        'malky', 'numpty', 'peely', 'plooky', 'scunner', 'shoogly', 'skelf', 'smirr', 'stoater', 'wabbit'
+        'malky', 'numpty', 'peely', 'plooky', 'scunner', 'shoogly', 'skelf', 'smirr', 'stoater', 'rapid'
       ];
       
       const [word1, word2] = (name as string).split('-');

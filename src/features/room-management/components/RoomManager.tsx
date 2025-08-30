@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import CreateRoom from './CreateRoom';
 import JoinRoom from './JoinRoom';
@@ -12,6 +13,14 @@ type RoomView = 'menu' | 'create' | 'join';
 const RoomManager: React.FC = () => {
   const { currentRoom } = useRoom();
   const [view, setView] = useState<RoomView>('menu');
+  const router = useRouter();
+
+  // Navigate to game screen when room status changes to 'playing'
+  useEffect(() => {
+    if (currentRoom && currentRoom.status === 'playing') {
+      router.push(`/game/${currentRoom.id}`);
+    }
+  }, [currentRoom?.status, router]);
 
   if (currentRoom) {
     return <RoomLobby />;

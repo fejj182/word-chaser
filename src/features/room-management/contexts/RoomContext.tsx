@@ -4,8 +4,6 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useSession } from '@/features/session-management/contexts/SessionContext';
 import { 
   Session, 
-  PartialSession, 
-  SessionState, 
   CreateSessionParams,
   SessionPlayer 
 } from '@/features/session-management/types/session';
@@ -39,6 +37,7 @@ const transformRoomParamsToSessionParams = (roomParams: CreateRoomParams): Creat
 
 interface RoomContextType extends RoomState {
   createRoom: (params: CreateRoomParams, alias: string) => Promise<string>;
+  loadRoom: (roomId: string) => Promise<void>;
   joinRoom: (roomId: string, alias: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
   updatePlayerReady: (isReady: boolean) => Promise<void>;
@@ -80,6 +79,10 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     return session.createSession(sessionParams, alias);
   };
 
+  const loadRoom = async (roomId: string): Promise<void> => {
+    return session.loadSession(roomId);
+  };
+
   const joinRoom = async (roomId: string, alias: string): Promise<void> => {
     return session.joinSession(roomId, alias);
   };
@@ -103,6 +106,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   const value: RoomContextType = {
     ...roomState,
     createRoom,
+    loadRoom,
     joinRoom,
     leaveRoom,
     updatePlayerReady,

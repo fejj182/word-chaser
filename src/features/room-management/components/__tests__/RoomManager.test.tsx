@@ -4,6 +4,11 @@ import RoomManager from '../RoomManager';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
 jest.mock('@/features/room-management/contexts/RoomContext');
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
 jest.mock('../CreateRoom', () => {
   return function MockCreateRoom() {
     return <div data-testid="create-room">Create Room Component</div>;
@@ -32,6 +37,8 @@ describe('RoomManager', () => {
       createRoom: jest.fn(),
       joinRoom: jest.fn(),
       leaveRoom: jest.fn(),
+      updatePlayerReady: jest.fn(),
+      startGame: jest.fn(),
       clearError: jest.fn(),
     });
   });
@@ -90,14 +97,30 @@ describe('RoomManager', () => {
   });
 
   describe('Room State', () => {
-    it('shows room lobby when user is in a room', () => {
+    it('shows room lobby when user is in a waiting room', () => {
+      const waitingRoom = {
+        id: 'room123',
+        name: 'Test Room',
+        createdBy: 'user123',
+        createdAt: Date.now(),
+        status: 'waiting' as const,
+        players: [],
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: waitingRoom,
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: jest.fn(),
       });
 
@@ -128,6 +151,8 @@ describe('RoomManager', () => {
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: jest.fn(),
       });
 
@@ -154,14 +179,30 @@ describe('RoomManager', () => {
       expect(screen.getByTestId('join-room')).toBeInTheDocument();
     });
 
-    it('renders RoomLobby component when user is in a room', () => {
+    it('renders RoomLobby component when user is in a waiting room', () => {
+      const waitingRoom = {
+        id: 'room123',
+        name: 'Test Room',
+        createdBy: 'user123',
+        createdAt: Date.now(),
+        status: 'waiting' as const,
+        players: [],
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: waitingRoom,
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: jest.fn(),
       });
 
@@ -180,6 +221,8 @@ describe('RoomManager', () => {
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: jest.fn(),
       });
 
@@ -188,13 +231,29 @@ describe('RoomManager', () => {
       fireEvent.click(screen.getByText('Create a New Room'));
       expect(screen.getByTestId('create-room')).toBeInTheDocument();
 
+      const waitingRoom = {
+        id: 'room123',
+        name: 'Test Room',
+        createdBy: 'user123',
+        createdAt: Date.now(),
+        status: 'waiting' as const,
+        players: [],
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: waitingRoom,
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: jest.fn(),
       });
 
@@ -212,6 +271,8 @@ describe('RoomManager', () => {
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: jest.fn(),
       });
 
@@ -220,13 +281,29 @@ describe('RoomManager', () => {
       fireEvent.click(screen.getByText('Join Existing Room'));
       expect(screen.getByTestId('join-room')).toBeInTheDocument();
 
+      const waitingRoom = {
+        id: 'room123',
+        name: 'Test Room',
+        createdBy: 'user123',
+        createdAt: Date.now(),
+        status: 'waiting' as const,
+        players: [],
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
+
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: waitingRoom,
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: jest.fn(),
       });
 
