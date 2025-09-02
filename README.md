@@ -103,7 +103,7 @@ src/
 ├── features/           # Feature-based modules
 │   ├── guest-auth/     # Authentication components and logic
 │   ├── room-management/ # Room creation, joining, and lobby
-│   └── session-management/ # Session state management
+
 ├── lib/                # Shared utilities and Firebase config
 └── types/              # TypeScript type definitions
 ```

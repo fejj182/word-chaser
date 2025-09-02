@@ -1,13 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { RoomProvider, useRoom } from '../RoomContext';
-import { SessionProvider } from '@/features/session-management/contexts/SessionContext';
 import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
-import { createRoom, joinRoom, leaveRoom, subscribeToRoom, resolveRoomId } from '@/lib/firebase/room-utils';
+import { createRoom, joinRoom, leaveRoom, subscribeToRoom, resolveRoomId, updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
-import { User } from 'firebase/auth';
 import { Room } from '@/features/room-management/types/room';
+import { User } from 'firebase/auth';
 
 // Mock Firebase utilities
 jest.mock('@/lib/firebase/room-utils', () => ({
@@ -15,6 +14,8 @@ jest.mock('@/lib/firebase/room-utils', () => ({
   joinRoom: jest.fn(),
   leaveRoom: jest.fn(),
   subscribeToRoom: jest.fn(),
+  updatePlayerReady: jest.fn(),
+  startGame: jest.fn(),
   resolveRoomId: jest.fn(),
 }));
 
@@ -32,12 +33,14 @@ const mockJoinRoom = joinRoom as jest.MockedFunction<typeof joinRoom>;
 const mockLeaveRoom = leaveRoom as jest.MockedFunction<typeof leaveRoom>;
 const mockSubscribeToRoom = subscribeToRoom as jest.MockedFunction<typeof subscribeToRoom>;
 const mockResolveRoomId = resolveRoomId as jest.MockedFunction<typeof resolveRoomId>;
+const mockUpdatePlayerReady = updatePlayerReady as jest.MockedFunction<typeof updatePlayerReady>;
+const mockStartGame = startGame as jest.MockedFunction<typeof startGame>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockEnsureAnon = ensureAnonymousWithAlias as jest.MockedFunction<typeof ensureAnonymousWithAlias>;
 
 // Test component to access room context
 const TestComponent = () => {
-  const { currentRoom, isLoading, error, createRoom, joinRoom, leaveRoom, clearError } = useRoom();
+  const { currentRoom, isLoading, error, createRoom, joinRoom, leaveRoom, updatePlayerReady, startGame, clearError } = useRoom();
   
   const handleCreateRoom = async () => {
     try {
@@ -62,6 +65,22 @@ const TestComponent = () => {
       // Error is handled by the context, we just need to catch it here to prevent test failures
     }
   };
+
+  const handleUpdatePlayerReady = async () => {
+    try {
+      await updatePlayerReady(true);
+    } catch {
+      // Error is handled by the context, we just need to catch it here to prevent test failures
+    }
+  };
+
+  const handleStartGame = async () => {
+    try {
+      await startGame();
+    } catch {
+      // Error is handled by the context, we just need to catch it here to prevent test failures
+    }
+  };
   
   return (
     <div>
@@ -71,6 +90,8 @@ const TestComponent = () => {
       <button onClick={handleCreateRoom}>Create Room</button>
       <button onClick={handleJoinRoom}>Join Room</button>
       <button onClick={handleLeaveRoom}>Leave Room</button>
+      <button onClick={handleUpdatePlayerReady}>Update Ready</button>
+      <button onClick={handleStartGame}>Start Game</button>
       <button onClick={() => clearError()}>Clear Error</button>
     </div>
   );
@@ -79,11 +100,9 @@ const TestComponent = () => {
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
     <UserProvider>
-      <SessionProvider>
-        <RoomProvider>
-          {component}
-        </RoomProvider>
-      </SessionProvider>
+      <RoomProvider>
+        {component}
+      </RoomProvider>
     </UserProvider>
   );
 };
@@ -238,6 +257,93 @@ describe('RoomContext', () => {
         expect(mockLeaveRoom).toHaveBeenCalledWith('room123', 'user123');
       });
     });
+
+    it('should not attempt to leave room when not in a room', async () => {
+      renderWithProvider(<TestComponent />);
+      
+      fireEvent.click(screen.getByText('Leave Room'));
+      
+      // Should not call leaveRoom when currentRoom is null
+      expect(mockLeaveRoom).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Update Player Ready', () => {
+    it('should update player ready status when in a room', async () => {
+      mockUpdatePlayerReady.mockResolvedValue(undefined);
+      
+      // Mock subscription to simulate being in a room
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        callback(mockRoom);
+        return () => {};
+      });
+      
+      renderWithProvider(<TestComponent />);
+      
+      // First create a room to set the room ID and trigger subscription
+      mockCreateRoom.mockResolvedValue('room123');
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      // Wait for room to be set
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).not.toHaveTextContent('null');
+      });
+      
+      fireEvent.click(screen.getByText('Update Ready'));
+      
+      await waitFor(() => {
+        expect(mockUpdatePlayerReady).toHaveBeenCalledWith('room123', 'user123', true);
+      });
+    });
+
+    it('should require room and user to update ready status', async () => {
+      renderWithProvider(<TestComponent />);
+      
+      fireEvent.click(screen.getByText('Update Ready'));
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('error')).toHaveTextContent('No room or user');
+      });
+    });
+  });
+
+  describe('Start Game', () => {
+    it('should start game when in a room', async () => {
+      mockStartGame.mockResolvedValue(undefined);
+      
+      // Mock subscription to simulate being in a room
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        callback(mockRoom);
+        return () => {};
+      });
+      
+      renderWithProvider(<TestComponent />);
+      
+      // First create a room to set the room ID and trigger subscription
+      mockCreateRoom.mockResolvedValue('room123');
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      // Wait for room to be set
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).not.toHaveTextContent('null');
+      });
+      
+      fireEvent.click(screen.getByText('Start Game'));
+      
+      await waitFor(() => {
+        expect(mockStartGame).toHaveBeenCalledWith('room123');
+      });
+    });
+
+    it('should require room to start game', async () => {
+      renderWithProvider(<TestComponent />);
+      
+      fireEvent.click(screen.getByText('Start Game'));
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('error')).toHaveTextContent('No room');
+      });
+    });
   });
 
   describe('Real-time Subscriptions', () => {
@@ -334,32 +440,6 @@ describe('RoomContext', () => {
       
       expect(screen.getByTestId('error')).toHaveTextContent('null');
     });
-
-    it('should create room even when unauthenticated by ensuring alias sign-in', async () => {
-      mockUseAuth.mockReturnValue({ user: null, loading: false });
-      mockCreateRoom.mockResolvedValue('room123');
-
-      renderWithProvider(<TestComponent />);
-
-      fireEvent.click(screen.getByText('Create Room'));
-
-      await waitFor(() => {
-        expect(mockEnsureAnon).toHaveBeenCalledWith('Test User');
-        expect(screen.getByTestId('error')).toHaveTextContent('null');
-      });
-    });
-
-    it('should handle empty room ID from Firebase', async () => {
-      mockCreateRoom.mockResolvedValue('');
-      
-      renderWithProvider(<TestComponent />);
-      
-      fireEvent.click(screen.getByText('Create Room'));
-      
-      await waitFor(() => {
-        expect(screen.getByTestId('error')).toHaveTextContent('Invalid session ID received from server');
-      });
-    });
   });
 
   describe('Loading States', () => {
@@ -379,139 +459,27 @@ describe('RoomContext', () => {
   });
 
   describe('Cleanup Logic', () => {
-    beforeEach(() => {
-      // Mock navigator.sendBeacon
-      Object.defineProperty(navigator, 'sendBeacon', {
-        value: jest.fn(),
-        writable: true,
-      });
+    it('should clean up subscription on unmount', async () => {
+      const mockUnsubscribe = jest.fn();
+      mockSubscribeToRoom.mockReturnValue(mockUnsubscribe);
       
-      // Mock document.visibilityState
-      Object.defineProperty(document, 'visibilityState', {
-        value: 'visible',
-        writable: true,
-      });
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should set up cleanup event listeners when user is in a room', async () => {
-      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-      const documentAddEventListenerSpy = jest.spyOn(document, 'addEventListener');
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
-      mockCreateRoom.mockResolvedValue('room123');
-      
-      renderWithProvider(<TestComponent />);
-      
-      // Trigger room creation to set up cleanup listeners
-      await act(async () => {
-        fireEvent.click(screen.getByText('Create Room'));
-      });
-      
-      await waitFor(() => {
-        expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-        expect(documentAddEventListenerSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
-      });
-    });
-
-    it('should not set up cleanup listeners when user is not in a room', () => {
-      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
-      
-      renderWithProvider(<TestComponent />);
-      
-      // Don't create a room, so no cleanup listeners should be set up
-      // The cleanup effect should not run because currentRoom is null
-      expect(addEventListenerSpy).not.toHaveBeenCalled();
-    });
-
-    it('should send cleanup request on beforeunload', async () => {
-      const sendBeaconSpy = jest.spyOn(navigator, 'sendBeacon');
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
-      mockCreateRoom.mockResolvedValue('room123');
-      
-      renderWithProvider(<TestComponent />);
-      
-      // Create a room to set up cleanup listeners
-      await act(async () => {
-        fireEvent.click(screen.getByText('Create Room'));
-      });
-      
-      // Wait for the room to be set up
-      await waitFor(() => {
-        expect(screen.getByTestId('current-room')).toContainHTML('room123');
-      });
-      
-      // Simulate beforeunload event
-      const beforeUnloadEvent = new Event('beforeunload');
-      window.dispatchEvent(beforeUnloadEvent);
-      
-      expect(sendBeaconSpy).toHaveBeenCalledWith(
-        '/api/leave-room',
-        JSON.stringify({
-          roomId: 'room123',
-          userId: 'user123'
-        })
-      );
-    });
-
-    it('should handle visibility change events', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
-      mockCreateRoom.mockResolvedValue('room123');
-      
-      renderWithProvider(<TestComponent />);
-      
-      // Create a room to set up cleanup listeners
-      await act(async () => {
-        fireEvent.click(screen.getByText('Create Room'));
-      });
-      
-      // Wait for the room to be set up
-      await waitFor(() => {
-        expect(screen.getByTestId('current-room')).toContainHTML('room123');
-      });
-      
-      // Simulate page becoming hidden
-      Object.defineProperty(document, 'visibilityState', { value: 'hidden' });
-      const visibilityChangeEvent = new Event('visibilitychange');
-      document.dispatchEvent(visibilityChangeEvent);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Page hidden - user may have navigated away');
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('should clean up event listeners on unmount', async () => {
-      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
-      const documentRemoveEventListenerSpy = jest.spyOn(document, 'removeEventListener');
-      
-      mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
       mockCreateRoom.mockResolvedValue('room123');
       
       const { unmount } = renderWithProvider(<TestComponent />);
       
-      // Create a room to set up cleanup listeners
-      await act(async () => {
-        fireEvent.click(screen.getByText('Create Room'));
-      });
+      // Create a room to set up subscription
+      fireEvent.click(screen.getByText('Create Room'));
       
-      // Wait for the room to be set up
+      // Wait for subscription to be set up
       await waitFor(() => {
-        expect(screen.getByTestId('current-room')).toContainHTML('room123');
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
       });
       
       // Unmount the component
       unmount();
       
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-      expect(documentRemoveEventListenerSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
+      // Should call the unsubscribe function
+      expect(mockUnsubscribe).toHaveBeenCalled();
     });
   });
 });

@@ -51,13 +51,13 @@ References: [Cursor Rules — Project Instructions](https://docs.cursor.com/en/c
 
 ## 4) State Management
 
-- Global, multiplayer lifecycle state is modeled with React Contexts (see `UserContext`, `RoomContext`, `SessionContext`).
+- Global, multiplayer lifecycle state is modeled with React Contexts (see `UserContext`, `RoomContext`).
 - Use local `useState` for purely component-local UI concerns.
 - Introduce/extend contexts when state is shared across routes/components or synchronized with Firebase.
 - Context rules:
   - Export `Context`, `Provider`, and a `useXxx` hook that throws if used out of provider.
   - Define explicit context value types and action signatures (promises for async ops).
-  - Use adapter/facade patterns to map session ↔ room concepts where appropriate (e.g., `RoomContext`).
+  - Keep contexts focused on their specific domain (e.g., `RoomContext` for room management).
 
 ## 5) Styling
 

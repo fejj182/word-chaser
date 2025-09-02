@@ -35,6 +35,7 @@ export interface CreateRoomParams {
 
 export interface RoomState {
   currentRoom: Room | PartialRoom | null;
+  roomId: string | null;
   isLoading: boolean;
   error: string | null;
 } 
