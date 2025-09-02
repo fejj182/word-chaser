@@ -23,16 +23,34 @@ jest.mock('../RoomLobby', () => {
 const mockUseRoom = useRoom as jest.MockedFunction<typeof useRoom>;
 
 describe('RoomManager', () => {
+  const createMockRoom = (id: string) => ({
+    id,
+    name: 'Test Room',
+    slug: 'test-room',
+    createdBy: 'user123',
+    createdAt: Date.now(),
+    status: 'waiting' as const,
+    players: [],
+    maxPlayers: 4,
+    settings: {
+      roundDuration: 60,
+      maxRounds: 5,
+    },
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRoom.mockReturnValue({
       currentRoom: null,
+      roomId: null,
       isLoading: false,
       error: null,
       createRoom: jest.fn(),
       joinRoom: jest.fn(),
       leaveRoom: jest.fn(),
       clearError: jest.fn(),
+      updatePlayerReady: jest.fn(),
+      startGame: jest.fn(),
     });
   });
 
@@ -91,14 +109,31 @@ describe('RoomManager', () => {
 
   describe('Room State', () => {
     it('shows room lobby when user is in a room', () => {
+      const room = {
+        id: 'room123',
+        name: 'Test Room',
+        slug: 'test-room',
+        createdBy: 'user123',
+        createdAt: Date.now(),
+        status: 'waiting' as const,
+        players: [],
+        maxPlayers: 4,
+        settings: {
+          roundDuration: 60,
+          maxRounds: 5,
+        },
+      };
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: room,
+        roomId: 'room123',
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
         clearError: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
       });
 
       render(<RoomManager />);
@@ -110,6 +145,7 @@ describe('RoomManager', () => {
       const completeRoom = {
         id: 'room123',
         name: 'Test Room',
+        slug: 'test-room',
         createdBy: 'user123',
         createdAt: Date.now(),
         status: 'waiting' as const,
@@ -123,12 +159,15 @@ describe('RoomManager', () => {
 
       mockUseRoom.mockReturnValue({
         currentRoom: completeRoom,
+        roomId: 'room123',
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
         clearError: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
       });
 
       render(<RoomManager />);
@@ -156,13 +195,16 @@ describe('RoomManager', () => {
 
     it('renders RoomLobby component when user is in a room', () => {
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: createMockRoom('room123'),
+        roomId: 'room123',
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
         clearError: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
       });
 
       render(<RoomManager />);
@@ -175,12 +217,15 @@ describe('RoomManager', () => {
     it('transitions from create room to lobby when room is created', () => {
       mockUseRoom.mockReturnValue({
         currentRoom: null,
+        roomId: null,
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
         clearError: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
       });
 
       const { rerender } = render(<RoomManager />);
@@ -189,13 +234,16 @@ describe('RoomManager', () => {
       expect(screen.getByTestId('create-room')).toBeInTheDocument();
 
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: createMockRoom('room123'),
+        roomId: 'room123',
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
         clearError: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
       });
 
       rerender(<RoomManager />);
@@ -207,12 +255,15 @@ describe('RoomManager', () => {
     it('transitions from join room to lobby when room is joined', () => {
       mockUseRoom.mockReturnValue({
         currentRoom: null,
+        roomId: null,
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
         clearError: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
       });
 
       const { rerender } = render(<RoomManager />);
@@ -221,13 +272,16 @@ describe('RoomManager', () => {
       expect(screen.getByTestId('join-room')).toBeInTheDocument();
 
       mockUseRoom.mockReturnValue({
-        currentRoom: { id: 'room123' },
+        currentRoom: createMockRoom('room123'),
+        roomId: 'room123',
         isLoading: false,
         error: null,
         createRoom: jest.fn(),
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
         clearError: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
       });
 
       rerender(<RoomManager />);

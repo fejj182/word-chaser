@@ -31,8 +31,11 @@ describe('JoinRoom', () => {
       leaveRoom: mockLeaveRoom,
       clearError: mockClearError,
       currentRoom: null,
+      roomId: null,
       isLoading: false,
       error: null,
+      updatePlayerReady: jest.fn(),
+      startGame: jest.fn(),
     });
   });
 
@@ -123,8 +126,11 @@ describe('JoinRoom', () => {
       leaveRoom: mockLeaveRoom,
       clearError: mockClearError,
       currentRoom: null,
+      roomId: null,
       isLoading: false,
       error: 'Room not found',
+      updatePlayerReady: jest.fn(),
+      startGame: jest.fn(),
     });
 
     render(
@@ -143,8 +149,11 @@ describe('JoinRoom', () => {
       leaveRoom: mockLeaveRoom,
       clearError: mockClearError,
       currentRoom: null,
+      roomId: null,
       isLoading: true,
       error: null,
+      updatePlayerReady: jest.fn(),
+      startGame: jest.fn(),
     });
 
     render(

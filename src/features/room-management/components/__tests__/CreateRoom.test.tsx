@@ -23,11 +23,14 @@ describe('CreateRoom', () => {
     jest.clearAllMocks();
     mockUseRoom.mockReturnValue({
       currentRoom: null,
+      roomId: null,
       isLoading: false,
       error: null,
       createRoom: mockCreateRoom,
       joinRoom: jest.fn(),
       leaveRoom: jest.fn(),
+      updatePlayerReady: jest.fn(),
+      startGame: jest.fn(),
       clearError: mockClearError,
     });
   });
@@ -96,11 +99,14 @@ describe('CreateRoom', () => {
     it('should display error message when room creation fails', () => {
       mockUseRoom.mockReturnValue({
         currentRoom: null,
+        roomId: null,
         isLoading: false,
         error: 'Failed to create room',
         createRoom: mockCreateRoom,
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: mockClearError,
       });
 
@@ -141,11 +147,14 @@ describe('CreateRoom', () => {
     it('should pass loading state to form component', () => {
       mockUseRoom.mockReturnValue({
         currentRoom: null,
+        roomId: null,
         isLoading: true,
         error: null,
         createRoom: mockCreateRoom,
         joinRoom: jest.fn(),
         leaveRoom: jest.fn(),
+        updatePlayerReady: jest.fn(),
+        startGame: jest.fn(),
         clearError: mockClearError,
       });
 

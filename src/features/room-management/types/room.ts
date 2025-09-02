@@ -10,11 +10,6 @@ export interface Room {
   settings: RoomSettings;
 }
 
-// Partial room state when only the ID is set (during loading)
-export interface PartialRoom {
-  id: string;
-}
-
 export interface Player {
   id: string;
   displayName: string;
@@ -34,7 +29,7 @@ export interface CreateRoomParams {
 }
 
 export interface RoomState {
-  currentRoom: Room | PartialRoom | null;
+  currentRoom: Room | null;
   roomId: string | null;
   isLoading: boolean;
   error: string | null;
