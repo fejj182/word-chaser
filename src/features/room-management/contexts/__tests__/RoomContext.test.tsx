@@ -482,4 +482,402 @@ describe('RoomContext', () => {
       expect(mockUnsubscribe).toHaveBeenCalled();
     });
   });
+
+  describe('Subscription Management', () => {
+    it('should automatically subscribe when roomId changes', async () => {
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Initially no subscription
+      expect(mockSubscribeToRoom).not.toHaveBeenCalled();
+      
+      // Create room to set roomId
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      // Should automatically subscribe when roomId is set
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalledWith('room123', expect.any(Function));
+      });
+    });
+
+    it('should handle subscription callback with room data', async () => {
+      let subscriptionCallback: (room: Room | null) => void;
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        subscriptionCallback = callback;
+        return () => {};
+      });
+      
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create room to trigger subscription
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
+      });
+      
+      // Simulate subscription callback with room data
+      act(() => {
+        subscriptionCallback!(mockRoom);
+      });
+      
+      // Should update currentRoom state
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('room123');
+      });
+    });
+
+    it('should handle subscription callback with null (room deleted)', async () => {
+      let subscriptionCallback: (room: Room | null) => void;
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        subscriptionCallback = callback;
+        return () => {};
+      });
+      
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create room to trigger subscription
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
+      });
+      
+      // First set room data
+      act(() => {
+        subscriptionCallback!(mockRoom);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('room123');
+      });
+      
+      // Simulate room deletion via subscription
+      act(() => {
+        subscriptionCallback!(null);
+      });
+      
+      // Should clear currentRoom state
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('null');
+      });
+    });
+
+    it('should not subscribe when roomId is null', () => {
+      renderWithProvider(<TestComponent />);
+      
+      // Should not call subscribeToRoom when roomId is null
+      expect(mockSubscribeToRoom).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Page Unload Cleanup', () => {
+    let mockWindowAddEventListener: jest.SpyInstance;
+    let mockWindowRemoveEventListener: jest.SpyInstance;
+    let mockDocumentAddEventListener: jest.SpyInstance;
+    let mockDocumentRemoveEventListener: jest.SpyInstance;
+    let mockSendBeacon: jest.MockedFunction<typeof navigator.sendBeacon>;
+    
+    beforeEach(() => {
+      mockWindowAddEventListener = jest.spyOn(window, 'addEventListener');
+      mockWindowRemoveEventListener = jest.spyOn(window, 'removeEventListener');
+      mockDocumentAddEventListener = jest.spyOn(document, 'addEventListener');
+      mockDocumentRemoveEventListener = jest.spyOn(document, 'removeEventListener');
+      
+      // Mock navigator.sendBeacon since it doesn't exist in Jest environment
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: jest.fn().mockImplementation(() => true),
+        writable: true,
+        configurable: true,
+      });
+      mockSendBeacon = navigator.sendBeacon as jest.MockedFunction<typeof navigator.sendBeacon>;
+    });
+    
+    afterEach(() => {
+      mockWindowAddEventListener.mockRestore();
+      mockWindowRemoveEventListener.mockRestore();
+      mockDocumentAddEventListener.mockRestore();
+      mockDocumentRemoveEventListener.mockRestore();
+      delete (navigator as any).sendBeacon;
+    });
+
+    it('should set up beforeunload and visibilitychange listeners when in a room', async () => {
+      let subscriptionCallback: (room: Room | null) => void;
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        subscriptionCallback = callback;
+        return () => {};
+      });
+      
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create room to be in a room
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
+      });
+      
+      // Simulate subscription callback to set room data
+      act(() => {
+        subscriptionCallback!(mockRoom);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('room123');
+      });
+      
+      // Wait for event listeners to be set up
+      await waitFor(() => {
+        const windowAddEventListenerCalls = mockWindowAddEventListener.mock.calls;
+        const documentAddEventListenerCalls = mockDocumentAddEventListener.mock.calls;
+        const allEventTypes = [
+          ...windowAddEventListenerCalls.map((call: any) => call[0]),
+          ...documentAddEventListenerCalls.map((call: any) => call[0])
+        ];
+        expect(allEventTypes).toContain('beforeunload');
+        expect(allEventTypes).toContain('visibilitychange');
+      });
+    });
+
+    it('should not set up listeners when not in a room', () => {
+      renderWithProvider(<TestComponent />);
+      
+      // Should not set up event listeners when not in a room
+      expect(mockWindowAddEventListener).not.toHaveBeenCalled();
+      expect(mockDocumentAddEventListener).not.toHaveBeenCalled();
+    });
+
+    it('should not set up listeners when user is not authenticated', () => {
+      mockUseAuth.mockReturnValue({ user: null, loading: false });
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Should not set up event listeners when user is null
+      expect(mockWindowAddEventListener).not.toHaveBeenCalled();
+      expect(mockDocumentAddEventListener).not.toHaveBeenCalled();
+    });
+
+    it('should clean up event listeners on unmount', async () => {
+      let subscriptionCallback: (room: Room | null) => void;
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        subscriptionCallback = callback;
+        return () => {};
+      });
+      
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      const { unmount } = renderWithProvider(<TestComponent />);
+      
+      // Create room to set up listeners
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
+      });
+      
+      // Simulate subscription callback to set room data
+      act(() => {
+        subscriptionCallback!(mockRoom);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('room123');
+      });
+      
+      // Unmount component
+      unmount();
+      
+      // Wait for event listeners to be set up before unmounting
+      await waitFor(() => {
+        const windowAddEventListenerCalls = mockWindowAddEventListener.mock.calls;
+        const documentAddEventListenerCalls = mockDocumentAddEventListener.mock.calls;
+        const allEventTypes = [
+          ...windowAddEventListenerCalls.map((call: any) => call[0]),
+          ...documentAddEventListenerCalls.map((call: any) => call[0])
+        ];
+        expect(allEventTypes).toContain('beforeunload');
+        expect(allEventTypes).toContain('visibilitychange');
+      });
+      
+      // Unmount component
+      unmount();
+      
+      // Should remove event listeners
+      await waitFor(() => {
+        const windowRemoveEventListenerCalls = mockWindowRemoveEventListener.mock.calls;
+        const documentRemoveEventListenerCalls = mockDocumentRemoveEventListener.mock.calls;
+        const allEventTypes = [
+          ...windowRemoveEventListenerCalls.map((call: any) => call[0]),
+          ...documentRemoveEventListenerCalls.map((call: any) => call[0])
+        ];
+        expect(allEventTypes).toContain('beforeunload');
+        expect(allEventTypes).toContain('visibilitychange');
+      });
+    });
+
+    it('should handle beforeunload event by sending cleanup request', async () => {
+      let beforeUnloadHandler: (event: Event) => void;
+      let subscriptionCallback: (room: Room | null) => void;
+      
+      mockWindowAddEventListener.mockImplementation((event: string, handler: any) => {
+        if (event === 'beforeunload') {
+          beforeUnloadHandler = handler;
+        }
+      });
+      
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        subscriptionCallback = callback;
+        return () => {};
+      });
+      
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create room to set up listeners
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
+      });
+      
+      // Simulate subscription callback to set room data
+      act(() => {
+        subscriptionCallback!(mockRoom);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('room123');
+      });
+      
+      // Simulate beforeunload event
+      const mockEvent = new Event('beforeunload');
+      beforeUnloadHandler!(mockEvent);
+      
+      // Should send cleanup request via sendBeacon
+      expect(mockSendBeacon).toHaveBeenCalledWith('/api/leave-room', expect.any(String));
+      
+      // Verify the data sent
+      const sentData = JSON.parse(mockSendBeacon.mock.calls[0][1] as string);
+      expect(sentData).toEqual({
+        roomId: 'room123',
+        userId: 'user123'
+      });
+    });
+
+    it('should handle visibilitychange event when page becomes hidden', async () => {
+      let visibilityChangeHandler: (event: Event) => void;
+      let subscriptionCallback: (room: Room | null) => void;
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
+      // Capture the visibilitychange handler
+      mockDocumentAddEventListener.mockImplementation((event: string, handler: any) => {
+        if (event === 'visibilitychange') {
+          visibilityChangeHandler = handler;
+        }
+      });
+      
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        subscriptionCallback = callback;
+        return () => {};
+      });
+      
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create room to set up listeners
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
+      });
+      
+      // Simulate subscription callback to set room data
+      act(() => {
+        subscriptionCallback!(mockRoom);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('room123');
+      });
+      
+      // Wait for event listeners to be set up
+      await waitFor(() => {
+        expect(mockDocumentAddEventListener).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
+      });
+      
+      // Simulate visibility change to hidden
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'hidden',
+        writable: true
+      });
+      
+      const mockEvent = new Event('visibilitychange');
+      visibilityChangeHandler!(mockEvent);
+      
+      // Should log when page becomes hidden
+      expect(consoleSpy).toHaveBeenCalledWith('Page hidden - user may have navigated away');
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle sendBeacon failure gracefully', async () => {
+      let beforeUnloadHandler: (event: Event) => void;
+      let subscriptionCallback: (room: Room | null) => void;
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      
+      mockWindowAddEventListener.mockImplementation((event: string, handler: any) => {
+        if (event === 'beforeunload') {
+          beforeUnloadHandler = handler;
+        }
+      });
+      
+      mockSubscribeToRoom.mockImplementation((roomId, callback) => {
+        subscriptionCallback = callback;
+        return () => {};
+      });
+      
+      // Mock sendBeacon to fail
+      mockSendBeacon.mockImplementation(() => {
+        throw new Error('sendBeacon failed');
+      });
+      
+      mockCreateRoom.mockResolvedValue('room123');
+      
+      renderWithProvider(<TestComponent />);
+      
+      // Create room to set up listeners
+      fireEvent.click(screen.getByText('Create Room'));
+      
+      await waitFor(() => {
+        expect(mockSubscribeToRoom).toHaveBeenCalled();
+      });
+      
+      // Simulate subscription callback to set room data
+      act(() => {
+        subscriptionCallback!(mockRoom);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('current-room')).toHaveTextContent('room123');
+      });
+      
+      // Simulate beforeunload event
+      const mockEvent = new Event('beforeunload');
+      beforeUnloadHandler!(mockEvent);
+      
+      // Should log warning when sendBeacon fails
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to send cleanup request:', expect.any(Error));
+      
+      consoleSpy.mockRestore();
+    });
+  });
 });

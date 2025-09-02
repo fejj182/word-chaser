@@ -185,24 +185,48 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   useEffect(() => {
     if (state.roomId) {
       const unsubscribe = subscribeToRoom(state.roomId, (room) => {
-        if (room) {
-          dispatch({ type: 'SET_ROOM', payload: room });
-        } else {
-          dispatch({ type: 'SET_ROOM', payload: null });
-        }
-      });
-      
+        dispatch({ type: 'SET_ROOM', payload: room });
+      });      
       // Return cleanup function
       return unsubscribe;
     }
   }, [state.roomId]);
 
-  // Effect to handle cleanup when room is cleared
   useEffect(() => {
-    if (!state.roomId && state.currentRoom) {
-      dispatch({ type: 'SET_ROOM', payload: null });
+    if (!state.currentRoom?.id || !user?.uid) {
+      return;
     }
-  }, [state.roomId, state.currentRoom]);
+
+    const handleBeforeUnload = () => {
+      if (state.currentRoom?.id && user?.uid) {
+        // Use sendBeacon for reliable cleanup on page unload
+        const data = JSON.stringify({
+          roomId: state.currentRoom.id,
+          userId: user.uid
+        });
+        
+        try {
+          navigator.sendBeacon('/api/leave-room', data);
+        } catch (error) {
+          console.warn('Failed to send cleanup request:', error);
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && state.currentRoom?.id && user?.uid) {
+        console.log('Page hidden - user may have navigated away');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [state.currentRoom?.id, user?.uid]);
 
   const value: RoomContextType = {
     ...state,
