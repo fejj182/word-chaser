@@ -1,41 +1,52 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useSession } from '@/features/session-management/contexts/SessionContext';
+import React, { createContext, useContext, ReactNode, useReducer, useEffect, useCallback } from 'react';
+import { useAuth } from '@/features/guest-auth/hooks/useAuth';
 import { 
-  Session, 
-  PartialSession, 
-  SessionState, 
-  CreateSessionParams,
-  SessionPlayer 
-} from '@/features/session-management/types/session';
-import { Room, PartialRoom, RoomState, CreateRoomParams, Player } from '@/features/room-management/types/room';
+  createRoom, 
+  joinRoom, 
+  leaveRoom, 
+  subscribeToRoom,
+  resolveRoomId, 
+  updatePlayerReady, 
+  startGame 
+} from '@/lib/firebase/room-utils';
+import { Room, PartialRoom, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
+import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
+import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
-// Transform session data to room data
-const transformSessionToRoom = (session: Session): Room => ({
-  id: session.id,
-  name: session.name,
-  slug: session.name, // Using name as slug for now
-  createdBy: session.players.find(p => p.isHost)?.id || '',
-  createdAt: Date.now(), // We'll need to add this to session later
-  status: session.status,
-  players: session.players.map(transformSessionPlayerToPlayer),
-  maxPlayers: session.maxPlayers,
-  settings: session.settings,
-});
+// Reducer actions
+type RoomAction =
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_ROOM'; payload: Room | PartialRoom | null }
+  | { type: 'SET_ROOM_ID'; payload: string }
+  | { type: 'CLEAR_ROOM' };
 
-const transformSessionPlayerToPlayer = (sessionPlayer: SessionPlayer): Player => ({
-  id: sessionPlayer.id,
-  displayName: sessionPlayer.displayName,
-  joinedAt: Date.now(), // We'll need to add this to session later
-  isHost: sessionPlayer.isHost,
-  isReady: sessionPlayer.isReady,
-});
+const initialState: RoomState = {
+  currentRoom: null,
+  roomId: null,
+  isLoading: false,
+  error: null,
+};
 
-const transformRoomParamsToSessionParams = (roomParams: CreateRoomParams): CreateSessionParams => ({
-  maxPlayers: roomParams.maxPlayers,
-  settings: roomParams.settings,
-});
+// Reducer function
+const roomReducer = (state: RoomState, action: RoomAction): RoomState => {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
+    case 'SET_ROOM':
+      return { ...state, currentRoom: action.payload };
+    case 'SET_ROOM_ID':
+      return { ...state, roomId: action.payload };
+    case 'CLEAR_ROOM':
+      return { ...state, currentRoom: null, roomId: null };
+    default:
+      return state;
+  }
+};
 
 interface RoomContextType extends RoomState {
   createRoom: (params: CreateRoomParams, alias: string) => Promise<string>;
@@ -61,52 +72,145 @@ interface RoomProviderProps {
 }
 
 export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
-  const session = useSession();
+  const { user } = useAuth();
+  const { setUser } = useUser();
+  const [state, dispatch] = useReducer(roomReducer, initialState);
 
-  // Transform session state to room state
-  const roomState: RoomState = {
-    currentRoom: session.currentSession 
-      ? (session.currentSession.id && 'players' in session.currentSession 
-          ? transformSessionToRoom(session.currentSession as Session)
-          : { id: session.currentSession.id } as PartialRoom)
-      : null,
-    isLoading: session.isLoading,
-    error: session.error,
-  };
+  const clearError = useCallback(() => {
+    dispatch({ type: 'SET_ERROR', payload: null });
+  }, []);
 
-  // Transform session methods to room methods
-  const createRoom = async (params: CreateRoomParams, alias: string): Promise<string> => {
-    const sessionParams = transformRoomParamsToSessionParams(params);
-    return session.createSession(sessionParams, alias);
-  };
+  const createRoomHandler = useCallback(async (params: CreateRoomParams, alias: string): Promise<string> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
 
-  const joinRoom = async (roomId: string, alias: string): Promise<void> => {
-    return session.joinSession(roomId, alias);
-  };
+    try {
+      const ensuredUser = await ensureAnonymousWithAlias(alias);
+      setUser(ensuredUser);
 
-  const leaveRoom = async (): Promise<void> => {
-    return session.leaveSession();
-  };
+      const roomId = await createRoom(params, ensuredUser.uid, alias.trim());
+      
+      if (!roomId || roomId.trim() === '') {
+        throw new Error('Invalid room ID received from server');
+      }
+      
+      // Set the room ID to trigger the subscription
+      dispatch({ type: 'SET_ROOM_ID', payload: roomId });
+      return roomId;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create room';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw err;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, [user]);
 
-  const updatePlayerReady = async (isReady: boolean): Promise<void> => {
-    return session.setPlayerReady(isReady);
-  };
+  const joinRoomHandler = useCallback(async (roomId: string, alias: string): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
 
-  const startGame = async (): Promise<void> => {
-    return session.startSession();
-  };
+    try {
+      const ensuredUser = await ensureAnonymousWithAlias(alias);
+      setUser(ensuredUser);
+      const resolvedRoomId = await resolveRoomId(roomId);
+      await joinRoom(resolvedRoomId, ensuredUser.uid, alias.trim());
+      
+      // Set the room ID to trigger the subscription
+      dispatch({ type: 'SET_ROOM_ID', payload: resolvedRoomId });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to join room';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw err;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, [user]);
 
-  const clearError = (): void => {
-    session.clearError();
-  };
+  const leaveRoomHandler = useCallback(async (): Promise<void> => {
+    if (!state.currentRoom || !user) {
+      return;
+    }
+
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+    
+    try {
+      await leaveRoom(state.currentRoom.id, user.uid);
+      
+      // Clear the room and room ID
+      dispatch({ type: 'CLEAR_ROOM' });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to leave room';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw err;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, [state.currentRoom, user]);
+
+  const updatePlayerReadyHandler = useCallback(async (isReady: boolean): Promise<void> => {
+    dispatch({ type: 'SET_ERROR', payload: null });
+    
+    try {
+      if (!state.currentRoom || !user) {
+        throw new Error('No room or user');
+      }
+
+      await updatePlayerReady(state.currentRoom.id, user.uid, isReady);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update ready status';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw err;
+    }
+  }, [state.currentRoom, user]);
+
+  const startGameHandler = useCallback(async (): Promise<void> => {
+    dispatch({ type: 'SET_ERROR', payload: null });
+    
+    try {
+      if (!state.currentRoom) {
+        throw new Error('No room');
+      }
+
+      await startGame(state.currentRoom.id);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to start game';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw err;
+    }
+  }, [state.currentRoom]);
+
+  // Effect to handle room subscription when roomId changes
+  useEffect(() => {
+    if (state.roomId) {
+      const unsubscribe = subscribeToRoom(state.roomId, (room) => {
+        if (room) {
+          dispatch({ type: 'SET_ROOM', payload: room });
+        } else {
+          dispatch({ type: 'SET_ROOM', payload: null });
+        }
+      });
+      
+      // Return cleanup function
+      return unsubscribe;
+    }
+  }, [state.roomId]);
+
+  // Effect to handle cleanup when room is cleared
+  useEffect(() => {
+    if (!state.roomId && state.currentRoom) {
+      dispatch({ type: 'SET_ROOM', payload: null });
+    }
+  }, [state.roomId, state.currentRoom]);
 
   const value: RoomContextType = {
-    ...roomState,
-    createRoom,
-    joinRoom,
-    leaveRoom,
-    updatePlayerReady,
-    startGame,
+    ...state,
+    createRoom: createRoomHandler,
+    joinRoom: joinRoomHandler,
+    leaveRoom: leaveRoomHandler,
+    updatePlayerReady: updatePlayerReadyHandler,
+    startGame: startGameHandler,
     clearError,
   };
 

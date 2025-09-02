@@ -65,7 +65,7 @@ src/features/
 │   ├── components/
 │   ├── contexts/
 │   └── types/
-└── session-management/
+
 ```
 
 **With Cursor:**
