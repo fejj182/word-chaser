@@ -3,11 +3,6 @@
 import React from 'react';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
-import { Room, PartialRoom } from '@/features/room-management/types/room';
-
-function isCompleteRoom(room: Room | PartialRoom): room is Room {
-  return 'players' in room && 'name' in room;
-}
 
 const RoomLobby: React.FC = () => {
   const { currentRoom, leaveRoom, isLoading, updatePlayerReady, startGame } = useRoom();
@@ -16,10 +11,6 @@ const RoomLobby: React.FC = () => {
   const [copied, setCopied] = React.useState(false);
 
   if (!currentRoom || !user) {
-    return null;
-  }
-
-  if (!isCompleteRoom(currentRoom)) {
     return null;
   }
 

@@ -11,8 +11,6 @@ jest.mock('@/lib/firebase/room-utils');
 
 const mockUseRoom = useRoom as jest.MockedFunction<typeof useRoom>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
-const mockUpdatePlayerReady = updatePlayerReady as jest.MockedFunction<typeof updatePlayerReady>;
-const mockStartGame = startGame as jest.MockedFunction<typeof startGame>;
 
 describe('RoomLobby', () => {
   const mockUser = {
@@ -35,12 +33,27 @@ describe('RoomLobby', () => {
     providerId: '',
   };
 
+  const mockSinglePlayerRoom = {
+    id: 'room123',
+    name: 'Test Room',
+    slug: 'test-room',
+    createdBy: 'user123',
+    createdAt: Date.now(),
+    status: 'waiting' as const,
+    players: [
+      { id: 'user123', displayName: 'Test User', joinedAt: Date.now(), isHost: true, isReady: true },
+    ],
+    maxPlayers: 4,
+    settings: { roundDuration: 60, maxRounds: 5 },
+  };
+
   const mockLeaveRoom = jest.fn();
   const mockUpdatePlayerReady = jest.fn();
   const mockStartGame = jest.fn();
 
   const createMockRoomContext = (overrides: Partial<ReturnType<typeof useRoom>> = {}) => ({
     currentRoom: null,
+    roomId: null,
     isLoading: false,
     error: null,
     createRoom: jest.fn(),
@@ -59,30 +72,9 @@ describe('RoomLobby', () => {
 
   describe('General Functionality', () => {
     it('displays room name and copy hint', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
 
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -91,30 +83,9 @@ describe('RoomLobby', () => {
     });
 
     it('displays game settings', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
 
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -127,30 +98,9 @@ describe('RoomLobby', () => {
     });
 
     it('calls leaveRoom when leave room button is clicked', async () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
 
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       mockLeaveRoom.mockResolvedValue(undefined);
@@ -165,47 +115,15 @@ describe('RoomLobby', () => {
     });
 
     it('disables buttons when loading', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
 
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
         isLoading: true,
       }));
 
       render(<RoomLobby />);
 
       expect(screen.getByRole('button', { name: /leave room/i })).toBeDisabled();
-    });
-
-    it('returns null when room data is incomplete', () => {
-      const incompleteRoom = { id: 'room123' };
-
-      mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: incompleteRoom,
-      }));
-
-      const { container } = render(<RoomLobby />);
-      expect(container.firstChild).toBeNull();
     });
 
     it('returns null when no user or room', () => {
@@ -221,30 +139,8 @@ describe('RoomLobby', () => {
 
   describe('Single Player Scenarios', () => {
     it('displays single player count', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
-
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -253,30 +149,8 @@ describe('RoomLobby', () => {
     });
 
     it('displays single player information', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
-
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -287,30 +161,8 @@ describe('RoomLobby', () => {
     });
 
     it('highlights current user', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
-
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -320,30 +172,8 @@ describe('RoomLobby', () => {
     });
 
     it('shows ready toggle button for current user', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
-
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -352,30 +182,8 @@ describe('RoomLobby', () => {
     });
 
     it('calls updatePlayerReady when ready toggle is clicked', async () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
-
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -388,30 +196,8 @@ describe('RoomLobby', () => {
     });
 
     it('shows start game button for host but disables it when not enough players', () => {
-      const singlePlayerRoom = {
-        id: 'room123',
-        name: 'Test Room',
-        createdBy: 'user123',
-        createdAt: Date.now(),
-        status: 'waiting' as const,
-        players: [
-          {
-            id: 'user123',
-            displayName: 'Test User',
-            joinedAt: Date.now(),
-            isHost: true,
-            isReady: true,
-          },
-        ],
-        maxPlayers: 4,
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-        },
-      };
-
       mockUseRoom.mockReturnValue(createMockRoomContext({
-        currentRoom: singlePlayerRoom,
+        currentRoom: mockSinglePlayerRoom,
       }));
 
       render(<RoomLobby />);
@@ -426,6 +212,7 @@ describe('RoomLobby', () => {
     const multiPlayerRoom = {
       id: 'room123',
       name: 'Test Room',
+      slug: 'test-room',
       createdBy: 'user123',
       createdAt: Date.now(),
       status: 'waiting' as const,

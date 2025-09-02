@@ -11,7 +11,7 @@ import {
   updatePlayerReady, 
   startGame 
 } from '@/lib/firebase/room-utils';
-import { Room, PartialRoom, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
+import { Room, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
 
@@ -19,7 +19,7 @@ import { useUser } from '@/features/guest-auth/contexts/UserContext';
 type RoomAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_ROOM'; payload: Room | PartialRoom | null }
+  | { type: 'SET_ROOM'; payload: Room | null }
   | { type: 'SET_ROOM_ID'; payload: string }
   | { type: 'CLEAR_ROOM' };
 
