@@ -1,10 +1,10 @@
 'use client';
 
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
+interface UserDisplayProps {
+  displayName: string | null;
+}
 
-export const UserDisplay = () => {
-  const { displayName } = useUser();
-
+export const UserDisplay = ({ displayName }: UserDisplayProps) => {
   if (!displayName) {
     return null;
   }
