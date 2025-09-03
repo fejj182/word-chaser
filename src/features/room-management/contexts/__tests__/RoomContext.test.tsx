@@ -12,6 +12,7 @@ import { User } from 'firebase/auth';
 jest.mock('@/lib/firebase/room-utils', () => ({
   createRoom: jest.fn(),
   joinRoom: jest.fn(),
+  loadRoom: jest.fn(),
   leaveRoom: jest.fn(),
   subscribeToRoom: jest.fn(),
   updatePlayerReady: jest.fn(),
@@ -40,13 +41,21 @@ const mockEnsureAnon = ensureAnonymousWithAlias as jest.MockedFunction<typeof en
 
 // Test component to access room context
 const TestComponent = () => {
-  const { currentRoom, isLoading, error, createRoom, joinRoom, leaveRoom, updatePlayerReady, startGame, clearError } = useRoom();
+  const { currentRoom, isLoading, error, createRoom, joinRoom, leaveRoom, updatePlayerReady, startGame, loadRoom,clearError } = useRoom();
   
   const handleCreateRoom = async () => {
     try {
       await createRoom({ maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } }, 'Test User');
     } catch {
-      // Error is handled by the context, we just need to catch it here to prevent test failures
+      // Error is handled by the context
+    }
+  };
+  
+  const handleLoadRoom = async () => {
+    try {
+      await loadRoom('test-room-id');
+    } catch {
+      // Error is handled by the context
     }
   };
   
@@ -54,7 +63,7 @@ const TestComponent = () => {
     try {
       await joinRoom('test-room-id', 'Test User');
     } catch {
-      // Error is handled by the context, we just need to catch it here to prevent test failures
+      // Error is handled by the context
     }
   };
   
@@ -62,7 +71,7 @@ const TestComponent = () => {
     try {
       await leaveRoom();
     } catch {
-      // Error is handled by the context, we just need to catch it here to prevent test failures
+      // Error is handled by the context
     }
   };
 
@@ -70,7 +79,7 @@ const TestComponent = () => {
     try {
       await updatePlayerReady(true);
     } catch {
-      // Error is handled by the context, we just need to catch it here to prevent test failures
+      // Error is handled by the context
     }
   };
 
@@ -78,7 +87,7 @@ const TestComponent = () => {
     try {
       await startGame();
     } catch {
-      // Error is handled by the context, we just need to catch it here to prevent test failures
+      // Error is handled by the context
     }
   };
   
@@ -88,6 +97,7 @@ const TestComponent = () => {
       <div data-testid="loading">{isLoading.toString()}</div>
       <div data-testid="error">{error || 'null'}</div>
       <button onClick={handleCreateRoom}>Create Room</button>
+      <button onClick={handleLoadRoom}>Load Room</button>
       <button onClick={handleJoinRoom}>Join Room</button>
       <button onClick={handleLeaveRoom}>Leave Room</button>
       <button onClick={handleUpdatePlayerReady}>Update Ready</button>
@@ -204,6 +214,44 @@ describe('RoomContext', () => {
     });
   });
 
+  describe('Load Room', () => {
+    it('should load a room successfully', async () => {
+      renderWithProvider(<TestComponent />);
+      
+      fireEvent.click(screen.getByText('Load Room'));
+      
+      await waitFor(() => {
+        expect(mockResolveRoomId).toHaveBeenCalledWith('test-room-id');
+      });
+    });
+
+    it('should handle load room errors', async () => {
+      mockResolveRoomId.mockRejectedValue(new Error('Room not found'));
+      
+      renderWithProvider(<TestComponent />);
+      
+      fireEvent.click(screen.getByText('Load Room'));
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('error')).toHaveTextContent('Room not found');
+      });
+    });
+
+    it('should show loading state during room loading', async () => {
+      mockResolveRoomId.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      
+      renderWithProvider(<TestComponent />);
+      
+      fireEvent.click(screen.getByText('Load Room'));
+      
+      expect(screen.getByTestId('loading')).toHaveTextContent('true');
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('loading')).toHaveTextContent('false');
+      });
+    });
+  });
+
   describe('Join Room', () => {
     it('should join a room successfully', async () => {
       mockJoinRoom.mockResolvedValue(undefined);
@@ -231,9 +279,7 @@ describe('RoomContext', () => {
   });
 
   describe('Leave Room', () => {
-    it('should leave room when user is in a room', async () => {
-      mockLeaveRoom.mockResolvedValue(undefined);
-      
+    it('should leave room when user is in a room', async () => {  
       // Mock subscription to simulate being in a room
       mockSubscribeToRoom.mockImplementation((roomId, callback) => {
         callback(mockRoom);
@@ -246,7 +292,6 @@ describe('RoomContext', () => {
       mockCreateRoom.mockResolvedValue('room123');
       fireEvent.click(screen.getByText('Create Room'));
       
-      // Wait for room to be set
       await waitFor(() => {
         expect(screen.getByTestId('current-room')).not.toHaveTextContent('null');
       });
@@ -263,15 +308,12 @@ describe('RoomContext', () => {
       
       fireEvent.click(screen.getByText('Leave Room'));
       
-      // Should not call leaveRoom when currentRoom is null
       expect(mockLeaveRoom).not.toHaveBeenCalled();
     });
   });
 
   describe('Update Player Ready', () => {
-    it('should update player ready status when in a room', async () => {
-      mockUpdatePlayerReady.mockResolvedValue(undefined);
-      
+    it('should update player ready status when in a room', async () => {  
       // Mock subscription to simulate being in a room
       mockSubscribeToRoom.mockImplementation((roomId, callback) => {
         callback(mockRoom);
@@ -309,8 +351,6 @@ describe('RoomContext', () => {
 
   describe('Start Game', () => {
     it('should start game when in a room', async () => {
-      mockStartGame.mockResolvedValue(undefined);
-      
       // Mock subscription to simulate being in a room
       mockSubscribeToRoom.mockImplementation((roomId, callback) => {
         callback(mockRoom);
