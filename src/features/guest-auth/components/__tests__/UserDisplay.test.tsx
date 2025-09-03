@@ -1,12 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import { UserDisplay } from '../UserDisplay';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
-
-jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
-  useUser: jest.fn(),
-}));
-
-const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 
 Object.assign(navigator, {
   clipboard: {
@@ -15,69 +8,42 @@ Object.assign(navigator, {
 });
 
 describe('UserDisplay', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseUser.mockReturnValue({
-      userId: null,
-      displayName: null,
-      setUser: jest.fn(),
-    });
-  });
-
   describe('Component Rendering', () => {
-    it('should not render when no user is signed in or alias missing', () => {
-      render(<UserDisplay />);
+    it('should not render when no displayName is provided', () => {
+      render(<UserDisplay displayName={null} />);
       
       expect(screen.queryByText('Playing as:')).not.toBeInTheDocument();
       expect(screen.queryByText('Share this ID:')).not.toBeInTheDocument();
     });
 
-    it('should render when alias is present', () => {
-      mockUseUser.mockReturnValue({
-        userId: 'user123',
-        displayName: 'AliasName',
-        setUser: jest.fn(),
-      });
+    it('should not render when empty string is provided', () => {
+      render(<UserDisplay displayName="" />);
       
-      render(<UserDisplay />);
+      expect(screen.queryByText('Playing as:')).not.toBeInTheDocument();
+      expect(screen.queryByText('Share this ID:')).not.toBeInTheDocument();
+    });
+
+    it('should render when displayName is present', () => {
+      render(<UserDisplay displayName="AliasName" />);
       
       expect(screen.getByText('Playing as:')).toBeInTheDocument();
       expect(screen.getByText('AliasName')).toBeInTheDocument();
       expect(screen.queryByText('Share this ID:')).not.toBeInTheDocument();
     });
 
-    it('should display only alias (not UID)', () => {
-      mockUseUser.mockReturnValue({
-        userId: 'verylonguserid123456789',
-        displayName: 'Alias-verylong',
-        setUser: jest.fn(),
-      });
-      
-      render(<UserDisplay />);
+    it('should display the provided displayName', () => {
+      render(<UserDisplay displayName="Alias-verylong" />);
       
       expect(screen.getByText('Alias-verylong')).toBeInTheDocument();
-      expect(screen.queryByText('verylonguserid123456789')).not.toBeInTheDocument();
     });
   });
 
-  
-
   describe('UI Elements', () => {
-    it('should render only alias when user is signed in', () => {
-      mockUseUser.mockReturnValue({
-        userId: 'user123',
-        displayName: 'Alias-abc123',
-        setUser: jest.fn(),
-      });
+    it('should have proper text hierarchy', () => {
+      render(<UserDisplay displayName="Test User" />);
       
-      render(<UserDisplay />);
-      
-      expect(screen.getByText('Playing as:')).toBeInTheDocument();
-      expect(screen.getByText('Alias-abc123')).toBeInTheDocument();
-      expect(screen.queryByText('Share this ID:')).not.toBeInTheDocument();
-      expect(screen.queryByText('user123')).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /copy id/i })).not.toBeInTheDocument();
+      expect(screen.getByText('Playing as:')).toHaveClass('text--label');
+      expect(screen.getByText('Test User')).toHaveClass('text--heading');
     });
-
   });
 }); 
