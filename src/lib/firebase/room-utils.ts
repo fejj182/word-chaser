@@ -17,8 +17,8 @@ function slugify(input: string): string {
 function generateGlaswegianSlug(): string {
   const glaswegianWords = [
     'wee', 'daftie', 'bampot', 'heid', 'bawbag', 'gallus', 'pure', 'dead', 'manky', 'scunner',
-    'boggin', 'mingin', 'braw', 'bonnie', 'crabbit', 'dreich', 'fankle', 'glaikit', 'guddle', 'keek',
-    'malky', 'numpty', 'peely', 'plooky', 'scunner', 'shoogly', 'skelf', 'smirr', 'stoater', 'wabbit'
+    'boggin', 'mingin', 'braw', 'bonnie', 'crabbit', 'dreich', 'fankle', 'glaikit', 'witnaw', 'tube',
+    'malky', 'numpty', 'tadger', 'chap', 'scunner', 'awrite', 'skelf', 'jaiket', 'stoater', 'rapid'
   ];
   const word1 = glaswegianWords[Math.floor(Math.random() * glaswegianWords.length)];
   const word2 = glaswegianWords[Math.floor(Math.random() * glaswegianWords.length)];
