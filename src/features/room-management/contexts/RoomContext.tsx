@@ -50,6 +50,7 @@ const roomReducer = (state: RoomState, action: RoomAction): RoomState => {
 
 interface RoomContextType extends RoomState {
   createRoom: (params: CreateRoomParams, alias: string) => Promise<string>;
+  loadRoom: (roomId: string) => Promise<void>;
   joinRoom: (roomId: string, alias: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
   updatePlayerReady: (isReady: boolean) => Promise<void>;
@@ -149,6 +150,23 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     }
   }, [state.currentRoom, user]);
 
+  const loadSessionHandler = async (sessionId: string): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    try {
+      const resolvedSessionId = await resolveRoomId(sessionId);
+      dispatch({ type: 'SET_ROOM_ID', payload: resolvedSessionId });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load session';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }
+
+
   const updatePlayerReadyHandler = useCallback(async (isReady: boolean): Promise<void> => {
     dispatch({ type: 'SET_ERROR', payload: null });
     
@@ -233,6 +251,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     createRoom: createRoomHandler,
     joinRoom: joinRoomHandler,
     leaveRoom: leaveRoomHandler,
+    loadRoom: loadSessionHandler,
     updatePlayerReady: updatePlayerReadyHandler,
     startGame: startGameHandler,
     clearError,

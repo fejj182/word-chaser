@@ -84,8 +84,15 @@ test.describe('Room Management & Multiplayer Flows', () => {
     await expect(startBtn).toBeVisible();
     await expect(startBtn).toBeEnabled();
     await startBtn.click();
-    
-    // TODO: Verify game started - waiting for game state implementation
+
+    await expect(host).toHaveURL(/\/game\/.+/);
+    await expect(p2).toHaveURL(/\/game\/.+/);
+
+    const wordInput = host.getByRole('textbox', { name: /current word/i });
+    expect(wordInput).toBeVisible();
+
+    const p2WordInput = p2.getByRole('textbox', { name: /current word/i });
+    expect(p2WordInput).toBeVisible();
   });
 
   test('should transfer host role when original host leaves room', async () => {
