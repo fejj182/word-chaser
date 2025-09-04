@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
@@ -9,37 +9,41 @@ import { WordInput } from './WordInput';
 import { ScoreDisplay } from './ScoreDisplay';
 import { GameTimer } from './GameTimer';
 import { GameHeader } from './GameHeader';
-import { Room } from '@/features/room-management/types/room';
+import { WordValidationResponse } from '../types/word';
 
 interface GameScreenProps {
   roomId: string;
-}
-
-function isCompleteRoom(room: Room): room is Room {
-  return 'players' in room && 'name' in room && 'status' in room;
 }
 
 export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
   const { currentRoom, leaveRoom, loadRoom } = useRoom();
   const { user } = useAuth();
   const router = useRouter();
+  const boardLetters = [
+    ['A', 'B', 'C', 'D'],
+    ['E', 'F', 'G', 'H'],
+    ['I', 'J', 'K', 'L'],
+    ['M', 'N', 'O', 'P']
+  ];
 
   const currentPlayer = currentRoom?.players.find(p => p.id === user?.uid);
 
   useEffect(() => {
     loadRoom(roomId);
-  }, [roomId])
+  }, [roomId]);
 
   // Redirect to lobby if room is not in playing status
   useEffect(() => {
-    if (currentRoom && isCompleteRoom(currentRoom) && currentRoom.status !== 'playing' && currentPlayer) {
+    if (currentRoom && currentRoom.status !== 'playing' && currentPlayer) {
       router.push('/');
     }
-  }, [currentRoom, router]);
+  }, [currentRoom, router, currentPlayer]);
 
-  if (!currentRoom || !user || !currentPlayer) {
-    return null;
-  }
+  const handleWordSubmitted = useCallback((result: WordValidationResponse) => {
+    // Handle successful word submission
+    // This could update scores, trigger animations, etc.
+    console.log('Word submitted:', result);
+  }, []);
 
   const handleLeaveGame = async () => {
     try {
@@ -48,6 +52,10 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
       console.error('Failed to leave game:', error);
     }
   };
+
+  if (!currentRoom || !user || !currentPlayer) {
+    return null;
+  }
 
   return (
     <div className="page">
@@ -73,12 +81,17 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
               
               {/* Center Column - Letter Grid */}
               <div className="lg:col-span-1">
-                <LetterGrid />
+                <LetterGrid 
+                  letters={boardLetters}
+                />
               </div>
               
               {/* Right Column - Word Input */}
               <div className="lg:col-span-1">
-                <WordInput />
+                <WordInput 
+                  boardLetters={boardLetters}
+                  onWordSubmitted={handleWordSubmitted}
+                />
               </div>
             </div>
           </div>
