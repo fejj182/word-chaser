@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { GridSizeSelector } from '../GridSizeSelector';
 import { useState } from 'react';
+import { GridSize } from '../../contexts/GamePlayContext';
 
 const meta: Meta<typeof GridSizeSelector> = {
   title: 'Features/Game Play/GridSizeSelector',
@@ -12,7 +13,7 @@ const meta: Meta<typeof GridSizeSelector> = {
   argTypes: {
     value: {
       control: 'select',
-      options: ['small', 'medium', 'large'],
+      options: ['small', 'medium'],
       description: 'The currently selected grid size',
     },
     onChange: {
@@ -35,7 +36,7 @@ type Story = StoryObj<typeof GridSizeSelector>;
 
 // Interactive story with state management
 const InteractiveTemplate = (args: any) => {
-  const [value, setValue] = useState<'small' | 'medium' | 'large'>('small');
+  const [value, setValue] = useState<GridSize>('small');
   
   return (
     <GridSizeSelector

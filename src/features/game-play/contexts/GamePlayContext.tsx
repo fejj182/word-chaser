@@ -9,7 +9,7 @@ export interface GridPosition {
   col: number;
 }
 
-export type GridSize = 'small' | 'medium' | 'large';
+export type GridSize = 'small' | 'medium';
 
 export interface GamePlayState {
   grid: string[][];

@@ -3,6 +3,8 @@
  * Implements Boggle-style letter distributions for better word yield
  */
 
+import { GridSize } from "@/features/game-play/contexts/GamePlayContext";
+
 // Boggle dice configurations (4x4 grid uses 16 dice)
 const BOGGLE_DICE_4X4 = [
   ['A', 'A', 'E', 'E', 'G', 'N'],
@@ -113,11 +115,10 @@ export function validateGridQuality(grid: string[][], minWords: number = 5): boo
 /**
  * Get grid size configuration
  */
-export function getGridSizeConfig(size: 'small' | 'medium' | 'large'): number {
+export function getGridSizeConfig(size: GridSize): number {
   switch (size) {
     case 'small': return 4;
     case 'medium': return 6;
-    case 'large': return 8;
     default: return 4;
   }
 }

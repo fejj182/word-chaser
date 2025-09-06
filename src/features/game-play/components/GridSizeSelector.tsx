@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
+import { GridSize } from '../contexts/GamePlayContext';
 
 export interface GridSizeSelectorFormProps {
-  value: 'small' | 'medium' | 'large';
-  onChange: (value: 'small' | 'medium' | 'large') => void;
+  value: GridSize;
+  onChange: (value: GridSize) => void;
   disabled?: boolean;
   className?: string;
 }
@@ -15,10 +16,9 @@ export const GridSizeSelector: React.FC<GridSizeSelectorFormProps> = ({
   disabled = false,
   className = ''
 }) => {
-  const gridSizes: Array<{ value: 'small' | 'medium' | 'large'; label: string; description: string }> = [
+  const gridSizes: Array<{ value: GridSize; label: string; description: string }> = [
     { value: 'small', label: '4×4', description: 'Small grid - easier, faster games' },
-    { value: 'medium', label: '6×6', description: 'Medium grid - balanced challenge' },
-    { value: 'large', label: '8×8', description: 'Large grid - maximum challenge' }
+    { value: 'medium', label: '6×6', description: 'Medium grid - balanced challenge' }
   ];
 
   return (
@@ -29,7 +29,7 @@ export const GridSizeSelector: React.FC<GridSizeSelectorFormProps> = ({
       <div 
         role="radiogroup"
         aria-labelledby="grid-size-label"
-        className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
       >
         {gridSizes.map(({ value: sizeValue, label, description }) => (
           <button

@@ -8,7 +8,7 @@ import { useGamePlay } from '../../game-play/contexts/GamePlayContext';
 /**
  * Complete word grid demo component that showcases all functionality
  * This component demonstrates:
- * - Grid size selection (4x4, 6x6, 8x8)
+ * - Grid size selection (4x4, 6x6)
  * - Boggle-style grid generation
  * - Two-way binding between grid and input
  * - Real-time word validation

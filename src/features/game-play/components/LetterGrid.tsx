@@ -40,7 +40,6 @@ export const LetterGrid: React.FC = () => {
     switch (state.grid.length) {
       case 4: return 'grid-cols-4';
       case 6: return 'grid-cols-6';
-      case 8: return 'grid-cols-8';
       default: return 'grid-cols-4';
     }
   }, [state.grid]);
@@ -49,7 +48,7 @@ export const LetterGrid: React.FC = () => {
     if (!state.grid || state.grid.length === 0) return 'max-w-xs';
     if (state.grid.length <= 4) return 'max-w-xs';
     if (state.grid.length <= 6) return 'max-w-sm';
-    return 'max-w-md';
+    return 'max-w-sm';
   }, [state.grid]);
 
   if (!state.grid || state.grid.length === 0) {
