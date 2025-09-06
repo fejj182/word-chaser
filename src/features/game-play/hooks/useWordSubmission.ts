@@ -1,6 +1,4 @@
 import { useState, useCallback } from 'react';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
-import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { WordValidationRequest, WordValidationResponse } from '../types/word';
 
 interface WordSubmissionState {
@@ -9,8 +7,6 @@ interface WordSubmissionState {
 }
 
 export const useWordSubmission = () => {
-  const { user } = useAuth();
-  const { currentRoom } = useRoom();
   const [state, setState] = useState<WordSubmissionState>({
     isLoading: false,
     error: null
@@ -20,18 +16,11 @@ export const useWordSubmission = () => {
     word: string,
     boardLetters: string[][]
   ): Promise<WordValidationResponse> => {
-    if (!user || !currentRoom) {
-      throw new Error('User or room not available');
-    }
-
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
       const request: WordValidationRequest = {
         word: word.trim(),
-        roomId: currentRoom.id,
-        playerId: user.uid,
-        playerName: user.displayName || 'Anonymous',
         boardLetters
       };
 
@@ -65,7 +54,7 @@ export const useWordSubmission = () => {
       }));
       throw error;
     }
-  }, [user, currentRoom]);
+  }, []);
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));

@@ -4,12 +4,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useGamePlay } from '../contexts/GamePlayContext';
 import { LetterGrid } from './LetterGrid';
 import { WordInput } from './WordInput';
 import { ScoreDisplay } from './ScoreDisplay';
 import { GameTimer } from './GameTimer';
 import { GameHeader } from './GameHeader';
-import { WordValidationResponse } from '../types/word';
 
 interface GameScreenProps {
   roomId: string;
@@ -18,13 +18,8 @@ interface GameScreenProps {
 export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
   const { currentRoom, leaveRoom, loadRoom } = useRoom();
   const { user } = useAuth();
+  const { actions: { loadGridFromRoom } } = useGamePlay();
   const router = useRouter();
-  const boardLetters = [
-    ['A', 'B', 'C', 'D'],
-    ['E', 'F', 'G', 'H'],
-    ['I', 'J', 'K', 'L'],
-    ['M', 'N', 'O', 'P']
-  ];
 
   const currentPlayer = currentRoom?.players.find(p => p.id === user?.uid);
 
@@ -32,18 +27,19 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
     loadRoom(roomId);
   }, [roomId]);
 
+  // Load grid from room data when room is loaded and has game data
+  useEffect(() => {
+    if (currentRoom?.gameData?.grid && currentRoom.settings?.gridSize) {
+      loadGridFromRoom(currentRoom.gameData.grid, currentRoom.settings.gridSize);
+    }
+  }, [currentRoom?.status, loadGridFromRoom]);
+
   // Redirect to lobby if room is not in playing status
   useEffect(() => {
     if (currentRoom && currentRoom.status !== 'playing' && currentPlayer) {
       router.push('/');
     }
   }, [currentRoom, router, currentPlayer]);
-
-  const handleWordSubmitted = useCallback((result: WordValidationResponse) => {
-    // Handle successful word submission
-    // This could update scores, trigger animations, etc.
-    console.log('Word submitted:', result);
-  }, []);
 
   const handleLeaveGame = async () => {
     try {
@@ -81,17 +77,12 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
               
               {/* Center Column - Letter Grid */}
               <div className="lg:col-span-1">
-                <LetterGrid 
-                  letters={boardLetters}
-                />
+                <LetterGrid />
               </div>
               
               {/* Right Column - Word Input */}
               <div className="lg:col-span-1">
-                <WordInput 
-                  boardLetters={boardLetters}
-                  onWordSubmitted={handleWordSubmitted}
-                />
+                <WordInput/>
               </div>
             </div>
           </div>

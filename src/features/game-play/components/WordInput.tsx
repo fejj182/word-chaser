@@ -1,19 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWordSubmission } from '../hooks/useWordSubmission';
 import { WordValidationResponse } from '../types/word';
+import { useGamePlay } from '../contexts/GamePlayContext';
+import { useWordPath } from '../hooks/useWordPath';
 
-export interface WordInputProps {
-  boardLetters: string[][];
-  onWordSubmitted?: (result: WordValidationResponse) => void;
-}
-
-export const WordInput: React.FC<WordInputProps> = ({ 
-  boardLetters,
-  onWordSubmitted 
-}) => {
-  const [word, setWord] = useState('');
+export const WordInput: React.FC = () => {
+  const { state } = useGamePlay();
+  const { 
+    currentWord, 
+    setCurrentWord, 
+    findPathForTypedWord, 
+    clearSelection,
+    isValidPath
+  } = useWordPath();
+  
   const [submittedWords, setSubmittedWords] = useState<Array<{
     word: string;
     result: WordValidationResponse;
@@ -22,24 +24,63 @@ export const WordInput: React.FC<WordInputProps> = ({
   
   const { submitWord, isLoading, error, clearError } = useWordSubmission();
 
+  // Debounced word input handler
+  const [inputValue, setInputValue] = useState('');
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // Update input value when currentWord changes from grid selection
+  useEffect(() => {
+    setInputValue(currentWord);
+  }, [currentWord]);
+
+  // Debounced handler for typing
+  const handleInputChange = useCallback((value: string) => {
+    setInputValue(value);
+    
+    // Clear existing timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    
+    // Set new timer
+    const timer = setTimeout(() => {
+      setCurrentWord(value);
+      if (value.length >= 3) {
+        findPathForTypedWord(value);
+      } else {
+        clearSelection();
+      }
+    }, 150);
+    
+    setDebounceTimer(timer);
+  }, [debounceTimer, setCurrentWord, findPathForTypedWord, clearSelection]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (word.trim() && !isLoading) {
+    if (currentWord.trim() && !isLoading && isValidPath) {
       try {
-        const result = await submitWord(word.trim(), boardLetters);
+        const result = await submitWord(currentWord.trim(), state.grid);
         
         const newSubmission = {
-          word: word.trim().toUpperCase(),
+          word: currentWord.trim().toUpperCase(),
           result,
           timestamp: Date.now()
         };
         
         setSubmittedWords(prev => [newSubmission, ...prev]);
-        setWord('');
+        setCurrentWord('');
+        setInputValue('');
+        clearSelection();
         
-        if (onWordSubmitted) {
-          onWordSubmitted(result);
-        }
       } catch (error) {
         // Error is handled by the hook
         console.error('Failed to submit word:', error);
@@ -48,7 +89,9 @@ export const WordInput: React.FC<WordInputProps> = ({
   };
 
   const handleClear = () => {
-    setWord('');
+    setCurrentWord('');
+    setInputValue('');
+    clearSelection();
     clearError();
   };
 
@@ -66,9 +109,20 @@ export const WordInput: React.FC<WordInputProps> = ({
     return '✗';
   };
 
+  // Get validation status for current word
+  const getValidationStatus = () => {
+    if (!currentWord || currentWord.length < 3 || !isValidPath) {
+      return { isValid: false };
+    }
+    
+    return { isValid: true };
+  };
+
+  const validationStatus = getValidationStatus();
+
   return (
-    <div className="space-y-4">
-      <h2 className="text--section-title">Submit Words</h2>
+    <div className={`space-y-4`}>
+      <h2 className="text-xl font-semibold text-gray-900">Submit Words</h2>
       
       <form onSubmit={handleSubmit} className="space-y-3" role="form">
         <div>
@@ -78,24 +132,31 @@ export const WordInput: React.FC<WordInputProps> = ({
           <input
             id="word-input"
             type="text"
-            value={word}
-            onChange={(e) => setWord(e.target.value)}
-            className="form-input text-center text-lg font-mono"
-            placeholder="Type your word..."
+            value={inputValue}
+            onChange={(e) => handleInputChange(e.target.value.toUpperCase())}
+            className={`form-input text-center text-lg font-mono ${
+              currentWord.length >= 3 
+                ? validationStatus.isValid 
+                  ? 'border-green-500 bg-green-50' 
+                  : 'border-red-500 bg-red-50'
+                : ''
+            }`}
+            placeholder="Type your word or click letters..."
             maxLength={20}
-            aria-describedby="word-help"
+            aria-describedby="word-help word-validation"
+            aria-invalid={currentWord.length >= 3 && !validationStatus.isValid}
             disabled={isLoading}
           />
           <p id="word-help" className="text-sm text-gray-600 mt-1">
-            Use at least 3 letters
+            Use at least 3 letters. Type or click letters on the grid.
           </p>
         </div>
         
         <div className="flex space-x-2">
           <button
             type="submit"
-            disabled={word.trim().length < 3 || isLoading}
-            className="btn btn--primary btn--full btn--disabled"
+            disabled={!validationStatus.isValid || isLoading}
+            className={`btn btn--primary btn--full ${!validationStatus.isValid ? 'btn--disabled' : ''}`}
             aria-busy={isLoading}
           >
             {isLoading ? 'Submitting...' : 'Submit Word'}

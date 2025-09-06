@@ -8,6 +8,10 @@ export interface Room {
   players: Player[];
   maxPlayers: number;
   settings: RoomSettings;
+  gameData?: {
+    grid: string[][];
+    currentRound?: number;
+  };
 }
 
 export interface Player {
@@ -21,6 +25,7 @@ export interface Player {
 export interface RoomSettings {
   roundDuration: number; // in seconds
   maxRounds: number;
+  gridSize: 'small' | 'medium' | 'large';
 }
 
 export interface CreateRoomParams {

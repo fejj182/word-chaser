@@ -1,23 +1,42 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WordInput } from '../WordInput';
+import { GamePlayProvider } from '../../contexts/GamePlayContext';
 
 // Mock the useWordSubmission hook
 jest.mock('../../hooks/useWordSubmission', () => ({
   useWordSubmission: jest.fn()
 }));
 
+// Mock the useWordPath hook
+jest.mock('../../hooks/useWordPath', () => ({
+  useWordPath: jest.fn()
+}));
+
+// Mock the GamePlayContext
+jest.mock('../../contexts/GamePlayContext', () => ({
+  useGamePlay: jest.fn(),
+  GamePlayProvider: ({ children }: { children: React.ReactNode }) => children
+}));
+
 const mockUseWordSubmission = require('../../hooks/useWordSubmission').useWordSubmission;
+const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
+const mockUseGamePlay = require('../../contexts/GamePlayContext').useGamePlay;
+
+// Mock board letters for testing
+const mockBoardLetters = [
+  ['A', 'B', 'C'],
+  ['D', 'E', 'F'],
+  ['G', 'H', 'I']
+];
 
 describe('WordInput', () => {
-  const mockBoardLetters = [
-    ['A', 'B', 'C', 'D'],
-    ['E', 'F', 'G', 'H']
-  ];
-
   const mockSubmitWord = jest.fn();
   const mockClearError = jest.fn();
   const mockClearSubmission = jest.fn();
+  const mockSetCurrentWord = jest.fn();
+  const mockFindPathForTypedWord = jest.fn();
+  const mockClearSelection = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,10 +49,28 @@ describe('WordInput', () => {
       clearError: mockClearError,
       clearSubmission: mockClearSubmission
     });
+
+    mockUseWordPath.mockReturnValue({
+      currentWord: '',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: false
+    });
+
+    mockUseGamePlay.mockReturnValue({
+      state: {
+        grid: mockBoardLetters
+      }
+    });
   });
 
   it('renders word input form', () => {
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     expect(screen.getByText('Submit Words')).toBeInTheDocument();
     expect(screen.getByLabelText('Current Word')).toBeInTheDocument();
@@ -42,7 +79,19 @@ describe('WordInput', () => {
   });
 
   it('disables submit button when word is too short', () => {
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    mockUseWordPath.mockReturnValue({
+      currentWord: '',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: false
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     const submitButton = screen.getByRole('button', { name: 'Submit Word' });
     const input = screen.getByLabelText('Current Word');
@@ -51,6 +100,14 @@ describe('WordInput', () => {
 
     fireEvent.change(input, { target: { value: 'ab' } });
     expect(submitButton).toBeDisabled();
+
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'ABC',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
 
     fireEvent.change(input, { target: { value: 'abc' } });
     expect(submitButton).not.toBeDisabled();
@@ -62,7 +119,19 @@ describe('WordInput', () => {
       result: { isValid: true, score: 30 }
     });
 
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'TEST',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     const input = screen.getByLabelText('Current Word');
     const submitButton = screen.getByRole('button', { name: 'Submit Word' });
@@ -71,7 +140,7 @@ describe('WordInput', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockSubmitWord).toHaveBeenCalledWith('test', mockBoardLetters);
+      expect(mockSubmitWord).toHaveBeenCalledWith('TEST', mockBoardLetters);
     });
 
     // The input should be cleared after successful submission
@@ -81,13 +150,17 @@ describe('WordInput', () => {
   });
 
   it('clears input when clear button is clicked', () => {
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     const input = screen.getByLabelText('Current Word');
     const clearButton = screen.getByRole('button', { name: 'Clear' });
 
     fireEvent.change(input, { target: { value: 'test' } });
-    expect(input).toHaveValue('test');
+    expect(input).toHaveValue('TEST');
 
     fireEvent.click(clearButton);
     expect(input).toHaveValue('');
@@ -100,16 +173,38 @@ describe('WordInput', () => {
       result: { isValid: true, score: 30 }
     });
 
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'FIRST',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     const input = screen.getByLabelText('Current Word');
     const submitButton = screen.getByRole('button', { name: 'Submit Word' });
 
-    // Submit first word
     fireEvent.change(input, { target: { value: 'first' } });
     fireEvent.click(submitButton);
 
-    // Submit second word
+    await waitFor(() => {
+      expect(mockSubmitWord).toHaveBeenCalledWith('FIRST', mockBoardLetters);
+    });
+
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'SECOND',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
+
     fireEvent.change(input, { target: { value: 'second' } });
     fireEvent.click(submitButton);
 
@@ -125,7 +220,19 @@ describe('WordInput', () => {
       result: { isValid: true, score: 30 }
     });
 
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'TEST',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     const input = screen.getByLabelText('Current Word');
 
@@ -133,7 +240,7 @@ describe('WordInput', () => {
     fireEvent.submit(screen.getByRole('form'));
 
     await waitFor(() => {
-      expect(mockSubmitWord).toHaveBeenCalledWith('test', mockBoardLetters);
+      expect(mockSubmitWord).toHaveBeenCalledWith('TEST', mockBoardLetters);
     });
 
     // The input should be cleared after successful submission
@@ -152,7 +259,19 @@ describe('WordInput', () => {
       clearSubmission: mockClearSubmission
     });
 
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    mockUseWordPath.mockReturnValue({
+      currentWord: '',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: false
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     expect(screen.getByRole('button', { name: 'Submitting...' })).toBeInTheDocument();
     expect(screen.getByLabelText('Current Word')).toBeDisabled();
@@ -169,36 +288,21 @@ describe('WordInput', () => {
       clearSubmission: mockClearSubmission
     });
 
-    render(<WordInput boardLetters={mockBoardLetters} />);
+    mockUseWordPath.mockReturnValue({
+      currentWord: '',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: false
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
 
     expect(screen.getByText('Network error')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Clear error' })).toBeInTheDocument();
-  });
-
-  it('calls onWordSubmitted callback when word is submitted', async () => {
-    const mockOnWordSubmitted = jest.fn();
-    const mockResult = {
-      success: true,
-      result: { isValid: true, score: 30 }
-    };
-
-    mockSubmitWord.mockResolvedValue(mockResult);
-
-    render(
-      <WordInput 
-        boardLetters={mockBoardLetters} 
-        onWordSubmitted={mockOnWordSubmitted}
-      />
-    );
-
-    const input = screen.getByLabelText('Current Word');
-    const submitButton = screen.getByRole('button', { name: 'Submit Word' });
-
-    fireEvent.change(input, { target: { value: 'test' } });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(mockOnWordSubmitted).toHaveBeenCalledWith(mockResult);
-    });
   });
 });

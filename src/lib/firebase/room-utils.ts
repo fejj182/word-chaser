@@ -1,6 +1,7 @@
 import { ref, push, set, get, onValue, off, update } from 'firebase/database';
 import { db } from './firebase';
 import { Room, Player, CreateRoomParams } from '@/features/room-management/types/room';
+import { generateLetterGrid, getGridSizeConfig } from '@/lib/utils/grid-generation';
 
 const ROOMS_PATH = 'rooms';
 const SLUGS_PATH = 'slugs';
@@ -216,8 +217,15 @@ export const startGame = async (roomId: string): Promise<void> => {
     throw new Error('Not all players are ready');
   }
 
-  const updates: Record<string, 'playing' | string> = {};
+  const gridSize = getGridSizeConfig(room.settings.gridSize);
+  const grid = generateLetterGrid(gridSize);
+
+  const updates: Record<string, any> = {};
   updates[`${ROOMS_PATH}/${roomId}/status`] = 'playing';
+  updates[`${ROOMS_PATH}/${roomId}/gameData`] = {
+    grid,
+    currentRound: 1
+  };
   
   await update(ref(db), updates);
 };

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { AuthenticatedContent } from '../AuthenticatedContent';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
+import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 
 // Mock the useUser hook
 jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
@@ -40,7 +41,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       const pageContainer = screen.getByTestId('user-display').closest('.page');
       expect(pageContainer).toBeInTheDocument();
@@ -53,7 +58,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       const headerSection = screen.getByTestId('game-header').closest('.page--header');
       expect(headerSection).toBeInTheDocument();
@@ -67,7 +76,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       const userSection = screen.getByTestId('user-display').closest('.page--padding');
       expect(userSection).toBeInTheDocument();
@@ -81,7 +94,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       const contentSection = screen.getByTestId('room-manager').closest('.page--content');
       expect(contentSection).toBeInTheDocument();
@@ -97,7 +114,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       const userDisplay = screen.getByTestId('user-display');
       expect(userDisplay).toHaveAttribute('data-display-name', 'John Doe');
@@ -111,7 +132,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       const userDisplay = screen.getByTestId('user-display');
       expect(userDisplay).toHaveAttribute('data-display-name', 'no-name');
@@ -125,7 +150,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       const userDisplay = screen.getByTestId('user-display');
       expect(userDisplay).toHaveAttribute('data-display-name', 'no-name');
@@ -141,7 +170,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       // Check main page structure
       const pageContainer = screen.getByTestId('user-display').closest('.page');
@@ -165,7 +198,11 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(<AuthenticatedContent />);
+      render(
+      <GamePlayProvider>
+        <AuthenticatedContent />
+      </GamePlayProvider>
+      );
       
       // Check that all components are rendered
       expect(screen.getByTestId('game-header')).toBeInTheDocument();

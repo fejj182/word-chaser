@@ -2,20 +2,21 @@
 
 import React, { useState } from 'react';
 import { CreateRoomParams, RoomSettings } from '@/features/room-management/types/room';
+import { GridSizeSelector } from '@/features/game-play/components/GridSizeSelector';
 
 interface CreateRoomUIProps {
   onSubmit: (params: CreateRoomParams, alias: string) => Promise<void>;
-  isLoading: boolean;
+  isLoading: boolean; //TODO: remove this prop
   error?: string | null;
   initialAlias?: string;
 }
-
 const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error = null, initialAlias }) => {
   const [formData, setFormData] = useState<CreateRoomParams>({
     maxPlayers: 4,
     settings: {
       roundDuration: 60,
       maxRounds: 5,
+      gridSize: 'medium',
     },
   });
   const [alias, setAlias] = useState<string>(initialAlias || '');
@@ -99,6 +100,13 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
           <option value={8}>8 Players</option>
         </select>
       </div>
+
+      {/* Grid Size */}
+      <GridSizeSelector
+        value={formData.settings.gridSize}
+        onChange={(gridSize) => handleSettingsChange('gridSize', gridSize)}
+        disabled={isLoading}
+      />
 
       {/* Game Settings */}
       <div className="section--divider-settings">
