@@ -45,8 +45,8 @@ test.describe('Room Management & Multiplayer Flows', () => {
   });
 
   test('should create room, join with second player, and start game when all ready', async () => {
-    // Host creates room
-    await host.goto('/');
+    // Host creates room on server 1 (localhost:3000)
+    await host.goto('http://localhost:3000/');
     await host.getByRole('button', { name: /create a new room/i }).click();
     await host.getByLabel(/alias/i).fill('Host Player');
     await host.getByTestId('max-players-select').selectOption('2');
@@ -63,8 +63,8 @@ test.describe('Room Management & Multiplayer Flows', () => {
     // Verify host badge
     await expect(host.getByTestId('host-badge')).toBeVisible();
     
-    // Second player joins
-    await p2.goto('/');
+    // Second player joins from server 2 (localhost:3001) - simulating different device/server
+    await p2.goto('http://localhost:3001/');
     await p2.getByRole('button', { name: /join existing room/i }).click();
     await p2.getByLabel(/room code/i).fill(roomCode);
     await p2.getByLabel(/alias/i).fill('Second Player');
@@ -88,16 +88,23 @@ test.describe('Room Management & Multiplayer Flows', () => {
     await expect(host).toHaveURL(/\/game\/.+/);
     await expect(p2).toHaveURL(/\/game\/.+/);
 
-    const wordInput = host.getByRole('textbox', { name: /current word/i });
-    expect(wordInput).toBeVisible();
-
-    const p2WordInput = p2.getByRole('textbox', { name: /current word/i });
-    expect(p2WordInput).toBeVisible();
+    // Wait for the game to fully load by checking for multiple elements
+    // This ensures the room data, user data, and game state are all ready
+    await expect(host.getByRole('textbox', { name: /current word/i })).toBeVisible();
+    await expect(p2.getByRole('textbox', { name: /current word/i })).toBeVisible();
+    
+    // Also wait for the letter grid to be visible to ensure game is fully loaded
+    await expect(host.getByRole('grid')).toBeVisible();
+    await expect(p2.getByRole('grid')).toBeVisible();
+    
+    // Wait for the game header to ensure the room and player data is loaded
+    await expect(host.getByText('Host Player')).toBeVisible();
+    await expect(p2.getByText('Second Player')).toBeVisible();
   });
 
   test('should transfer host role when original host leaves room', async () => {
-    // Create room and join
-    await host.goto('/');
+    // Create room and join - Host on server 1 (localhost:3000)
+    await host.goto('http://localhost:3000/');
     await host.getByRole('button', { name: /create a new room/i }).click();
     await host.getByLabel(/alias/i).fill('Host Player');
     await host.getByTestId('max-players-select').selectOption('2');
@@ -114,8 +121,8 @@ test.describe('Room Management & Multiplayer Flows', () => {
     // Verify original host badge
     await expect(host.getByTestId('host-badge')).toBeVisible();
     
-    // Second player joins
-    await p2.goto('/');
+    // Second player joins from server 2 (localhost:3001)
+    await p2.goto('http://localhost:3001/');
     await p2.getByRole('button', { name: /join existing room/i }).click();
     await p2.getByLabel(/room code/i).fill(roomCode);
     await p2.getByLabel(/alias/i).fill('Second Player');

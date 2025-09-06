@@ -22,6 +22,7 @@ export interface Player {
   joinedAt: number;
   isHost: boolean;
   isReady: boolean;
+  lastSeen?: number; // Timestamp of last heartbeat
 }
 
 export interface RoomSettings {

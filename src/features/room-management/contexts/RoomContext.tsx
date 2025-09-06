@@ -215,32 +215,70 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
       return;
     }
 
+    // Heartbeat system to track user presence
+    let heartbeatInterval: NodeJS.Timeout | null = null;
+    let lastHeartbeat = Date.now();
+
+    const sendHeartbeat = async () => {
+      if (!state.currentRoom?.id || !user?.uid) return;
+      
+      try {
+        const response = await fetch('/api/heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomId: state.currentRoom.id,
+            userId: user.uid
+          })
+        });
+        
+        if (response.ok) {
+          lastHeartbeat = Date.now();
+        }
+      } catch (error) {
+        console.warn('Heartbeat failed:', error);
+      }
+    };
+
     const handleBeforeUnload = () => {
       if (state.currentRoom?.id && user?.uid) {
-        // Use sendBeacon for reliable cleanup on page unload
+        // Send immediate heartbeat to mark user as leaving
         const data = JSON.stringify({
           roomId: state.currentRoom.id,
-          userId: user.uid
+          userId: user.uid,
+          action: 'leave'
         });
         
         try {
-          navigator.sendBeacon('/api/leave-room', data);
+          navigator.sendBeacon('/api/heartbeat', data);
         } catch (error) {
-          console.warn('Failed to send cleanup request:', error);
+          console.warn('Failed to send leave heartbeat:', error);
         }
       }
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' && state.currentRoom?.id && user?.uid) {
+      if (document.visibilityState === 'hidden') {
         console.log('Page hidden - user may have navigated away');
+      } else if (document.visibilityState === 'visible') {
+        // Send heartbeat when page becomes visible again
+        sendHeartbeat();
       }
     };
+
+    // Start heartbeat (every 10 seconds)
+    heartbeatInterval = setInterval(sendHeartbeat, 10000);
+    
+    // Send initial heartbeat
+    sendHeartbeat();
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+      }
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
