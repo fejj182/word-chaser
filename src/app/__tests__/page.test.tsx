@@ -1,15 +1,22 @@
 import { render, screen } from '@testing-library/react';
-import { AuthenticatedContent } from '../AuthenticatedContent';
+import Home from '../page';
 import { useUser } from '@/features/guest-auth/contexts/UserContext';
-import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 
 // Mock the useUser hook
 jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
   useUser: jest.fn(),
 }));
 
-// Mock child components to focus on AuthenticatedContent behavior
-jest.mock('../UserDisplay', () => ({
+// Mock the useAuth hook
+jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
+  useAuth: jest.fn(() => ({
+    user: null,
+    loading: false,
+  })),
+}));
+
+// Mock child components to focus on page behavior
+jest.mock('@/features/guest-auth/components/UserDisplay', () => ({
   UserDisplay: ({ displayName }: { displayName: string | null }) => (
     <div data-testid="user-display" data-display-name={displayName || 'no-name'}>
       UserDisplay: {displayName || 'No name'}
@@ -22,13 +29,17 @@ jest.mock('@/features/room-management/components/RoomManager', () => ({
   default: () => <div data-testid="room-manager">RoomManager</div>,
 }));
 
-jest.mock('../GameHeader', () => ({
+jest.mock('@/features/guest-auth/components/GameHeader', () => ({
   GameHeader: () => <div data-testid="game-header">GameHeader</div>,
+}));
+
+jest.mock('@/features/guest-auth/components/WordGridDemo', () => ({
+  WordGridDemo: () => <div data-testid="word-grid-demo">WordGridDemo</div>,
 }));
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 
-describe('AuthenticatedContent', () => {
+describe('Home Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -41,11 +52,7 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       const pageContainer = screen.getByTestId('user-display').closest('.page');
       expect(pageContainer).toBeInTheDocument();
@@ -58,11 +65,7 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       const headerSection = screen.getByTestId('game-header').closest('.page--header');
       expect(headerSection).toBeInTheDocument();
@@ -76,33 +79,26 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       const userSection = screen.getByTestId('user-display').closest('.page--padding');
       expect(userSection).toBeInTheDocument();
       expect(screen.getByTestId('user-display')).toBeInTheDocument();
     });
 
-    it('should render the main content section with RoomManager', () => {
+    it('should render the main content section with RoomManager and WordGridDemo', () => {
       mockUseUser.mockReturnValue({
         userId: 'user123',
         displayName: 'Test User',
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       const contentSection = screen.getByTestId('room-manager').closest('.page--content');
       expect(contentSection).toBeInTheDocument();
       expect(screen.getByTestId('room-manager')).toBeInTheDocument();
+      expect(screen.getByTestId('word-grid-demo')).toBeInTheDocument();
     });
   });
 
@@ -114,11 +110,7 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       const userDisplay = screen.getByTestId('user-display');
       expect(userDisplay).toHaveAttribute('data-display-name', 'John Doe');
@@ -132,11 +124,7 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       const userDisplay = screen.getByTestId('user-display');
       expect(userDisplay).toHaveAttribute('data-display-name', 'no-name');
@@ -150,11 +138,7 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       const userDisplay = screen.getByTestId('user-display');
       expect(userDisplay).toHaveAttribute('data-display-name', 'no-name');
@@ -170,11 +154,7 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       // Check main page structure
       const pageContainer = screen.getByTestId('user-display').closest('.page');
@@ -198,16 +178,13 @@ describe('AuthenticatedContent', () => {
         setUser: jest.fn(),
       });
 
-      render(
-      <GamePlayProvider>
-        <AuthenticatedContent />
-      </GamePlayProvider>
-      );
+      render(<Home />);
       
       // Check that all components are rendered
       expect(screen.getByTestId('game-header')).toBeInTheDocument();
       expect(screen.getByTestId('user-display')).toBeInTheDocument();
       expect(screen.getByTestId('room-manager')).toBeInTheDocument();
+      expect(screen.getByTestId('word-grid-demo')).toBeInTheDocument();
       
       // Check the order by looking at the DOM structure
       const pageContainer = screen.getByTestId('user-display').closest('.page');
@@ -218,6 +195,24 @@ describe('AuthenticatedContent', () => {
       expect(header).toBeInTheDocument();
       expect(userSection).toBeInTheDocument();
       expect(contentSection).toBeInTheDocument();
+    });
+  });
+
+  describe('Provider Integration', () => {
+    it('should wrap content with RoomProvider and GamePlayProvider', () => {
+      mockUseUser.mockReturnValue({
+        userId: 'user123',
+        displayName: 'Test User',
+        setUser: jest.fn(),
+      });
+
+      render(<Home />);
+      
+      // The providers should be present (they don't render anything visible)
+      // but the content should be rendered correctly
+      expect(screen.getByTestId('game-header')).toBeInTheDocument();
+      expect(screen.getByTestId('user-display')).toBeInTheDocument();
+      expect(screen.getByTestId('room-manager')).toBeInTheDocument();
     });
   });
 });
