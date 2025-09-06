@@ -1,146 +1,172 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { useRoom } from '@/features/room-management/contexts/RoomContext';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { render, screen, waitFor } from '@testing-library/react';
 import { GameScreen } from '../GameScreen';
-import { User } from 'firebase/auth';
+import { RoomProvider } from '@/features/room-management/contexts/RoomContext';
+import { GamePlayProvider } from '../../contexts/GamePlayContext';
+import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
 
-// Mock the contexts
-jest.mock('@/features/room-management/contexts/RoomContext');
+jest.mock('@/features/room-management/contexts/RoomContext', () => ({
+  ...jest.requireActual('@/features/room-management/contexts/RoomContext'),
+  useRoom: jest.fn(),
+}));
+
 jest.mock('@/features/guest-auth/hooks/useAuth');
-
-// Mock next/navigation
-const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: mockPush,
+    push: jest.fn(),
   }),
 }));
 
-const mockUseRoom = useRoom as jest.MockedFunction<typeof useRoom>;
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
+const mockUseAuth = require('@/features/guest-auth/hooks/useAuth').useAuth;
 
 describe('GameScreen', () => {
-  const mockLeaveRoom = jest.fn();
-  const mockUser = {
-    uid: 'user123',
-    displayName: 'Test Player',
-    email: 'test@example.com',
-    emailVerified: true,
-    isAnonymous: false,
-    metadata: {},
-    providerData: [],
-    refreshToken: '',
-    tenantId: null,
-    delete: jest.fn(),
-    getIdToken: jest.fn(),
-    getIdTokenResult: jest.fn(),
-    reload: jest.fn(),
-    toJSON: jest.fn(),
-    phoneNumber: null,
-    photoURL: null,
-    providerId: 'password',
-  } as User;
-  
   const mockRoom = {
-    id: 'room123',
-    name: 'TEST123',
-    slug: 'TEST123',
-    createdBy: 'user123',
+    id: 'test-room',
+    name: 'Test Room',
+    slug: 'test-room',
+    createdBy: 'user1',
     createdAt: Date.now(),
     status: 'playing' as const,
     players: [
-      { id: 'user123', displayName: 'Test Player', joinedAt: Date.now(), isHost: false, isReady: true }
+      {
+        id: 'user1',
+        displayName: 'Test User',
+        joinedAt: Date.now(),
+        isHost: true,
+        isReady: true,
+      }
     ],
     maxPlayers: 4,
-    settings: { roundDuration: 60, maxRounds: 5 }
+    settings: {
+      roundDuration: 60,
+      maxRounds: 5,
+      gridSize: 'medium' as const,
+    },
+    gameData: {
+      grid: [
+        ['A', 'B', 'C', 'D'],
+        ['E', 'F', 'G', 'H'],
+        ['I', 'J', 'K', 'L'],
+        ['M', 'N', 'O', 'P']
+      ],
+      currentRound: 1
+    },
+  };
+
+  const mockUser = {
+    uid: 'user1',
+    displayName: 'Test User',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockPush.mockClear();
-  });
-
-  it('renders game screen when room is in playing status', () => {
     mockUseRoom.mockReturnValue({
       currentRoom: mockRoom,
-      leaveRoom: mockLeaveRoom,
-      isLoading: false,
-      error: null,
-      createRoom: jest.fn(),
+      leaveRoom: jest.fn(),
       loadRoom: jest.fn(),
-      joinRoom: jest.fn(),
-      updatePlayerReady: jest.fn(),
-      startGame: jest.fn(),
-      roomId: 'room123',
-      clearError: jest.fn(),
     });
-    
+
     mockUseAuth.mockReturnValue({
       user: mockUser,
-      loading: false,
     });
-
-    render(<GameScreen roomId="room123" />);
-
-    expect(screen.getByText('Word Chaser')).toBeInTheDocument();
-    expect(screen.getByText(/Room:/)).toBeInTheDocument();
-    expect(screen.getByText('TEST123')).toBeInTheDocument();
-    expect(screen.getByText(/Playing as:/)).toBeInTheDocument();
-    expect(screen.getByText('Test Player')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Leave game' })).toBeInTheDocument();
   });
 
-  it('redirects to home when room is not in playing status', () => {
-    const waitingRoom = { ...mockRoom, status: 'waiting' as const };
-    
-    mockUseRoom.mockReturnValue({
-      currentRoom: waitingRoom,
-      leaveRoom: mockLeaveRoom,
-      loadRoom: jest.fn(),
-      isLoading: false,
-      error: null,
-      createRoom: jest.fn(),
-      joinRoom: jest.fn(),
-      updatePlayerReady: jest.fn(),
-      startGame: jest.fn(),
-      clearError: jest.fn(),
-      roomId: 'room123',
-    });
-    
-    mockUseAuth.mockReturnValue({
-      user: mockUser,
-      loading: false,
-    });
-
-    render(<GameScreen roomId="room123" />);
-    
-    // The component should render initially, then redirect
-    expect(screen.getByText('Word Chaser')).toBeInTheDocument();
-    expect(mockPush).toHaveBeenCalledWith('/');
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('does not render when no room or user', () => {
+  it('should render game screen with room data', async () => {
+    render(
+      <UserProvider>
+        <RoomProvider>
+          <GamePlayProvider>
+            <GameScreen roomId="test-room" />
+          </GamePlayProvider>
+        </RoomProvider>
+      </UserProvider>
+    );
+
+    expect(await screen.findByText('Test Room')).toBeInTheDocument();
+    expect(await screen.findByText('Test User')).toBeInTheDocument();
+  });
+
+  it('should load grid from room data', async () => {
+    render(
+      <UserProvider>
+        <RoomProvider>
+          <GamePlayProvider>
+            <GameScreen roomId="test-room" />
+          </GamePlayProvider>
+        </RoomProvider>
+      </UserProvider>
+    );
+
+    // Wait for the grid to be loaded
+    await waitFor(() => {
+      // The grid should be loaded from room data
+      // We can verify this by checking if the LetterGrid component is rendered
+      expect(screen.getByText('Letter Grid')).toBeInTheDocument();
+    });
+  });
+
+  it('should not render when room is not loaded', () => {
     mockUseRoom.mockReturnValue({
       currentRoom: null,
-      leaveRoom: mockLeaveRoom,
-      isLoading: false,
-      error: null,
-      createRoom: jest.fn(),
+      leaveRoom: jest.fn(),
       loadRoom: jest.fn(),
-      joinRoom: jest.fn(),
-      updatePlayerReady: jest.fn(),
-      startGame: jest.fn(),
-      clearError: jest.fn(),
-      roomId: 'room123',
-    });
-    
-    mockUseAuth.mockReturnValue({
-      user: null,
-      loading: false,
     });
 
-    const { container } = render(<GameScreen roomId="room123" />);
-    expect(container.firstChild).toBeNull();
+    render(
+      <UserProvider>
+        <RoomProvider>
+          <GamePlayProvider>
+            <GameScreen roomId="test-room" />
+          </GamePlayProvider>
+        </RoomProvider>
+      </UserProvider>
+    );
+
+    expect(screen.queryByText('Test Room')).not.toBeInTheDocument();
+  });
+
+  it('should not render when user is not authenticated', () => {
+    mockUseAuth.mockReturnValue({
+      user: null,
+    });
+
+    render(
+      <UserProvider>
+        <RoomProvider>
+          <GamePlayProvider>
+            <GameScreen roomId="test-room" />
+          </GamePlayProvider>
+        </RoomProvider>
+      </UserProvider>
+    );
+
+    expect(screen.queryByText('Test Room')).not.toBeInTheDocument();
+  });
+
+  it('should not render when current player is not found', () => {
+    mockUseRoom.mockReturnValue({
+      currentRoom: {
+        ...mockRoom,
+        players: [], // No players
+      },
+      leaveRoom: jest.fn(),
+      loadRoom: jest.fn(),
+    });
+
+    render(
+      <UserProvider>
+        <RoomProvider>
+          <GamePlayProvider>
+            <GameScreen roomId="test-room" />
+          </GamePlayProvider>
+        </RoomProvider>
+      </UserProvider>
+    );
+
+    expect(screen.queryByText('Test Room')).not.toBeInTheDocument();
   });
 });

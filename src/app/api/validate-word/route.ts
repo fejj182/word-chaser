@@ -5,10 +5,10 @@ import { WordValidationRequest, WordValidationResponse } from '@/features/game-p
 export async function POST(request: NextRequest) {
   try {
     const body: WordValidationRequest = await request.json();
-    const { word, roomId, playerId, playerName, boardLetters } = body;
+    const { word, boardLetters } = body;
 
     // Validate required fields
-    if (!word || !roomId || !playerId || !playerName || !boardLetters) {
+    if (!word || !boardLetters) {
       return NextResponse.json(
         { 
           success: false, 

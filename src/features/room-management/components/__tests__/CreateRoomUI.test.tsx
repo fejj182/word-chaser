@@ -14,6 +14,7 @@ describe('CreateRoomUI', () => {
 
     expect(screen.getByLabelText(/alias/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/maximum players/i)).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: /grid size/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/round duration \(seconds\)/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/number of rounds/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create room/i })).toBeInTheDocument();
@@ -44,6 +45,7 @@ describe('CreateRoomUI', () => {
           settings: {
             roundDuration: 60,
             maxRounds: 5,
+            gridSize: 'medium',
           },
         },
         'Tester'
@@ -85,5 +87,48 @@ describe('CreateRoomUI', () => {
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
+  it('allows changing grid size selection', () => {
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
+
+    // Default should be medium (6×6)
+    expect(screen.getByText('6×6').closest('button')).toHaveClass('border-blue-500');
+
+    // Click on small (4×4)
+    fireEvent.click(screen.getByText('4×4').closest('button')!);
+    expect(screen.getByText('4×4').closest('button')).toHaveClass('border-blue-500');
+    expect(screen.getByText('6×6').closest('button')).not.toHaveClass('border-blue-500');
+
+    // Click on large (8×8)
+    fireEvent.click(screen.getByText('8×8').closest('button')!);
+    expect(screen.getByText('8×8').closest('button')).toHaveClass('border-blue-500');
+    expect(screen.getByText('4×4').closest('button')).not.toHaveClass('border-blue-500');
+  });
+
+  it('submits form with selected grid size', async () => {
+    render(<CreateRoomUI onSubmit={mockOnSubmit} isLoading={false} />);
+
+    // Change grid size to small
+    fireEvent.click(screen.getByText('4×4').closest('button')!);
+    
+    fireEvent.change(screen.getByLabelText(/alias/i), {
+      target: { value: 'Tester' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /create room/i }));
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        {
+          maxPlayers: 4,
+          settings: {
+            roundDuration: 60,
+            maxRounds: 5,
+            gridSize: 'small',
+          },
+        },
+        'Tester'
+      );
+    });
+  });
 
 }); 

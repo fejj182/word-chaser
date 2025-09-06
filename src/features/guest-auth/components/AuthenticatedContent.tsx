@@ -4,6 +4,7 @@ import { useUser } from '@/features/guest-auth/contexts/UserContext';
 import { UserDisplay } from './UserDisplay';
 import RoomManager from '@/features/room-management/components/RoomManager';
 import { GameHeader } from '@/features/guest-auth/components/GameHeader';
+import { WordGridDemo } from '@/features/guest-auth/components/WordGridDemo';
 
 export const AuthenticatedContent = () => {
   const { displayName } = useUser();
@@ -26,6 +27,7 @@ export const AuthenticatedContent = () => {
       <div className="page--content">
         <div className="page--content-container">
           <RoomManager />
+          <WordGridDemo />
         </div>
       </div>
     </div>

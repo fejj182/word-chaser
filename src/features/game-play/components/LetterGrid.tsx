@@ -1,73 +1,105 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useGamePlay } from '../contexts/GamePlayContext';
+import { useWordPath } from '../hooks/useWordPath';
 
-export interface LetterGridProps {
-  letters: string[][];
-}
-
-export const LetterGrid: React.FC<LetterGridProps> = ({ 
-  letters 
-}) => {
-  const [selectedLetters, setSelectedLetters] = useState<Set<string>>(new Set());
+export const LetterGrid: React.FC = () => {
+  const { state } = useGamePlay();
+  const { 
+    selectTile, 
+    isPositionSelectable, 
+    isPositionInCurrentPath,
+    currentWord 
+  } = useWordPath();
 
   const handleLetterClick = useCallback((row: number, col: number) => {
-    // Toggle letter selection
-    const newSelected = new Set(selectedLetters);
-    const posKey = `${row},${col}`;
-    
-    if (newSelected.has(posKey)) {
-      newSelected.delete(posKey);
-    } else {
-      newSelected.add(posKey);
-    }
-    
-    setSelectedLetters(newSelected);
-    
-  }, [letters, selectedLetters]);
-
-  const isSelected = useCallback((row: number, col: number) => {
-    return selectedLetters.has(`${row},${col}`);
-  }, [selectedLetters]);
+    selectTile({ row, col });
+  }, [selectTile]);
 
   const getLetterClass = useCallback((row: number, col: number) => {
-    const baseClass = "aspect-square border-2 rounded-lg text-2xl font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500";
+    const baseClass = "aspect-square border-2 rounded-lg text-2xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] min-w-[44px]";
     
-    if (isSelected(row, col)) {
-      return `${baseClass} bg-blue-500 text-white border-blue-600`;
+    const isSelected = isPositionInCurrentPath({ row, col });
+    const isSelectable = isPositionSelectable({ row, col });
+    
+    if (isSelected) {
+      return `${baseClass} bg-blue-500 text-white border-blue-600 shadow-lg transform scale-105`;
     }
     
-    return `${baseClass} bg-blue-100 hover:bg-blue-200 border-blue-300 text-blue-800`;
-  }, [isSelected]);
+    if (isSelectable) {
+      return `${baseClass} bg-blue-100 hover:bg-blue-200 border-blue-300 text-blue-800 hover:shadow-md`;
+    }
+    
+    return `${baseClass} bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed`;
+  }, [isPositionInCurrentPath, isPositionSelectable]);
+
+  const getGridCols = useCallback(() => {
+    if (!state.grid || state.grid.length === 0) return 'grid-cols-4';
+    // Use explicit grid column classes that Tailwind knows about
+    switch (state.grid.length) {
+      case 4: return 'grid-cols-4';
+      case 6: return 'grid-cols-6';
+      case 8: return 'grid-cols-8';
+      default: return 'grid-cols-4';
+    }
+  }, [state.grid]);
+
+  const getMaxWidth = useCallback(() => {
+    if (!state.grid || state.grid.length === 0) return 'max-w-xs';
+    if (state.grid.length <= 4) return 'max-w-xs';
+    if (state.grid.length <= 6) return 'max-w-sm';
+    return 'max-w-md';
+  }, [state.grid]);
+
+  if (!state.grid || state.grid.length === 0) {
+    return (
+      <div className={`space-y-4`}>
+        <h2 className="text-xl font-semibold text-gray-900 text-center">Letter Grid</h2>
+        <div className="text-center text-gray-500 py-8">
+          <p>No grid generated yet.</p>
+          <p className="text-sm">Select a grid size and generate a new grid to start playing.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text--section-title text-center">Letter Grid</h2>
-      <div className="grid grid-cols-4 gap-3 max-w-xs mx-auto">
-        {letters.flat().map((letter, index) => {
-          const row = Math.floor(index / 4);
-          const col = index % 4;
-          
-          return (
+    <div className={`space-y-4`}>
+      <h2 className="text-xl font-semibold text-gray-900 text-center">Letter Grid</h2>
+      
+      <div 
+        className={`grid ${getGridCols()} gap-3 ${getMaxWidth()} mx-auto`}
+        role="grid"
+        aria-label={`${state.gridSize} letter grid`}
+      >
+        {state.grid.map((row, rowIndex) =>
+          row.map((letter, colIndex) => (
             <button
-              key={index}
+              key={`${rowIndex}-${colIndex}`}
               type="button"
-              className={getLetterClass(row, col)}
-              onClick={() => handleLetterClick(row, col)}
-              aria-label={`Select letter ${letter} at position ${row + 1}, ${col + 1}`}
-              aria-pressed={isSelected(row, col)}
+              className={getLetterClass(rowIndex, colIndex)}
+              onClick={() => handleLetterClick(rowIndex, colIndex)}
+              aria-label={`Letter ${letter} at position ${rowIndex + 1}, ${colIndex + 1}`}
+              aria-pressed={isPositionInCurrentPath({ row: rowIndex, col: colIndex })}
+              disabled={!isPositionSelectable({ row: rowIndex, col: colIndex })}
+              tabIndex={0}
             >
               {letter}
             </button>
-          );
-        })}
+          ))
+        )}
       </div>
-      <p className="text-sm text-gray-600 text-center">
-        Click letters to form words
-      </p>
-      <div className="text-xs text-gray-500 text-center">
-        {selectedLetters.size > 0 && (
-          <span>Selected: {selectedLetters.size} letter{selectedLetters.size !== 1 ? 's' : ''}</span>
+
+      <div className="text-center space-y-2">
+        <p className="text-sm text-gray-600">
+          Click letters to form words. Adjacent letters only.
+        </p>
+        
+        {currentWord && (
+          <div className="text-lg font-mono font-semibold text-blue-700">
+            Current word: {currentWord}
+          </div>
         )}
       </div>
     </div>

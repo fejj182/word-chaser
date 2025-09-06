@@ -31,6 +31,7 @@ describe('CreateRoom', () => {
       leaveRoom: jest.fn(),
       updatePlayerReady: jest.fn(),
       startGame: jest.fn(),
+      loadRoom: jest.fn(),
       clearError: mockClearError,
     });
   });
@@ -69,7 +70,7 @@ describe('CreateRoom', () => {
       await waitFor(() => {
         expect(mockCreateRoom).toHaveBeenCalledWith({
           maxPlayers: 4,
-          settings: { roundDuration: 60, maxRounds: 5 }
+          settings: { roundDuration: 60, maxRounds: 5, gridSize: 'medium' }
         }, 'Test User');
       });
     });
@@ -107,6 +108,7 @@ describe('CreateRoom', () => {
         leaveRoom: jest.fn(),
         updatePlayerReady: jest.fn(),
         startGame: jest.fn(),
+        loadRoom: jest.fn(),
         clearError: mockClearError,
       });
 
@@ -155,6 +157,7 @@ describe('CreateRoom', () => {
         leaveRoom: jest.fn(),
         updatePlayerReady: jest.fn(),
         startGame: jest.fn(),
+        loadRoom: jest.fn(),
         clearError: mockClearError,
       });
 

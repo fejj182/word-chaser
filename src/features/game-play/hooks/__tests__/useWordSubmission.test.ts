@@ -80,9 +80,6 @@ describe('useWordSubmission', () => {
       },
       body: JSON.stringify({
         word: 'cat',
-        roomId: 'room123',
-        playerId: 'user123',
-        playerName: 'TestUser',
         boardLetters: mockBoardLetters
       })
     });
@@ -123,38 +120,6 @@ describe('useWordSubmission', () => {
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe('HTTP error! status: 500');
-  });
-
-  it('throws error when user is not available', async () => {
-    mockUseAuth.mockReturnValue({
-      user: null
-    } as ReturnType<typeof useAuth>);
-
-    const { result } = renderHook(() => useWordSubmission());
-
-    await act(async () => {
-      try {
-        await result.current.submitWord('cat', mockBoardLetters);
-      } catch (error) {
-        expect((error as Error).message).toBe('User or room not available');
-      }
-    });
-  });
-
-  it('throws error when room is not available', async () => {
-    mockUseRoom.mockReturnValue({
-      currentRoom: null
-    } as ReturnType<typeof useRoom>);
-
-    const { result } = renderHook(() => useWordSubmission());
-
-    await act(async () => {
-      try {
-        await result.current.submitWord('cat', mockBoardLetters);
-      } catch (error) {
-        expect((error as Error).message).toBe('User or room not available');
-      }
-    });
   });
 
   it('clears error when clearError is called', () => {
@@ -198,9 +163,6 @@ describe('useWordSubmission', () => {
       },
       body: JSON.stringify({
         word: 'cat', // Should be trimmed
-        roomId: 'room123',
-        playerId: 'user123',
-        playerName: 'TestUser',
         boardLetters: mockBoardLetters
       })
     });
