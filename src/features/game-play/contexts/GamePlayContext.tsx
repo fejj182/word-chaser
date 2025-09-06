@@ -138,10 +138,17 @@ const GamePlayContext = createContext<GamePlayContextValue | null>(null);
 // Provider component
 export interface GamePlayProviderProps {
   children: React.ReactNode;
+  initialGridSize?: GridSize;
 }
 
-export const GamePlayProvider: React.FC<GamePlayProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(gamePlayReducer, initialState);
+export const GamePlayProvider: React.FC<GamePlayProviderProps> = ({ 
+  children, 
+  initialGridSize = 'small' 
+}) => {
+  const [state, dispatch] = useReducer(gamePlayReducer, {
+    ...initialState,
+    gridSize: initialGridSize
+  });
 
   // Memoized actions to prevent unnecessary re-renders
   const actions = useMemo<GamePlayActions>(() => ({
