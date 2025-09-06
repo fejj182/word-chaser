@@ -3,14 +3,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { GameScreen } from '../GameScreen';
 import { RoomProvider } from '@/features/room-management/contexts/RoomContext';
 import { GamePlayProvider } from '../../contexts/GamePlayContext';
-import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
+import { UserProvider } from '@/features/user-management/contexts/UserContext';
 
 jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   ...jest.requireActual('@/features/room-management/contexts/RoomContext'),
   useRoom: jest.fn(),
 }));
 
-jest.mock('@/features/guest-auth/hooks/useAuth');
+jest.mock('@/features/user-management/hooks/useAuth');
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
-const mockUseAuth = require('@/features/guest-auth/hooks/useAuth').useAuth;
+const mockUseAuth = require('@/features/user-management/hooks/useAuth').useAuth;
 
 describe('GameScreen', () => {
   const mockRoom = {

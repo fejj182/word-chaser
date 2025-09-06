@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import Home from '../page';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
+import { useUser } from '@/features/user-management/contexts/UserContext';
 
 // Mock the useUser hook
-jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
+jest.mock('@/features/user-management/contexts/UserContext', () => ({
   useUser: jest.fn(),
 }));
 
 // Mock the useAuth hook
-jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
+jest.mock('@/features/user-management/hooks/useAuth', () => ({
   useAuth: jest.fn(() => ({
     user: null,
     loading: false,
@@ -16,7 +16,7 @@ jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
 }));
 
 // Mock child components to focus on page behavior
-jest.mock('@/features/guest-auth/components/UserDisplay', () => ({
+jest.mock('@/features/user-management/components/UserDisplay', () => ({
   UserDisplay: ({ displayName }: { displayName: string | null }) => (
     <div data-testid="user-display" data-display-name={displayName || 'no-name'}>
       UserDisplay: {displayName || 'No name'}
@@ -29,11 +29,11 @@ jest.mock('@/features/room-management/components/RoomManager', () => ({
   default: () => <div data-testid="room-manager">RoomManager</div>,
 }));
 
-jest.mock('@/features/guest-auth/components/GameHeader', () => ({
+jest.mock('@/features/user-management/components/GameHeader', () => ({
   GameHeader: () => <div data-testid="game-header">GameHeader</div>,
 }));
 
-jest.mock('@/features/guest-auth/components/WordGridDemo', () => ({
+jest.mock('@/features/development/components/WordGridDemo', () => ({
   WordGridDemo: () => <div data-testid="word-grid-demo">WordGridDemo</div>,
 }));
 

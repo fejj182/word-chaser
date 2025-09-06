@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GridDebugControls } from '../GridDebugControls';
-import { GamePlayProvider } from '../../../game-play/contexts/GamePlayContext';
+import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 
 // Mock the grid generation utility
 jest.mock('@/lib/utils/grid-generation', () => ({

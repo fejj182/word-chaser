@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode, useReducer, useEffect, useCallback } from 'react';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
 import { 
   createRoom, 
   joinRoom, 
@@ -13,7 +13,7 @@ import {
 } from '@/lib/firebase/room-utils';
 import { Room, RoomState, CreateRoomParams } from '@/features/room-management/types/room';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
+import { useUser } from '@/features/user-management/contexts/UserContext';
 
 // Reducer actions
 type RoomAction =

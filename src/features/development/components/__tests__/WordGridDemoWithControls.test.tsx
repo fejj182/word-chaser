@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { WordGridDemoWithControls } from '../WordGridDemoWithControls';
-import { GamePlayProvider } from '../../../game-play/contexts/GamePlayContext';
+import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 
 // Mock the WordGridDemo component
 jest.mock('../WordGridDemo', () => ({

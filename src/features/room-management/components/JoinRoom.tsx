@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import JoinRoomUI from './JoinRoomUI';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
+import { useUser } from '@/features/user-management/contexts/UserContext';
 
 const JoinRoom: React.FC = () => {
   const { joinRoom, isLoading, error, clearError } = useRoom();

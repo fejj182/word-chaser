@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { useWordSubmission } from '../useWordSubmission';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 
 // Mock the hooks
-jest.mock('@/features/guest-auth/hooks/useAuth');
+jest.mock('@/features/user-management/hooks/useAuth');
 jest.mock('@/features/room-management/contexts/RoomContext');
 
 // Mock fetch
