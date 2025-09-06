@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { RoomProvider, useRoom } from '../RoomContext';
-import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
+import { UserProvider } from '@/features/user-management/contexts/UserContext';
 import { createRoom, joinRoom, leaveRoom, subscribeToRoom, resolveRoomId, updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 import { Room } from '@/features/room-management/types/room';
 import { User } from 'firebase/auth';
@@ -21,7 +21,7 @@ jest.mock('@/lib/firebase/room-utils', () => ({
 }));
 
 // Mock useAuth hook
-jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
+jest.mock('@/features/user-management/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 

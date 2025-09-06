@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
 import { useGamePlay } from '../contexts/GamePlayContext';
 import { LetterGrid } from './LetterGrid';
 import { WordInput } from './WordInput';

@@ -2,8 +2,8 @@
 
 import React, { useEffect } from 'react';
 import { WordGridDemo } from './WordGridDemo';
-import { useGamePlay } from '../../game-play/contexts/GamePlayContext';
-import { GridSize } from '../../game-play/contexts/GamePlayContext';
+import { useGamePlay } from '@/features/game-play/contexts/GamePlayContext';
+import { GridSize } from '@/features/game-play/contexts/GamePlayContext';
 
 interface WordGridDemoWithControlsProps {
   gridSize: GridSize;

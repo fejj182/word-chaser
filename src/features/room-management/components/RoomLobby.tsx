@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
-import { useAuth } from '@/features/guest-auth/hooks/useAuth';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
 
 const RoomLobby: React.FC = () => {
   const { currentRoom, leaveRoom, isLoading, updatePlayerReady, startGame } = useRoom();

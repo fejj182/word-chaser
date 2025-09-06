@@ -10,7 +10,7 @@ jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   RoomProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-jest.mock('@/features/guest-auth/contexts/UserContext', () => ({
+jest.mock('@/features/user-management/contexts/UserContext', () => ({
   UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 

@@ -2,11 +2,11 @@
 
 import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 import { RoomProvider } from '@/features/room-management/contexts/RoomContext';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
-import { UserDisplay } from '@/features/guest-auth/components/UserDisplay';
+import { useUser } from '@/features/user-management/contexts/UserContext';
+import { UserDisplay } from '@/features/user-management/components/UserDisplay';
 import RoomManager from '@/features/room-management/components/RoomManager';
-import { GameHeader } from '@/features/guest-auth/components/GameHeader';
-import { WordGridDemo } from '@/features/guest-auth/components/WordGridDemo';
+import { GameHeader } from '@/features/user-management/components/GameHeader';
+import { WordGridDemo } from '@/features/development/components/WordGridDemo';
 
 export default function Home() {
   const { displayName } = useUser();

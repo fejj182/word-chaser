@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import DemoPage from '../page';
 
 // Mock the components to avoid complex dependencies
-jest.mock('@/features/guest-auth/components/WordGridDemoWithControls', () => ({
+jest.mock('@/features/development/components/WordGridDemoWithControls', () => ({
   WordGridDemoWithControls: ({ gridSize }: { gridSize: string }) => (
     <div data-testid="word-grid-demo-with-controls">
       Word Grid Demo - Size: {gridSize}
@@ -11,7 +11,7 @@ jest.mock('@/features/guest-auth/components/WordGridDemoWithControls', () => ({
   )
 }));
 
-jest.mock('@/features/guest-auth/components/GridDebugControls', () => ({
+jest.mock('@/features/development/components/GridDebugControls', () => ({
   GridDebugControls: () => <div data-testid="grid-debug-controls">Grid Debug Controls</div>
 }));
 

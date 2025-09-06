@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { WordGridDemoWithControls } from '@/features/guest-auth/components/WordGridDemoWithControls';
-import { GridDebugControls } from '@/features/guest-auth/components/GridDebugControls';
+import { WordGridDemoWithControls } from '@/features/development/components/WordGridDemoWithControls';
+import { GridDebugControls } from '@/features/development/components/GridDebugControls';
 import { GridSizeSelector } from '@/features/game-play/components/GridSizeSelector';
 import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 import { GridSize } from '@/features/game-play/contexts/GamePlayContext';

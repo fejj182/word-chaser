@@ -4,7 +4,7 @@ import React from 'react';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { CreateRoomParams } from '@/features/room-management/types/room';
 import CreateRoomUI from './CreateRoomUI';
-import { useUser } from '@/features/guest-auth/contexts/UserContext';
+import { useUser } from '@/features/user-management/contexts/UserContext';
 
 const CreateRoom: React.FC = () => {
   const { createRoom, isLoading, error, clearError } = useRoom();

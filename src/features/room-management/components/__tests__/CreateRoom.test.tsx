@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { UserProvider } from '@/features/guest-auth/contexts/UserContext';
+import { UserProvider } from '@/features/user-management/contexts/UserContext';
 
-jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
+jest.mock('@/features/user-management/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, loading: false })
 }));
 

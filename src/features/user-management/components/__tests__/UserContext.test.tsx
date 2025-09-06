@@ -5,7 +5,7 @@ import { User } from 'firebase/auth';
 import { UserProvider, useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../hooks/useAuth';
 
-jest.mock('@/features/guest-auth/hooks/useAuth', () => ({
+jest.mock('@/features/user-management/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useGamePlay } from '../../game-play/contexts/GamePlayContext';
+import { useGamePlay } from '@/features/game-play/contexts/GamePlayContext';
 import { validateGridQuality } from '@/lib/utils/grid-generation';
 
 /**
