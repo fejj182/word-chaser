@@ -1,3 +1,5 @@
+import { GridSize } from "@/features/game-play/contexts/GamePlayContext";
+
 export interface Room {
   id: string;
   name: string;
@@ -25,7 +27,7 @@ export interface Player {
 export interface RoomSettings {
   roundDuration: number; // in seconds
   maxRounds: number;
-  gridSize: 'small' | 'medium' | 'large';
+  gridSize: GridSize;
 }
 
 export interface CreateRoomParams {

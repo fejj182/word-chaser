@@ -37,17 +37,6 @@ describe('Grid Generation', () => {
       });
     });
 
-    it('should generate an 8x8 grid using Boggle strategy', () => {
-      const grid = generateLetterGrid(8);
-      
-      expect(grid).toHaveLength(8);
-      grid.forEach(row => {
-        expect(row).toHaveLength(8);
-        row.forEach(cell => {
-          expect(cell).toMatch(/^[A-Z]$/);
-        });
-      });
-    });
 
     it('should accept options parameter for future enhancements', () => {
       const grid = generateLetterGrid(4, { seedWords: ['CAT'], minWordLength: 3 });
@@ -98,7 +87,6 @@ describe('Grid Generation', () => {
     it('should return correct sizes for each grid type', () => {
       expect(getGridSizeConfig('small')).toBe(4);
       expect(getGridSizeConfig('medium')).toBe(6);
-      expect(getGridSizeConfig('large')).toBe(8);
     });
   });
 

@@ -478,42 +478,6 @@ describe('room-utils', () => {
       expect(mockGenerateLetterGrid).toHaveBeenCalledWith({ size: 6 });
     });
 
-    it('generates grid with correct size configuration for large grid', async () => {
-      const mockRoomRef = createMockRef();
-      const mockSnapshot = createMockSnapshot(true, {
-        id: 'test-room-id',
-        status: 'waiting',
-        players: [
-          { id: 'user1', displayName: 'User 1', isReady: true },
-        ],
-        settings: {
-          roundDuration: 60,
-          maxRounds: 5,
-          gridSize: 'large',
-        },
-      });
-
-      mockGetGridSizeConfig.mockReturnValue({ size: 8 });
-      mockGenerateLetterGrid.mockReturnValue([
-        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
-        ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'],
-        ['Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'],
-        ['Y', 'Z', 'A', 'B', 'C', 'D', 'E', 'F'],
-        ['G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'],
-        ['O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'],
-        ['W', 'X', 'Y', 'Z', 'A', 'B', 'C', 'D'],
-        ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
-      ]);
-
-      mockRef.mockReturnValue(mockRoomRef);
-      mockGet.mockResolvedValue(mockSnapshot);
-      mockUpdate.mockResolvedValue(undefined);
-
-      await startGame('test-room-id');
-
-      expect(mockGetGridSizeConfig).toHaveBeenCalledWith('large');
-      expect(mockGenerateLetterGrid).toHaveBeenCalledWith({ size: 8 });
-    });
 
     it('stores gameData with correct structure', async () => {
       const mockRoomRef = createMockRef();

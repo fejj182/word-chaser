@@ -98,9 +98,9 @@ describe('CreateRoomUI', () => {
     expect(screen.getByText('4×4').closest('button')).toHaveClass('border-blue-500');
     expect(screen.getByText('6×6').closest('button')).not.toHaveClass('border-blue-500');
 
-    // Click on large (8×8)
-    fireEvent.click(screen.getByText('8×8').closest('button')!);
-    expect(screen.getByText('8×8').closest('button')).toHaveClass('border-blue-500');
+    // Click on medium (6×6)
+    fireEvent.click(screen.getByText('6×6').closest('button')!);
+    expect(screen.getByText('6×6').closest('button')).toHaveClass('border-blue-500');
     expect(screen.getByText('4×4').closest('button')).not.toHaveClass('border-blue-500');
   });
 
