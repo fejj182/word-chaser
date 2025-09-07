@@ -28,43 +28,12 @@ export const GameTimer: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progressPercentage = ((180 - timeLeft) / 180) * 100;
-
   return (
-    <div className="space-y-4">
-      <h2 className="text--section-title">Time Remaining</h2>
-      
-      <div className="space-y-3">
-        <div className="bg-red-50 rounded-lg p-4 text-center">
-          <div className={`text-4xl font-bold ${timeLeft <= 30 ? 'text-red-600' : 'text-red-500'}`}>
-            {formatTime(timeLeft)}
-          </div>
-          <div className="text-sm text-red-700">
-            {timeLeft <= 30 ? 'Hurry up!' : 'Round in progress'}
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Progress</span>
-            <span>{Math.round(progressPercentage)}%</span>
-          </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-bar--fill bg-red-500"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
-        </div>
-        
-        {!isActive && timeLeft === 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-            <div className="text-sm font-medium text-yellow-800">
-              Time's up! Round complete.
-            </div>
-          </div>
-        )}
-      </div>
+    <div className="flex items-center gap-2 text-sm" role="region" aria-label="Timer">
+      <span className="text-gray-600">Time</span>
+      <span className={`font-mono px-2 py-0.5 rounded ${timeLeft <= 30 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`} aria-live={timeLeft <= 30 ? 'assertive' : 'polite'}>
+        {formatTime(timeLeft)}
+      </span>
     </div>
   );
 };

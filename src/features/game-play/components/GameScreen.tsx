@@ -66,16 +66,17 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
       </div>
       
       <div className="page--content">
-        <div className="page--content-container">
-          <div className="card p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Timer and Score */}
-              <div className="lg:col-span-1 space-y-4">
-                <GameTimer />
-                <ScoreDisplay />
-              </div>
-              
-              {/* Center Column - Letter Grid */}
+        <div className="max-w-4xl mx-auto p-6 space-y-4">
+          {/* Compact Status Bar */}
+          <div className="flex items-center justify-between px-2 py-2 rounded bg-white/70 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700" role="region" aria-label="Round status bar">
+            <GameTimer />
+            <ScoreDisplay />
+          </div>
+
+          {/* Main Game Container */}
+          <div className="card p-6" role="region" aria-label="Game interaction">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Letter Grid */}
               <div className="lg:col-span-1">
                 <LetterGrid />
               </div>
