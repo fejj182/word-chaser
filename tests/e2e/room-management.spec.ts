@@ -12,41 +12,16 @@ test.describe('Room Management & Multiplayer Flows', () => {
     host = await hostCtx.newPage();
     p2Ctx = await browser.newContext();
     p2 = await p2Ctx.newPage();
-
-    // Reset RTDB emulator before each test
-    try {
-      await host.request.put('http://127.0.0.1:9000/.json?ns=demo-word-chaser', {
-        data: null
-      });
-    } catch (error) {
-      console.warn('Could not reset RTDB emulator:', error);
-    }
   });
 
   test.afterEach(async () => {
-    // Clean up browser contexts
     await hostCtx?.close();
     await p2Ctx?.close();
   });
 
-  test.afterAll(async ({ browser }) => {
-    // Reset RTDB emulator after all tests complete
-    try {
-      const cleanupCtx = await browser.newContext();
-      const cleanupPage = await cleanupCtx.newPage();
-      await cleanupPage.request.put('http://127.0.0.1:9000/.json?ns=demo-word-chaser', {
-        data: null
-      });
-      await cleanupCtx.close();
-      console.log('✅ RTDB emulator cleaned up after all tests (worker cleanup)');
-    } catch (error) {
-      console.warn('Could not reset RTDB emulator after tests:', error);
-    }
-  });
-
   test('should create room, join with second player, and start game when all ready', async () => {
-    // Host creates room
-    await host.goto('/');
+    // Host creates room on server 1 (localhost:3000)
+    await host.goto('http://localhost:3000/');
     await host.getByRole('button', { name: /create a new room/i }).click();
     await host.getByLabel(/alias/i).fill('Host Player');
     await host.getByTestId('max-players-select').selectOption('2');
@@ -63,8 +38,8 @@ test.describe('Room Management & Multiplayer Flows', () => {
     // Verify host badge
     await expect(host.getByTestId('host-badge')).toBeVisible();
     
-    // Second player joins
-    await p2.goto('/');
+    // Second player joins from server 2 (localhost:3001) - simulating different device/server
+    await p2.goto('http://localhost:3001/');
     await p2.getByRole('button', { name: /join existing room/i }).click();
     await p2.getByLabel(/room code/i).fill(roomCode);
     await p2.getByLabel(/alias/i).fill('Second Player');
@@ -88,16 +63,12 @@ test.describe('Room Management & Multiplayer Flows', () => {
     await expect(host).toHaveURL(/\/game\/.+/);
     await expect(p2).toHaveURL(/\/game\/.+/);
 
-    const wordInput = host.getByRole('textbox', { name: /current word/i });
-    expect(wordInput).toBeVisible();
-
-    const p2WordInput = p2.getByRole('textbox', { name: /current word/i });
-    expect(p2WordInput).toBeVisible();
+    await expect(host.getByRole('grid')).toBeVisible();
+    await expect(p2.getByRole('grid')).toBeVisible();
   });
 
   test('should transfer host role when original host leaves room', async () => {
-    // Create room and join
-    await host.goto('/');
+    await host.goto('http://localhost:3000/');
     await host.getByRole('button', { name: /create a new room/i }).click();
     await host.getByLabel(/alias/i).fill('Host Player');
     await host.getByTestId('max-players-select').selectOption('2');
@@ -114,8 +85,8 @@ test.describe('Room Management & Multiplayer Flows', () => {
     // Verify original host badge
     await expect(host.getByTestId('host-badge')).toBeVisible();
     
-    // Second player joins
-    await p2.goto('/');
+    // Second player joins from server 2 (localhost:3001)
+    await p2.goto('http://localhost:3001/');
     await p2.getByRole('button', { name: /join existing room/i }).click();
     await p2.getByLabel(/room code/i).fill(roomCode);
     await p2.getByLabel(/alias/i).fill('Second Player');
