@@ -3,9 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import DemoPage from '../page';
 
 // Mock the components to avoid complex dependencies
-jest.mock('@/features/development/components/WordGridDemoWithControls', () => ({
-  WordGridDemoWithControls: ({ gridSize }: { gridSize: string }) => (
-    <div data-testid="word-grid-demo-with-controls">
+jest.mock('@/features/development/components/WordGridDemo', () => ({
+  WordGridDemo: ({ gridSize }: { gridSize: string }) => (
+    <div data-testid="word-grid-demo">
       Word Grid Demo - Size: {gridSize}
     </div>
   )
@@ -43,7 +43,7 @@ describe('DemoPage', () => {
     expect(screen.getByText('Development tool for testing and debugging grid-related functionality')).toBeInTheDocument();
     expect(screen.getByTestId('grid-size-selector')).toBeInTheDocument();
     expect(screen.getByTestId('grid-debug-controls')).toBeInTheDocument();
-    expect(screen.getByTestId('word-grid-demo-with-controls')).toBeInTheDocument();
+    expect(screen.getByTestId('word-grid-demo')).toBeInTheDocument();
   });
 
   it('should display debug information', () => {

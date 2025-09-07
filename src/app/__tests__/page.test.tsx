@@ -33,8 +33,8 @@ jest.mock('@/features/user-management/components/GameHeader', () => ({
   GameHeader: () => <div data-testid="game-header">GameHeader</div>,
 }));
 
-jest.mock('@/features/development/components/WordGridDemo', () => ({
-  WordGridDemo: () => <div data-testid="word-grid-demo">WordGridDemo</div>,
+jest.mock('@/features/development/components/Features', () => ({
+  Features: () => <div data-testid="features">Features</div>,
 }));
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
@@ -72,6 +72,19 @@ describe('Home Page', () => {
       expect(screen.getByTestId('game-header')).toBeInTheDocument();
     });
 
+    it('should render the features section with Features', () => {
+      mockUseUser.mockReturnValue({
+        userId: 'user123',
+        displayName: 'Test User',
+        setUser: jest.fn(),
+      });
+      render(<Home />);
+      
+      const featuresSection = screen.getByTestId('features').closest('.page--header');
+      expect(featuresSection).toBeInTheDocument();
+      expect(screen.getByTestId('features')).toBeInTheDocument();
+    });
+
     it('should render the user display section with correct classes', () => {
       mockUseUser.mockReturnValue({
         userId: 'user123',
@@ -86,7 +99,7 @@ describe('Home Page', () => {
       expect(screen.getByTestId('user-display')).toBeInTheDocument();
     });
 
-    it('should render the main content section with RoomManager and WordGridDemo', () => {
+    it('should render the main content section with RoomManager', () => {
       mockUseUser.mockReturnValue({
         userId: 'user123',
         displayName: 'Test User',
@@ -98,7 +111,6 @@ describe('Home Page', () => {
       const contentSection = screen.getByTestId('room-manager').closest('.page--content');
       expect(contentSection).toBeInTheDocument();
       expect(screen.getByTestId('room-manager')).toBeInTheDocument();
-      expect(screen.getByTestId('word-grid-demo')).toBeInTheDocument();
     });
   });
 
@@ -167,34 +179,6 @@ describe('Home Page', () => {
       // Check content structure
       const contentContainer = screen.getByTestId('room-manager').closest('.page--content-container');
       expect(contentContainer).toBeInTheDocument();
-    });
-  });
-
-  describe('Component Integration', () => {
-    it('should render all child components in correct order', () => {
-      mockUseUser.mockReturnValue({
-        userId: 'user123',
-        displayName: 'Test User',
-        setUser: jest.fn(),
-      });
-
-      render(<Home />);
-      
-      // Check that all components are rendered
-      expect(screen.getByTestId('game-header')).toBeInTheDocument();
-      expect(screen.getByTestId('user-display')).toBeInTheDocument();
-      expect(screen.getByTestId('room-manager')).toBeInTheDocument();
-      expect(screen.getByTestId('word-grid-demo')).toBeInTheDocument();
-      
-      // Check the order by looking at the DOM structure
-      const pageContainer = screen.getByTestId('user-display').closest('.page');
-      const header = pageContainer?.querySelector('.page--header');
-      const userSection = pageContainer?.querySelector('.page--padding');
-      const contentSection = pageContainer?.querySelector('.page--content');
-      
-      expect(header).toBeInTheDocument();
-      expect(userSection).toBeInTheDocument();
-      expect(contentSection).toBeInTheDocument();
     });
   });
 

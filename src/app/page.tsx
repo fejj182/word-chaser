@@ -6,7 +6,7 @@ import { useUser } from '@/features/user-management/contexts/UserContext';
 import { UserDisplay } from '@/features/user-management/components/UserDisplay';
 import RoomManager from '@/features/room-management/components/RoomManager';
 import { GameHeader } from '@/features/user-management/components/GameHeader';
-import { WordGridDemo } from '@/features/development/components/WordGridDemo';
+import { Features } from '@/features/development/components/Features';
 
 export default function Home() {
   const { displayName } = useUser();
@@ -19,6 +19,7 @@ export default function Home() {
           <div className="page--header">
             <div className="page--header-container">
               <GameHeader />
+              <Features />
             </div>
           </div>
 
@@ -31,7 +32,6 @@ export default function Home() {
           <div className="page--content">
             <div className="page--content-container">
               <RoomManager />
-              <WordGridDemo />
             </div>
           </div>
         </div>

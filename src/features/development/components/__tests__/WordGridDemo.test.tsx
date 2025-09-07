@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { WordGridDemoWithControls } from '../WordGridDemoWithControls';
+import { WordGridDemo } from '../WordGridDemo';
 import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 
 // Mock the WordGridDemo component
@@ -8,11 +8,11 @@ jest.mock('../WordGridDemo', () => ({
   WordGridDemo: () => <div data-testid="word-grid-demo">Word Grid Demo</div>
 }));
 
-describe('WordGridDemoWithControls', () => {
+describe('WordGridDemo', () => {
   it('should render WordGridDemo component', () => {
     render(
       <GamePlayProvider initialGridSize="small">
-        <WordGridDemoWithControls gridSize="small" />
+        <WordGridDemo gridSize="small" />
       </GamePlayProvider>
     );
 
@@ -22,14 +22,14 @@ describe('WordGridDemoWithControls', () => {
   it('should update grid size when prop changes', () => {
     const { rerender } = render(
       <GamePlayProvider initialGridSize="small">
-        <WordGridDemoWithControls gridSize="small" />
+        <WordGridDemo gridSize="small" />
       </GamePlayProvider>
     );
 
     // Change the grid size prop
     rerender(
       <GamePlayProvider initialGridSize="medium">
-        <WordGridDemoWithControls gridSize="medium" />
+        <WordGridDemo gridSize="medium" />
       </GamePlayProvider>
     );
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { WordGridDemoWithControls } from '@/features/development/components/WordGridDemoWithControls';
+import { WordGridDemo } from '@/features/development/components/WordGridDemo';
 import { GridDebugControls } from '@/features/development/components/GridDebugControls';
 import { GridSizeSelector } from '@/features/game-play/components/GridSizeSelector';
 import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
@@ -90,7 +90,7 @@ export default function DemoPage() {
           <div className="p-6 space-y-6">
             <GamePlayProvider initialGridSize={gridSize}>
               <GridDebugControls />
-              <WordGridDemoWithControls gridSize={gridSize} />
+              <WordGridDemo gridSize={gridSize} />
             </GamePlayProvider>
           </div>
         </div>
