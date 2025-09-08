@@ -8,7 +8,6 @@ export const LetterGrid: React.FC = () => {
   const { state } = useGamePlay();
   const { 
     selectTile, 
-    isPositionSelectable, 
     isPositionInCurrentPath,
     currentWord 
   } = useWordPath();
@@ -21,18 +20,13 @@ export const LetterGrid: React.FC = () => {
     const baseClass = "aspect-square border-2 rounded-lg text-2xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] min-w-[44px]";
     
     const isSelected = isPositionInCurrentPath({ row, col });
-    const isSelectable = isPositionSelectable({ row, col });
     
     if (isSelected) {
       return `${baseClass} bg-blue-500 text-white border-blue-600 shadow-lg transform scale-105`;
     }
     
-    if (isSelectable) {
-      return `${baseClass} bg-blue-100 hover:bg-blue-200 border-blue-300 text-blue-800 hover:shadow-md`;
-    }
-    
-    return `${baseClass} bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed`;
-  }, [isPositionInCurrentPath, isPositionSelectable]);
+    return `${baseClass} bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200 hover:shadow-md`;
+  }, [isPositionInCurrentPath]);
 
   const getGridCols = useCallback(() => {
     if (!state.grid || state.grid.length === 0) return 'grid-cols-4';
@@ -81,7 +75,6 @@ export const LetterGrid: React.FC = () => {
               onClick={() => handleLetterClick(rowIndex, colIndex)}
               aria-label={`Letter ${letter} at position ${rowIndex + 1}, ${colIndex + 1}`}
               aria-pressed={isPositionInCurrentPath({ row: rowIndex, col: colIndex })}
-              disabled={!isPositionSelectable({ row: rowIndex, col: colIndex })}
               tabIndex={0}
             >
               {letter}
@@ -92,7 +85,7 @@ export const LetterGrid: React.FC = () => {
 
       <div className="text-center space-y-2">
         <p className="text-sm text-gray-600">
-          Click letters to form words. Adjacent letters only.
+          Click letters to form words. Only adjacent letters can be selected.
         </p>
         
         {currentWord && (

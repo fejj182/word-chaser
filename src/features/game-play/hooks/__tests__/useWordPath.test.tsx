@@ -230,7 +230,7 @@ describe('useWordPath', () => {
       expect(mockActions.selectTile).toHaveBeenCalledWith({ row: 0, col: 1 });
     });
 
-    it('should not select non-adjacent tile when position is not selectable', () => {
+    it('should clear selection and start new path when non-adjacent tile is clicked', () => {
       const mockSelectedPath = [{ row: 0, col: 0 }];
       mockUseGamePlay.mockReturnValue({
         state: { ...defaultMockState, selectedPath: mockSelectedPath },
@@ -243,9 +243,9 @@ describe('useWordPath', () => {
         result.current.selectTile({ row: 2, col: 2 }); // Non-adjacent
       });
 
-      // The hook should not select the tile because it's not selectable (not adjacent)
-      expect(mockActions.clearSelection).not.toHaveBeenCalled();
-      expect(mockActions.selectTile).not.toHaveBeenCalled();
+      // The hook should clear selection and start a new path from the non-adjacent tile
+      expect(mockActions.clearSelection).toHaveBeenCalled();
+      expect(mockActions.selectTile).toHaveBeenCalledWith({ row: 2, col: 2 });
     });
 
     it('should not select invalid position', () => {
@@ -270,12 +270,12 @@ describe('useWordPath', () => {
   });
 
   describe('Position Analysis', () => {
-    it('should check if position is selectable', () => {
+    it('should check if position is selectable (only positions in current path)', () => {
       const { result } = renderHook(() => useWordPath());
 
+      // With no current path, no position should be selectable
       const isSelectable = result.current.isPositionSelectable({ row: 0, col: 0 });
-      
-      expect(isSelectable).toBe(true);
+      expect(isSelectable).toBe(false);
     });
 
     it('should reject out-of-bounds positions', () => {
@@ -495,8 +495,8 @@ describe('useWordPath', () => {
         allowReuse: false
       }));
 
-      // Position already in path should not be selectable
-      expect(result.current.isPositionSelectable({ row: 0, col: 0 })).toBe(false);
+      // Position already in path should be selectable (only selected tiles are selectable)
+      expect(result.current.isPositionSelectable({ row: 0, col: 0 })).toBe(true);
     });
 
     it('should allow position reuse when configured', () => {
@@ -510,10 +510,10 @@ describe('useWordPath', () => {
         allowReuse: true
       }));
 
-      // Position already in path should be selectable when reuse is allowed
-      // But it still needs to be adjacent to the last position
-      expect(result.current.isPositionSelectable({ row: 0, col: 1 })).toBe(true);
-      expect(result.current.isPositionSelectable({ row: 1, col: 0 })).toBe(true);
+      // Only positions already in the current path are selectable
+      expect(result.current.isPositionSelectable({ row: 0, col: 0 })).toBe(true);
+      expect(result.current.isPositionSelectable({ row: 0, col: 1 })).toBe(false);
+      expect(result.current.isPositionSelectable({ row: 1, col: 0 })).toBe(false);
     });
   });
 });

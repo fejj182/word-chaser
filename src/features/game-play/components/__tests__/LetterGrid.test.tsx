@@ -19,12 +19,10 @@ const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
 
 describe('LetterGrid', () => {
   const mockSelectTile = jest.fn();
-  const mockIsPositionSelectable = jest.fn();
   const mockIsPositionInPath = jest.fn();
 
   const defaultMockReturn = {
     selectTile: mockSelectTile,
-    isPositionSelectable: mockIsPositionSelectable,
     isPositionInCurrentPath: mockIsPositionInPath,
     currentWord: '',
   };
@@ -48,7 +46,6 @@ describe('LetterGrid', () => {
     jest.clearAllMocks();
     
     // Default mock implementations
-    mockIsPositionSelectable.mockReturnValue(true);
     mockIsPositionInPath.mockReturnValue(false);
     mockUseWordPath.mockReturnValue(defaultMockReturn);
   });
@@ -146,20 +143,8 @@ describe('LetterGrid', () => {
       expect(buttonA).toHaveClass('border-blue-600');
     });
 
-    it('should apply correct classes for selectable tiles', () => {
-      mockIsPositionSelectable.mockImplementation(({ row, col }) => row === 0 && col === 0);
+    it('should apply correct classes for unselected tiles', () => {
       mockIsPositionInPath.mockReturnValue(false);
-      
-      renderWithProvider();
-
-      const buttonA = screen.getByText('A');
-      expect(buttonA).toHaveClass('bg-blue-100');
-      expect(buttonA).toHaveClass('hover:bg-blue-200');
-      expect(buttonA).toHaveClass('border-blue-300');
-    });
-
-    it('should apply correct classes for non-selectable tiles', () => {
-      mockIsPositionSelectable.mockReturnValue(false);
       
       renderWithProvider();
 
@@ -167,7 +152,7 @@ describe('LetterGrid', () => {
       expect(buttonA).toHaveClass('bg-gray-100');
       expect(buttonA).toHaveClass('border-gray-200');
       expect(buttonA).toHaveClass('text-gray-500');
-      expect(buttonA).toBeDisabled();
+      expect(buttonA).toHaveClass('hover:bg-gray-200');
     });
 
     it('should show current word when available', () => {
@@ -244,15 +229,6 @@ describe('LetterGrid', () => {
 
       const buttonA = screen.getByText('A');
       expect(buttonA).toHaveAttribute('aria-pressed', 'true');
-    });
-
-    it('should disable non-selectable buttons', () => {
-      mockIsPositionSelectable.mockReturnValue(false);
-      
-      renderWithProvider();
-
-      const buttonA = screen.getByText('A');
-      expect(buttonA).toBeDisabled();
     });
   });
 

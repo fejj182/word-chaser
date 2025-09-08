@@ -76,6 +76,11 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     return pathValidation.isValid && state.selectedPath.length >= minLength;
   }, [pathValidation.isValid, state.selectedPath.length, minLength]);
 
+  // Check if a position is in the current path
+  const isPositionInCurrentPath = useCallback((position: GridPosition) => {
+    return state.selectedPath.some(p => p.row === position.row && p.col === position.col);
+  }, [state.selectedPath]);
+
   // Find paths for a given word
   const findPathsForWord = useCallback((word: string) => {
     if (!word || !state.grid || state.grid.length === 0) return [];
@@ -96,14 +101,20 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
 
   // Select a tile (add to path)
   const selectTile = useCallback((position: GridPosition) => {
-    // Check if position is valid and selectable
-    if (!isPositionSelectable(position)) {
+    // Check bounds
+    if (!state.grid || position.row < 0 || position.row >= state.grid.length ||
+        position.col < 0 || position.col >= state.grid[0]?.length) {
       return;
     }
 
     // If this is the first selection, just add it
     if (state.selectedPath.length === 0) {
       actions.selectTile(position);
+      return;
+    }
+
+    // Check if tile has already been selected
+    if (isPositionInCurrentPath(position)) {
       return;
     }
 
@@ -120,7 +131,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     }
 
     actions.selectTile(position);
-  }, [state.selectedPath, actions, allowDiagonals]);
+  }, [state.selectedPath, actions, isPositionInCurrentPath]);
 
   // Clear all selections
   const clearSelection = useCallback(() => {
@@ -147,30 +158,9 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
       return false;
     }
 
-    // If no current path, any position is selectable
-    if (state.selectedPath.length === 0) {
-      return true;
-    }
-
-    // Check if position is already in path (unless reuse is allowed)
-    if (!allowReuse && isPositionInCurrentPath(position)) {
-      return false;
-    }
-
-    // Check if position is adjacent to the last selected position
-    const lastPos = state.selectedPath[state.selectedPath.length - 1];
-    const distance = Math.max(
-      Math.abs(position.row - lastPos.row),
-      Math.abs(position.col - lastPos.col)
-    );
-
-    return distance === 1;
-  }, [state.grid, state.selectedPath, allowReuse]);
-
-  // Check if a position is in the current path
-  const isPositionInCurrentPath = useCallback((position: GridPosition) => {
-    return state.selectedPath.some(p => p.row === position.row && p.col === position.col);
-  }, [state.selectedPath]);
+    // Only positions already in the current path are selectable
+    return isPositionInCurrentPath(position);
+  }, [state.grid, isPositionInCurrentPath]);
 
   // Set current word (for typing integration)
   const setCurrentWord = useCallback((word: string) => {
