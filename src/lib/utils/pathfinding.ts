@@ -27,7 +27,7 @@ export function findWordPaths(
 ): GridPosition[][] {
   const {
     allowDiagonals = true,
-    minLength = 3,
+    minLength = 1,
     maxLength = 16,
     allowReuse = false
   } = options;

@@ -305,4 +305,34 @@ describe('WordInput', () => {
     expect(screen.getByText('Network error')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Clear error' })).toBeInTheDocument();
   });
+
+  it('shows invalid state when typing word that cannot be formed on grid', () => {
+    mockUseWordSubmission.mockReturnValue({
+      submitWord: mockSubmitWord,
+      isLoading: false,
+      error: null,
+      lastSubmission: null,
+      clearError: mockClearError,
+      clearSubmission: mockClearSubmission
+    });
+
+    // Mock that "zzz" cannot be formed on the grid
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'zzz',
+      setCurrentWord: mockSetCurrentWord,
+      findPathForTypedWord: mockFindPathForTypedWord,
+      clearSelection: mockClearSelection,
+      isValidPath: false // This should be false when word cannot be formed
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
+
+    const input = screen.getByLabelText('Current Word');
+    expect(input).toHaveClass('border-red-500', 'bg-red-50');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+  });
 });

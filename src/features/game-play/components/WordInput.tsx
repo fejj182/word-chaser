@@ -45,7 +45,7 @@ export const WordInput: React.FC = () => {
     // Set new timer
     const timer = setTimeout(() => {
       setCurrentWord(value);
-      if (value.length >= 3) {
+      if (value.length >= 1) {
         findPathForTypedWord(value);
       } else {
         clearSelection();
@@ -109,7 +109,7 @@ export const WordInput: React.FC = () => {
     return '✗';
   };
 
-  // Get validation status for current word
+  // Get validation status for current word (for submission)
   const getValidationStatus = () => {
     if (!currentWord || currentWord.length < 3 || !isValidPath) {
       return { isValid: false };
@@ -135,10 +135,12 @@ export const WordInput: React.FC = () => {
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value.toUpperCase())}
             className={`form-input text-center text-lg font-mono ${
-              currentWord.length >= 3 
-                ? validationStatus.isValid 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-red-500 bg-red-50'
+              currentWord.length >= 1 
+                ? currentWord.length >= 3
+                  ? validationStatus.isValid 
+                    ? 'border-green-500 bg-green-50' 
+                    : 'border-red-500 bg-red-50'
+                  : 'border-blue-500 bg-blue-50' // Show blue for valid path but not ready for submission
                 : ''
             }`}
             placeholder="Type your word or click letters..."

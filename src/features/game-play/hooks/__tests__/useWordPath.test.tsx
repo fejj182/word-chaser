@@ -79,7 +79,7 @@ describe('useWordPath', () => {
       
       expect(mockFindWordPaths).toHaveBeenCalledWith(mockGrid, 'AB', {
         allowDiagonals: true,
-        minLength: 3,
+        minLength: 1,
         maxLength: 16,
         allowReuse: false
       });
@@ -96,7 +96,7 @@ describe('useWordPath', () => {
       
       expect(mockFindBestWordPath).toHaveBeenCalledWith(mockGrid, 'AB', {
         allowDiagonals: true,
-        minLength: 3,
+        minLength: 1,
         maxLength: 16,
         allowReuse: false
       });
@@ -112,7 +112,7 @@ describe('useWordPath', () => {
       
       expect(mockCanFormWord).toHaveBeenCalledWith(mockGrid, 'ABC', {
         allowDiagonals: true,
-        minLength: 3,
+        minLength: 1,
         maxLength: 16,
         allowReuse: false
       });
@@ -179,7 +179,7 @@ describe('useWordPath', () => {
       expect(result.current.isValidPath).toBe(true);
     });
 
-    it('should mark path as invalid if too short', () => {
+    it('should mark path as valid regardless of length (pathfinding only)', () => {
       const mockSelectedPath = [{ row: 0, col: 0 }, { row: 0, col: 1 }];
       mockUseGamePlay.mockReturnValue({
         state: { ...defaultMockState, selectedPath: mockSelectedPath },
@@ -190,7 +190,7 @@ describe('useWordPath', () => {
 
       const { result } = renderHook(() => useWordPath());
 
-      expect(result.current.isValidPath).toBe(false);
+      expect(result.current.isValidPath).toBe(true);
     });
 
     it('should handle empty path', () => {
@@ -199,7 +199,7 @@ describe('useWordPath', () => {
       const { result } = renderHook(() => useWordPath());
 
       expect(result.current.pathValidation).toEqual({ isValid: true, word: '' });
-      expect(result.current.isValidPath).toBe(false);
+      expect(result.current.isValidPath).toBe(true);
     });
   });
 
@@ -357,7 +357,7 @@ describe('useWordPath', () => {
       
       expect(mockFindBestWordPath).toHaveBeenCalledWith(mockGrid, 'ABC', {
         allowDiagonals: true,
-        minLength: 3,
+        minLength: 1,
         maxLength: 16,
         allowReuse: false
       });
@@ -374,7 +374,26 @@ describe('useWordPath', () => {
       const path = result.current.findPathForTypedWord('XYZ');
       
       expect(path).toBeNull();
+      // clearSelection should not be called when there's no existing selected path
       expect(mockActions.clearSelection).not.toHaveBeenCalled();
+    });
+
+    it('should clear existing selected path when typed word cannot be formed', () => {
+      const mockSelectedPath = [{ row: 0, col: 0 }, { row: 0, col: 1 }];
+      mockUseGamePlay.mockReturnValue({
+        state: { ...defaultMockState, selectedPath: mockSelectedPath },
+        actions: mockActions,
+      });
+      
+      mockFindBestWordPath.mockReturnValue(null);
+
+      const { result } = renderHook(() => useWordPath());
+
+      const path = result.current.findPathForTypedWord('XYZ');
+      
+      expect(path).toBeNull();
+      expect(mockActions.clearSelection).toHaveBeenCalled();
+      expect(mockActions.setCurrentWord).toHaveBeenCalledWith('XYZ');
     });
 
     it('should set word from path', () => {
@@ -417,7 +436,7 @@ describe('useWordPath', () => {
 
       expect(mockFindWordPaths).toHaveBeenCalledWith(mockGrid, 'ABC', {
         allowDiagonals: true,
-        minLength: 3,
+        minLength: 1,
         maxLength: 16,
         allowReuse: false
       });
