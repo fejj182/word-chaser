@@ -19,11 +19,11 @@ const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
 
 describe('LetterGrid', () => {
   const mockSelectTile = jest.fn();
-  const mockIsPositionInPath = jest.fn();
 
   const defaultMockReturn = {
     selectTile: mockSelectTile,
-    isPositionInCurrentPath: mockIsPositionInPath,
+    isPositionInAnyPath: jest.fn(),
+    availablePaths: [],
     currentWord: '',
   };
 
@@ -46,7 +46,7 @@ describe('LetterGrid', () => {
     jest.clearAllMocks();
     
     // Default mock implementations
-    mockIsPositionInPath.mockReturnValue(false);
+    defaultMockReturn.isPositionInAnyPath.mockReturnValue(false);
     mockUseWordPath.mockReturnValue(defaultMockReturn);
   });
 
@@ -132,8 +132,8 @@ describe('LetterGrid', () => {
   });
 
   describe('Visual States', () => {
-    it('should apply correct classes for selected tiles', () => {
-      mockIsPositionInPath.mockImplementation(({ row, col }) => row === 0 && col === 0);
+    it('should apply correct classes for tiles in available paths', () => {
+      defaultMockReturn.isPositionInAnyPath.mockImplementation(({ row, col }) => row === 0 && col === 0);
       
       renderWithProvider();
 
@@ -144,7 +144,7 @@ describe('LetterGrid', () => {
     });
 
     it('should apply correct classes for unselected tiles', () => {
-      mockIsPositionInPath.mockReturnValue(false);
+      defaultMockReturn.isPositionInAnyPath.mockReturnValue(false);
       
       renderWithProvider();
 
@@ -222,8 +222,8 @@ describe('LetterGrid', () => {
       expect(buttonA).toHaveAttribute('tabIndex', '0');
     });
 
-    it('should update aria-pressed when tile is selected', () => {
-      mockIsPositionInPath.mockImplementation(({ row, col }) => row === 0 && col === 0);
+    it('should update aria-pressed when tile is in any path', () => {
+      defaultMockReturn.isPositionInAnyPath.mockImplementation(({ row, col }) => row === 0 && col === 0);
       
       renderWithProvider();
 

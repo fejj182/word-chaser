@@ -8,7 +8,8 @@ export const LetterGrid: React.FC = () => {
   const { state } = useGamePlay();
   const { 
     selectTile, 
-    isPositionInCurrentPath,
+    isPositionInAnyPath,
+    availablePaths,
     currentWord 
   } = useWordPath();
 
@@ -19,14 +20,14 @@ export const LetterGrid: React.FC = () => {
   const getLetterClass = useCallback((row: number, col: number) => {
     const baseClass = "aspect-square border-2 rounded-lg text-2xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] min-w-[44px]";
     
-    const isSelected = isPositionInCurrentPath({ row, col });
+    const isInAnyPath = isPositionInAnyPath({ row, col });
     
-    if (isSelected) {
+    if (isInAnyPath) {
       return `${baseClass} bg-blue-500 text-white border-blue-600 shadow-lg transform scale-105`;
     }
     
     return `${baseClass} bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200 hover:shadow-md`;
-  }, [isPositionInCurrentPath]);
+  }, [isPositionInAnyPath]);
 
   const getGridCols = useCallback(() => {
     if (!state.grid || state.grid.length === 0) return 'grid-cols-4';
@@ -74,7 +75,7 @@ export const LetterGrid: React.FC = () => {
               className={getLetterClass(rowIndex, colIndex)}
               onClick={() => handleLetterClick(rowIndex, colIndex)}
               aria-label={`Letter ${letter} at position ${rowIndex + 1}, ${colIndex + 1}`}
-              aria-pressed={isPositionInCurrentPath({ row: rowIndex, col: colIndex })}
+              aria-pressed={isPositionInAnyPath({ row: rowIndex, col: colIndex })}
               tabIndex={0}
             >
               {letter}

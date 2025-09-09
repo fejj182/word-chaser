@@ -43,16 +43,14 @@ export function findWordPaths(
   for (let row = 0; row < grid.length; row++) {
     for (let col = 0; col < grid[row].length; col++) {
       if (grid[row][col] === targetWord[0]) {
-        const path = findPathFromPosition(
+        const pathsFromPosition = findAllPathsFromPosition(
           grid,
           targetWord,
           [{ row, col }],
           allowDiagonals,
           allowReuse
         );
-        if (path.length === targetWord.length) {
-          paths.push(path);
-        }
+        paths.push(...pathsFromPosition);
       }
     }
   }
@@ -61,24 +59,25 @@ export function findWordPaths(
 }
 
 /**
- * Find a path starting from a specific position
+ * Find all paths starting from a specific position
  */
-function findPathFromPosition(
+function findAllPathsFromPosition(
   grid: string[][],
   targetWord: string,
   currentPath: GridPosition[],
   allowDiagonals: boolean,
   allowReuse: boolean
-): GridPosition[] {
+): GridPosition[][] {
   const currentLength = currentPath.length;
   
   // Base case: we've found the complete word
   if (currentLength === targetWord.length) {
-    return [...currentPath];
+    return [[...currentPath]];
   }
 
   const currentPos = currentPath[currentLength - 1];
   const nextLetter = targetWord[currentLength];
+  const allPaths: GridPosition[][] = [];
   
   // Get adjacent positions
   const adjacentPositions = allowDiagonals 
@@ -104,7 +103,7 @@ function findPathFromPosition(
 
     // Recursively search from this position
     const newPath = [...currentPath, nextPos];
-    const result = findPathFromPosition(
+    const pathsFromHere = findAllPathsFromPosition(
       grid,
       targetWord,
       newPath,
@@ -112,12 +111,24 @@ function findPathFromPosition(
       allowReuse
     );
 
-    if (result.length === targetWord.length) {
-      return result;
-    }
+    allPaths.push(...pathsFromHere);
   }
 
-  return currentPath; // Return partial path if no complete path found
+  return allPaths;
+}
+
+/**
+ * Find a path starting from a specific position (legacy function)
+ */
+function findPathFromPosition(
+  grid: string[][],
+  targetWord: string,
+  currentPath: GridPosition[],
+  allowDiagonals: boolean,
+  allowReuse: boolean
+): GridPosition[] {
+  const allPaths = findAllPathsFromPosition(grid, targetWord, currentPath, allowDiagonals, allowReuse);
+  return allPaths.length > 0 ? allPaths[0] : currentPath;
 }
 
 /**

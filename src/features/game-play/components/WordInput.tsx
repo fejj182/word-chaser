@@ -10,8 +10,8 @@ export const WordInput: React.FC = () => {
   const { state } = useGamePlay();
   const { 
     currentWord, 
-    setCurrentWord, 
-    findPathForTypedWord, 
+    setCurrentWord,
+    findAllPathsForTypedWord, 
     clearSelection,
     isValidPath
   } = useWordPath();
@@ -46,14 +46,14 @@ export const WordInput: React.FC = () => {
     const timer = setTimeout(() => {
       setCurrentWord(value);
       if (value.length >= 1) {
-        findPathForTypedWord(value);
+        findAllPathsForTypedWord(value);
       } else {
         clearSelection();
       }
     }, 150);
     
     setDebounceTimer(timer);
-  }, [debounceTimer, setCurrentWord, findPathForTypedWord, clearSelection]);
+  }, [debounceTimer, setCurrentWord, findAllPathsForTypedWord, clearSelection]);
 
   // Cleanup timer on unmount
   useEffect(() => {

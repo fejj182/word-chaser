@@ -35,7 +35,7 @@ describe('WordInput', () => {
   const mockClearError = jest.fn();
   const mockClearSubmission = jest.fn();
   const mockSetCurrentWord = jest.fn();
-  const mockFindPathForTypedWord = jest.fn();
+  const mockFindAllPathsForTypedWord = jest.fn();
   const mockClearSelection = jest.fn();
 
   beforeEach(() => {
@@ -53,7 +53,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: '',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: false
     });
@@ -82,7 +82,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: '',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: false
     });
@@ -104,7 +104,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: 'ABC',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: true
     });
@@ -122,7 +122,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: 'TEST',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: true
     });
@@ -176,7 +176,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: 'FIRST',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: true
     });
@@ -200,7 +200,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: 'SECOND',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: true
     });
@@ -223,7 +223,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: 'TEST',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: true
     });
@@ -262,7 +262,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: '',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: false
     });
@@ -291,7 +291,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: '',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: false
     });
@@ -320,7 +320,7 @@ describe('WordInput', () => {
     mockUseWordPath.mockReturnValue({
       currentWord: 'zzz',
       setCurrentWord: mockSetCurrentWord,
-      findPathForTypedWord: mockFindPathForTypedWord,
+      findAllPathsForTypedWord: mockFindAllPathsForTypedWord,
       clearSelection: mockClearSelection,
       isValidPath: false // This should be false when word cannot be formed
     });

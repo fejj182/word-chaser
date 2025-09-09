@@ -25,6 +25,7 @@ export interface UseWordPathReturn {
   // Current state
   currentWord: string;
   selectedPath: GridPosition[];
+  availablePaths: GridPosition[][];
   isValidPath: boolean;
   pathValidation: { isValid: boolean; word: string; error?: string };
   
@@ -37,10 +38,12 @@ export interface UseWordPathReturn {
   getNextSelectablePositions: (allowDiagonals?: boolean) => GridPosition[];
   isPositionSelectable: (position: GridPosition) => boolean;
   isPositionInCurrentPath: (position: GridPosition) => boolean;
+  isPositionInAnyPath: (position: GridPosition) => boolean;
   
   // Word input integration
   setCurrentWord: (word: string) => void;
   findPathForTypedWord: (word: string) => GridPosition[] | null;
+  findAllPathsForTypedWord: (word: string) => GridPosition[][];
 }
 
 /**
@@ -91,6 +94,12 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
   const isPositionInCurrentPath = useCallback((position: GridPosition) => {
     return state.selectedPath.some(p => p.row === position.row && p.col === position.col);
   }, [state.selectedPath]);
+
+  const isPositionInAnyPath = useCallback((position: GridPosition) => {
+    return state.availablePaths.some(path => 
+      path.some(p => p.row === position.row && p.col === position.col)
+    );
+  }, [state.availablePaths]);
 
   const findPathsForWord = useCallback((word: string) => {
     if (!word || !state.grid || state.grid.length === 0) return [];
@@ -178,6 +187,33 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     return path;
   }, [state.grid, pathfindingOptions, actions, state.selectedPath.length]);
 
+  const findAllPathsForTypedWord = useCallback((word: string) => {
+    if (!word || state.grid.length === 0) return [];
+    
+    const paths = findWordPaths(state.grid, word, pathfindingOptions);
+    
+    // If there are paths available, set them and select the first one
+    if (paths.length > 0) {
+      actions.setAvailablePaths(paths);
+      // Clear current selected path but preserve available paths
+      actions.clearSelectedPath();
+      // Select the first path
+      paths[0].forEach(pos => actions.selectTile(pos));
+    } else {
+      // Clear available paths if no paths found
+      actions.setAvailablePaths([]);
+      // Don't clear selection when word cannot be formed - keep the typed word
+      // but clear any existing selected path so validation works correctly
+      if (state.selectedPath.length > 0) {
+        actions.clearSelection();
+        // Restore the current word after clearing selection
+        actions.setCurrentWord(word);
+      }
+    }
+    
+    return paths;
+  }, [state.grid, pathfindingOptions, actions, state.selectedPath.length]);
+
   return {
     // Path operations
     findPathsForWord,
@@ -187,6 +223,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     // Current state
     currentWord: state.currentWord,
     selectedPath: state.selectedPath,
+    availablePaths: state.availablePaths,
     isValidPath,
     pathValidation,
     
@@ -199,10 +236,12 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     getNextSelectablePositions,
     isPositionSelectable,
     isPositionInCurrentPath,
+    isPositionInAnyPath,
     
     // Word input integration
     setCurrentWord,
-    findPathForTypedWord
+    findPathForTypedWord,
+    findAllPathsForTypedWord
   };
 }
 

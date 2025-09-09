@@ -44,6 +44,26 @@ describe('Pathfinding', () => {
       expect(paths).toHaveLength(0);
     });
 
+    it('should find multiple paths when they exist', () => {
+      // Create a grid where "AN" can be formed in multiple ways
+      const multiPathGrid = [
+        ['A', 'N', 'A'],
+        ['N', 'A', 'N'],
+        ['A', 'N', 'A']
+      ];
+      
+      const paths = findWordPaths(multiPathGrid, 'AN');
+      
+      // Should find multiple paths since there are multiple A's and N's
+      expect(paths.length).toBeGreaterThan(1);
+      
+      // All paths should form "AN"
+      paths.forEach(path => {
+        const word = path.map(pos => multiPathGrid[pos.row][pos.col]).join('');
+        expect(word).toBe('AN');
+      });
+    });
+
     it('should respect minimum length constraint', () => {
       const paths = findWordPaths(testGrid, 'CA', { minLength: 3 });
       expect(paths).toHaveLength(0);

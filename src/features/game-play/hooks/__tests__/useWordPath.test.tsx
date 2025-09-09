@@ -41,11 +41,14 @@ describe('useWordPath', () => {
     selectTile: jest.fn(),
     clearSelection: jest.fn(),
     setCurrentWord: jest.fn(),
+    setAvailablePaths: jest.fn(),
+    clearSelectedPath: jest.fn(),
   };
 
   const defaultMockState = {
     grid: mockGrid,
     selectedPath: [],
+    availablePaths: [],
     currentWord: '',
   };
 
@@ -301,6 +304,25 @@ describe('useWordPath', () => {
       expect(result.current.isPositionInCurrentPath({ row: 0, col: 2 })).toBe(false);
     });
 
+    it('should check if position is in any available path', () => {
+      const mockAvailablePaths = [
+        [{ row: 0, col: 0 }, { row: 0, col: 1 }],
+        [{ row: 1, col: 0 }, { row: 1, col: 1 }]
+      ];
+      mockUseGamePlay.mockReturnValue({
+        state: { ...defaultMockState, availablePaths: mockAvailablePaths },
+        actions: mockActions,
+      });
+
+      const { result } = renderHook(() => useWordPath());
+
+      expect(result.current.isPositionInAnyPath({ row: 0, col: 0 })).toBe(true);
+      expect(result.current.isPositionInAnyPath({ row: 0, col: 1 })).toBe(true);
+      expect(result.current.isPositionInAnyPath({ row: 1, col: 0 })).toBe(true);
+      expect(result.current.isPositionInAnyPath({ row: 1, col: 1 })).toBe(true);
+      expect(result.current.isPositionInAnyPath({ row: 0, col: 2 })).toBe(false);
+    });
+
     it('should get next selectable positions', () => {
       const mockNextPositions = [{ row: 0, col: 1 }, { row: 1, col: 0 }];
       mockGetNextValidPositions.mockReturnValue(mockNextPositions);
@@ -411,6 +433,59 @@ describe('useWordPath', () => {
 
       expect(mockActions.setCurrentWord).toHaveBeenCalledWith('ABC');
     });
+
+    it('should find all paths for typed word', () => {
+      const mockPaths = [
+        [{ row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 }],
+        [{ row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 }]
+      ];
+      mockFindWordPaths.mockReturnValue(mockPaths);
+
+      const { result } = renderHook(() => useWordPath());
+
+      const paths = result.current.findAllPathsForTypedWord('ABC');
+      
+      expect(mockFindWordPaths).toHaveBeenCalledWith(mockGrid, 'ABC', {
+        allowDiagonals: true,
+        minLength: 1,
+        maxLength: 16,
+        allowReuse: false
+      });
+      expect(paths).toEqual(mockPaths);
+      expect(mockActions.setAvailablePaths).toHaveBeenCalledWith(mockPaths);
+      expect(mockActions.clearSelectedPath).toHaveBeenCalled();
+      expect(mockActions.selectTile).toHaveBeenCalledTimes(3); // First path selected
+    });
+
+    it('should clear available paths when no paths found for typed word', () => {
+      mockFindWordPaths.mockReturnValue([]);
+
+      const { result } = renderHook(() => useWordPath());
+
+      const paths = result.current.findAllPathsForTypedWord('XYZ');
+      
+      expect(paths).toEqual([]);
+      expect(mockActions.setAvailablePaths).toHaveBeenCalledWith([]);
+    });
+
+    it('should clear available paths and restore word when no paths found but existing selection', () => {
+      const mockSelectedPath = [{ row: 0, col: 0 }, { row: 0, col: 1 }];
+      mockUseGamePlay.mockReturnValue({
+        state: { ...defaultMockState, selectedPath: mockSelectedPath },
+        actions: mockActions,
+      });
+      
+      mockFindWordPaths.mockReturnValue([]);
+
+      const { result } = renderHook(() => useWordPath());
+
+      const paths = result.current.findAllPathsForTypedWord('XYZ');
+      
+      expect(paths).toEqual([]);
+      expect(mockActions.setAvailablePaths).toHaveBeenCalledWith([]);
+      expect(mockActions.clearSelection).toHaveBeenCalled();
+      expect(mockActions.setCurrentWord).toHaveBeenCalledWith('XYZ');
+    });
   });
 
   describe('Options Configuration', () => {
@@ -465,6 +540,21 @@ describe('useWordPath', () => {
       const { result } = renderHook(() => useWordPath());
 
       expect(result.current.selectedPath).toEqual(mockSelectedPath);
+    });
+
+    it('should provide available paths from state', () => {
+      const mockAvailablePaths = [
+        [{ row: 0, col: 0 }, { row: 0, col: 1 }],
+        [{ row: 1, col: 0 }, { row: 1, col: 1 }]
+      ];
+      mockUseGamePlay.mockReturnValue({
+        state: { ...defaultMockState, availablePaths: mockAvailablePaths },
+        actions: mockActions,
+      });
+
+      const { result } = renderHook(() => useWordPath());
+
+      expect(result.current.availablePaths).toEqual(mockAvailablePaths);
     });
   });
 

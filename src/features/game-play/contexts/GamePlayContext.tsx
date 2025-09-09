@@ -15,6 +15,7 @@ export interface GamePlayState {
   grid: string[][];
   gridSize: GridSize;
   selectedPath: GridPosition[];
+  availablePaths: GridPosition[][];
   currentWord: string;
   isValidating: boolean;
   validationError: string | null;
@@ -26,7 +27,9 @@ export interface GamePlayActions {
   loadGridFromRoom: (grid: string[][], gridSize: GridSize) => void;
   selectTile: (position: GridPosition) => void;
   setCurrentWord: (word: string) => void;
+  setAvailablePaths: (paths: GridPosition[][]) => void;
   clearSelection: () => void;
+  clearSelectedPath: () => void;
   setValidating: (isValidating: boolean) => void;
   setValidationError: (error: string | null) => void;
 }
@@ -41,6 +44,7 @@ const initialState: GamePlayState = {
   grid: [],
   gridSize: 'small',
   selectedPath: [],
+  availablePaths: [],
   currentWord: '',
   isValidating: false,
   validationError: null,
@@ -53,7 +57,9 @@ type GamePlayAction =
   | { type: 'LOAD_GRID_FROM_ROOM'; payload: { grid: string[][]; gridSize: GridSize } }
   | { type: 'SELECT_TILE'; payload: GridPosition }
   | { type: 'SET_CURRENT_WORD'; payload: string }
+  | { type: 'SET_AVAILABLE_PATHS'; payload: GridPosition[][] }
   | { type: 'CLEAR_SELECTION' }
+  | { type: 'CLEAR_SELECTED_PATH' }
   | { type: 'SET_VALIDATING'; payload: boolean }
   | { type: 'SET_VALIDATION_ERROR'; payload: string | null };
 
@@ -66,6 +72,7 @@ function gamePlayReducer(state: GamePlayState, action: GamePlayAction): GamePlay
         gridSize: action.payload,
         grid: [],
         selectedPath: [],
+        availablePaths: [],
         currentWord: '',
         validationError: null,
       };
@@ -75,6 +82,7 @@ function gamePlayReducer(state: GamePlayState, action: GamePlayAction): GamePlay
         ...state,
         grid: action.payload,
         selectedPath: [],
+        availablePaths: [],
         currentWord: '',
         validationError: null,
       };
@@ -85,6 +93,7 @@ function gamePlayReducer(state: GamePlayState, action: GamePlayAction): GamePlay
         grid: action.payload.grid,
         gridSize: action.payload.gridSize,
         selectedPath: [],
+        availablePaths: [],
         currentWord: '',
         validationError: null,
       };
@@ -106,11 +115,25 @@ function gamePlayReducer(state: GamePlayState, action: GamePlayAction): GamePlay
         validationError: null,
       };
 
+    case 'SET_AVAILABLE_PATHS':
+      return {
+        ...state,
+        availablePaths: action.payload,
+      };
+
     case 'CLEAR_SELECTION':
       return {
         ...state,
         selectedPath: [],
+        availablePaths: [],
         currentWord: '',
+        validationError: null,
+      };
+
+    case 'CLEAR_SELECTED_PATH':
+      return {
+        ...state,
+        selectedPath: [],
         validationError: null,
       };
 
@@ -174,8 +197,16 @@ export const GamePlayProvider: React.FC<GamePlayProviderProps> = ({
       dispatch({ type: 'SET_CURRENT_WORD', payload: word });
     },
 
+    setAvailablePaths: (paths: GridPosition[][]) => {
+      dispatch({ type: 'SET_AVAILABLE_PATHS', payload: paths });
+    },
+
     clearSelection: () => {
       dispatch({ type: 'CLEAR_SELECTION' });
+    },
+
+    clearSelectedPath: () => {
+      dispatch({ type: 'CLEAR_SELECTED_PATH' });
     },
 
     setValidating: (isValidating: boolean) => {
