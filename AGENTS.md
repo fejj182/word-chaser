@@ -128,4 +128,16 @@ References: [Cursor Rules — Project Instructions](https://docs.cursor.com/en/c
 - Keep tests colocated with features and components.
 - Respect ESLint config (`eslint.config.mjs`) and Next.js defaults.
 
+## 13) Code Quality Enforcement
+- Functions max 80 lines (encourages small, focused functions)
+- Explicit return types for better self-documentation
+- Descriptive variable/function names (min 2 characters)
+- Max complexity of 15 (encourages simple logic)
+- Max 5 parameters per function (encourages focused APIs)
+- Pre-commit hooks enforce these rules automatically
+
+Follow the scout rule. If you can see an opportunity to refactor the code to improve it according to these standards, do it.
+
+**Remember:** Comments should be rare. If you need a comment, consider if the code can be made more self-documenting through better naming or smaller functions.
+
 
