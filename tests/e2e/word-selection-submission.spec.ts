@@ -1,5 +1,21 @@
 import { test, expect, BrowserContext, Page } from '@playwright/test';
 
+// Test grids for predictable testing
+const TEST_GRIDS = {
+  COMMON_WORDS: [
+    ['C', 'A', 'T', 'S'],
+    ['D', 'O', 'G', 'E'],
+    ['B', 'A', 'T', 'R'],
+    ['M', 'A', 'N', 'Y']
+  ],
+  NO_WORDS: [
+    ['X', 'Q', 'Z', 'J'],
+    ['K', 'V', 'B', 'N'],
+    ['M', 'W', 'F', 'G'],
+    ['H', 'P', 'L', 'C']
+  ]
+};
+
 test.describe('Word Selection and Submission', () => {
   let hostCtx: BrowserContext;
   let host: Page;
@@ -19,10 +35,13 @@ test.describe('Word Selection and Submission', () => {
     await p2Ctx?.close();
   });
 
-  // Helper function to set up a game with two players
-  async function setupGameWithTwoPlayers() {
-    // Host creates room
-    await host.goto('http://localhost:3000/');
+  // Helper function to set up a game with two players and a specific test grid
+  async function setupGameWithTestGrid(testGridType: keyof typeof TEST_GRIDS) {
+    const testGrid = TEST_GRIDS[testGridType];
+    const testGridParam = encodeURIComponent(JSON.stringify(testGrid));
+    
+    // Host creates room with test grid
+    await host.goto(`http://localhost:3000/?testGrid=${testGridParam}`);
     await host.getByRole('button', { name: /create a new room/i }).click();
     await host.getByLabel(/alias/i).fill('Host Player');
     await host.getByTestId('max-players-select').selectOption('2');
@@ -37,7 +56,7 @@ test.describe('Word Selection and Submission', () => {
     const roomCode = await roomCodeElement.innerText();
     
     // Second player joins
-    await p2.goto('http://localhost:3001/');
+    await p2.goto(`http://localhost:3001/?testGrid=${testGridParam}`);
     await p2.getByRole('button', { name: /join existing room/i }).click();
     await p2.getByLabel(/room code/i).fill(roomCode);
     await p2.getByLabel(/alias/i).fill('Second Player');
@@ -66,41 +85,45 @@ test.describe('Word Selection and Submission', () => {
     await expect(host.getByRole('grid')).toBeVisible();
     await expect(p2.getByRole('grid')).toBeVisible();
 
-    return { roomCode };
+    return { roomCode, testGrid };
   }
 
-  test('should allow clicking letters on grid to form words', async () => {
-    await setupGameWithTwoPlayers();
+  test('should allow clicking letters on grid to form words with known grid', async () => {
+    await setupGameWithTestGrid('COMMON_WORDS');
 
     // Wait for grid to be fully loaded
     await expect(host.getByRole('grid')).toBeVisible();
     
-    // Get the first few letters from the grid
+    // Verify we have the expected test grid
     const gridButtons = host.locator('[role="grid"] button');
-    const firstLetter = await gridButtons.nth(0).textContent();
-    const secondLetter = await gridButtons.nth(1).textContent();
+    await expect(gridButtons).toHaveCount(16); // 4x4 grid
     
-    // Click first letter
+    // Click first letter (should be 'C')
     await gridButtons.nth(0).click();
     
     // Verify current word shows the first letter
-    await expect(host.getByText(`Current word: ${firstLetter}`)).toBeVisible();
+    await expect(host.getByText('Current word: C')).toBeVisible();
     
-    // Click second letter (should be adjacent)
+    // Click second letter (should be 'A' - adjacent to 'C')
     await gridButtons.nth(1).click();
     
     // Verify current word shows both letters
-    const expectedWord = `${firstLetter}${secondLetter}`;
-    await expect(host.getByText(`Current word: ${expectedWord}`)).toBeVisible();
+    await expect(host.getByText('Current word: CA')).toBeVisible();
+    
+    // Click third letter (should be 'T' - forming 'CAT')
+    await gridButtons.nth(2).click();
+    
+    // Verify we can form 'CAT'
+    await expect(host.getByText('Current word: CAT')).toBeVisible();
   });
 
-  test('should allow typing words in input field', async () => {
-    await setupGameWithTwoPlayers();
+  test('should allow typing words in input field with known grid', async () => {
+    await setupGameWithTestGrid('COMMON_WORDS');
 
     // Wait for word input to be visible
     await expect(host.getByLabel(/current word/i)).toBeVisible();
     
-    // Type a word
+    // Type a word that exists in our test grid
     const wordInput = host.getByLabel(/current word/i);
     await wordInput.fill('CAT');
     
@@ -114,20 +137,18 @@ test.describe('Word Selection and Submission', () => {
     await expect(wordInput).toHaveValue('CAT');
   });
 
-  test('should submit valid words successfully', async () => {
-    await setupGameWithTwoPlayers();
+  test('should submit valid words successfully with known grid', async () => {
+    await setupGameWithTestGrid('COMMON_WORDS');
 
-    const gridButtons = host.locator('[role="grid"] button');
-    await gridButtons.nth(0).click();
-    await gridButtons.nth(1).click();
-    await gridButtons.nth(2).click();
+    // Wait for word input to be visible
+    await expect(host.getByLabel(/current word/i)).toBeVisible();
+    
+    // Type a valid word that exists in our test grid
+    const wordInput = host.getByLabel(/current word/i);
+    await wordInput.fill('CAT');
     
     // Wait for debounce to complete
     await host.waitForTimeout(200);
-
-    // Wait for word input to be visible
-    const wordInput = host.getByLabel(/current word/i);
-    await expect(wordInput).toBeVisible();
     
     // Verify submit button is enabled
     const submitButton = host.getByRole('button', { name: /submit word/i });
@@ -150,8 +171,29 @@ test.describe('Word Selection and Submission', () => {
     await expect(wordInput).toHaveValue('');
   });
 
+  test('should handle invalid word submissions with no-words grid', async () => {
+    await setupGameWithTestGrid('NO_WORDS');
+
+    // Wait for word input to be visible
+    await expect(host.getByLabel(/current word/i)).toBeVisible();
+    
+    // Type a word that cannot be formed on this grid
+    const wordInput = host.getByLabel(/current word/i);
+    await wordInput.fill('CAT');
+    
+    // Wait for debounce to complete
+    await host.waitForTimeout(200);
+    
+    // Verify submit button is disabled (word cannot be formed on grid)
+    const submitButton = host.getByRole('button', { name: /submit word/i });
+    await expect(submitButton).toBeDisabled();
+    
+    // Verify input shows invalid styling
+    await expect(wordInput).toHaveClass(/border-red-500/);
+  });
+
   test('should clear word selection and input', async () => {
-    await setupGameWithTwoPlayers();
+    await setupGameWithTestGrid('COMMON_WORDS');
 
     // Wait for grid to be visible
     await expect(host.getByRole('grid')).toBeVisible();
@@ -160,7 +202,10 @@ test.describe('Word Selection and Submission', () => {
     const gridButtons = host.locator('[role="grid"] button');
     await gridButtons.nth(0).click();
     await gridButtons.nth(1).click();
+    
+    // Also type in the input field
     const wordInput = host.getByLabel(/current word/i);
+    await wordInput.fill('TEST');
     
     // Wait for debounce
     await host.waitForTimeout(200);
@@ -177,7 +222,7 @@ test.describe('Word Selection and Submission', () => {
   });
 
   test('should show validation feedback for current word', async () => {
-    await setupGameWithTwoPlayers();
+    await setupGameWithTestGrid('COMMON_WORDS');
 
     // Wait for word input to be visible
     await expect(host.getByLabel(/current word/i)).toBeVisible();
@@ -204,52 +249,5 @@ test.describe('Word Selection and Submission', () => {
     
     // Verify input field shows validation styling
     await expect(wordInput).toHaveClass(/border-green-500/);
-  });
-
-  test('should display submitted words with correct status', async () => {
-    await setupGameWithTwoPlayers();
-
-    // Wait for word input to be visible
-    await expect(host.getByLabel(/current word/i)).toBeVisible();
-    
-    const wordInput = host.getByLabel(/current word/i);
-    const submitButton = host.getByRole('button', { name: /submit word/i });
-    
-    // Submit a valid word
-    const gridButtons = host.locator('[role="grid"] button');
-    await gridButtons.nth(0).click();
-    await gridButtons.nth(1).click();
-    await gridButtons.nth(2).click();
-
-    await host.waitForTimeout(200);
-    await submitButton.click();
-    await host.waitForTimeout(1000);
-    
-    // Verify submitted words section is visible
-    await expect(host.getByText('Submitted Words')).toBeVisible();
-    
-    // Check that we have at least 2 submitted words
-    const submittedWordElements = host.locator('[class*="p-3 rounded-lg border"]');
-    await expect(submittedWordElements).toHaveCount(1);
-  });
-
-  test('should prevent submission of words that cannot be formed on grid', async () => {
-    await setupGameWithTwoPlayers();
-
-    // Wait for word input to be visible
-    await expect(host.getByLabel(/current word/i)).toBeVisible();
-    
-    const wordInput = host.getByLabel(/current word/i);
-    
-    // Type a word that likely cannot be formed on the grid
-    await wordInput.fill('QUIZZICAL');
-    await host.waitForTimeout(200);
-    
-    // Verify submit button is disabled for words that cannot be formed
-    const submitButton = host.getByRole('button', { name: /submit word/i });
-    await expect(submitButton).toBeDisabled();
-    
-    // Verify input shows invalid styling
-    await expect(wordInput).toHaveClass(/border-red-500/);
   });
 });

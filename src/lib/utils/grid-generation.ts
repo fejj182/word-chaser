@@ -64,9 +64,35 @@ export function generateLetterGrid(
 ): string[][] {
   const { seedWords = []} = options;
   
+  const testGrid = getTestGridFromUrl();
+  if (testGrid) {
+    return testGrid;
+  }
+  
   // For now, we only support Boggle strategy
   // seedWords are reserved for future enhancements
   return generateBoggleGrid(size);
+}
+
+/**
+ * Get test grid from environment variable or URL (for e2e tests)
+ */
+function getTestGridFromUrl(): string[][] | null {
+  if (typeof window === 'undefined') return null;
+  
+  const testGridParam = new URLSearchParams(window.location.search).get('testGrid');
+  if (!testGridParam || window.location.hostname !== 'localhost') return null;
+  
+  try {
+    const grid = JSON.parse(testGridParam);
+    if (Array.isArray(grid) && grid.every(row => Array.isArray(row))) {
+      return grid;
+    }
+  } catch (error) {
+    console.warn('Invalid testGrid parameter:', error);
+  }
+  
+  return null;
 }
 
 /**
@@ -143,4 +169,3 @@ export function getAdjacentPositions(row: number, col: number): Array<{row: numb
   }
   return positions;
 }
-
