@@ -443,7 +443,7 @@ describe('useWordPath', () => {
 
       const { result } = renderHook(() => useWordPath());
 
-      const paths = result.current.findAllPathsForTypedWord('ABC');
+      const paths = result.current.selectTilesForWord('ABC');
       
       expect(mockFindWordPaths).toHaveBeenCalledWith(mockGrid, 'ABC', {
         allowDiagonals: true,
@@ -462,7 +462,7 @@ describe('useWordPath', () => {
 
       const { result } = renderHook(() => useWordPath());
 
-      const paths = result.current.findAllPathsForTypedWord('XYZ');
+      const paths = result.current.selectTilesForWord('XYZ');
       
       expect(paths).toEqual([]);
       expect(mockActions.setAvailablePaths).toHaveBeenCalledWith([]);
@@ -479,7 +479,7 @@ describe('useWordPath', () => {
 
       const { result } = renderHook(() => useWordPath());
 
-      const paths = result.current.findAllPathsForTypedWord('XYZ');
+      const paths = result.current.selectTilesForWord('XYZ');
       
       expect(paths).toEqual([]);
       expect(mockActions.setAvailablePaths).toHaveBeenCalledWith([]);

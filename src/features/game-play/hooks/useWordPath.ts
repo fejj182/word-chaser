@@ -31,6 +31,7 @@ export interface UseWordPathReturn {
   
   // Path manipulation
   selectTile: (position: GridPosition) => void;
+  selectTilesForWord: (word: string) => GridPosition[][];
   clearSelection: () => void;
   setWordFromPath: (path: GridPosition[]) => void;
   
@@ -43,7 +44,6 @@ export interface UseWordPathReturn {
   // Word input integration
   setCurrentWord: (word: string) => void;
   findPathForTypedWord: (word: string) => GridPosition[] | null;
-  findAllPathsForTypedWord: (word: string) => GridPosition[][];
 }
 
 /**
@@ -187,7 +187,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     return path;
   }, [state.grid, pathfindingOptions, actions, state.selectedPath.length]);
 
-  const findAllPathsForTypedWord = useCallback((word: string) => {
+  const selectTilesForWord = useCallback((word: string) => {
     if (!word || state.grid.length === 0) return [];
     
     const paths = findWordPaths(state.grid, word, pathfindingOptions);
@@ -229,6 +229,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     
     // Path manipulation
     selectTile,
+    selectTilesForWord,
     clearSelection,
     setWordFromPath,
     
@@ -241,7 +242,6 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     // Word input integration
     setCurrentWord,
     findPathForTypedWord,
-    findAllPathsForTypedWord
   };
 }
 

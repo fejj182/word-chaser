@@ -16,7 +16,7 @@ import { GridSize } from '@/features/game-play/contexts/GamePlayContext';
  * - Complete WordGridDemo integration
  */
 export default function DemoPage() {
-  const [gridSize, setGridSize] = useState<GridSize>('small');
+  const [gridSize, setGridSize] = useState<GridSize>('medium');
 
   return (
     <div className="min-h-screen bg-gray-50">

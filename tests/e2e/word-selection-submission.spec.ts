@@ -117,6 +117,23 @@ test.describe('Word Selection and Submission', () => {
     await expect(host.getByText('Current word: CAT')).toBeVisible();
   });
 
+  test('should allow clicking letter on grid to select tiles for word', async () => {
+    await setupGameWithTestGrid('COMMON_WORDS');
+    const gridButtons = host.locator('[role="grid"] button');
+    await gridButtons.nth(1).click();
+    await expect(host.getByText('Current word: A')).toBeVisible();
+    await expect(gridButtons.nth(1)).toHaveClass(/bg-blue-500/);
+    await expect(gridButtons.nth(9)).toHaveClass(/bg-blue-500/);
+    await expect(gridButtons.nth(13)).toHaveClass(/bg-blue-500/);
+    await gridButtons.nth(4).click();
+    await expect(host.getByText('Current word: AD')).toBeVisible();
+    await expect(gridButtons.nth(1)).toHaveClass(/bg-blue-500/);
+    await expect(gridButtons.nth(4)).toHaveClass(/bg-blue-500/);
+    await expect(gridButtons.nth(9)).toHaveClass(/bg-blue-500/);
+    await expect(gridButtons.nth(13)).not.toHaveClass(/bg-blue-500/);
+  });
+
+
   test('should allow typing words in input field with known grid', async () => {
     await setupGameWithTestGrid('COMMON_WORDS');
 

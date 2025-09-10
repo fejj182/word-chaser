@@ -18,10 +18,10 @@ const mockUseGamePlay = require('../../contexts/GamePlayContext').useGamePlay;
 const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
 
 describe('LetterGrid', () => {
-  const mockSelectTile = jest.fn();
+  const mockSelectTilesForWord = jest.fn();
 
   const defaultMockReturn = {
-    selectTile: mockSelectTile,
+    selectTilesForWord: mockSelectTilesForWord,
     isPositionInAnyPath: jest.fn(),
     availablePaths: [],
     currentWord: '',
@@ -47,6 +47,7 @@ describe('LetterGrid', () => {
     
     // Default mock implementations
     defaultMockReturn.isPositionInAnyPath.mockReturnValue(false);
+    defaultMockReturn.currentWord = '';
     mockUseWordPath.mockReturnValue(defaultMockReturn);
   });
 
@@ -58,7 +59,7 @@ describe('LetterGrid', () => {
         setGridSize: jest.fn(),
         generateGrid: jest.fn(),
         loadGridFromRoom: jest.fn(),
-        selectTile: jest.fn(),
+        selectTilesForWord: jest.fn(),
         setCurrentWord: jest.fn(),
         clearSelection: jest.fn(),
         setValidating: jest.fn(),
@@ -112,22 +113,23 @@ describe('LetterGrid', () => {
   });
 
   describe('Click Interactions', () => {
-    it('should call selectTile when button is clicked', () => {
+    it('should call selectTilesForWord when button is clicked', () => {
       renderWithProvider();
 
       const buttonA = screen.getByText('A');
       fireEvent.click(buttonA);
 
-      expect(mockSelectTile).toHaveBeenCalledWith({ row: 0, col: 0 });
+      expect(mockSelectTilesForWord).toHaveBeenCalledWith('A');
     });
 
-    it('should call selectTile for different positions', () => {
+    it('should call selectTilesForWord with current word and letter', () => {
+      defaultMockReturn.currentWord = 'CA';
       renderWithProvider();
 
       const buttonP = screen.getByText('P');
       fireEvent.click(buttonP);
 
-      expect(mockSelectTile).toHaveBeenCalledWith({ row: 3, col: 3 });
+      expect(mockSelectTilesForWord).toHaveBeenCalledWith('CAP');
     });
   });
 

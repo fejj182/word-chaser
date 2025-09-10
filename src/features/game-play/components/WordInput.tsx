@@ -11,7 +11,7 @@ export const WordInput: React.FC = () => {
   const { 
     currentWord, 
     setCurrentWord,
-    findAllPathsForTypedWord, 
+    selectTilesForWord, 
     clearSelection,
     isValidPath
   } = useWordPath();
@@ -46,14 +46,14 @@ export const WordInput: React.FC = () => {
     const timer = setTimeout(() => {
       setCurrentWord(value);
       if (value.length >= 1) {
-        findAllPathsForTypedWord(value);
+        selectTilesForWord(value);
       } else {
         clearSelection();
       }
     }, 150);
     
     setDebounceTimer(timer);
-  }, [debounceTimer, setCurrentWord, findAllPathsForTypedWord, clearSelection]);
+  }, [debounceTimer, setCurrentWord, selectTilesForWord, clearSelection]);
 
   // Cleanup timer on unmount
   useEffect(() => {

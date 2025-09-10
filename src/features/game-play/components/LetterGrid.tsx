@@ -7,17 +7,16 @@ import { useWordPath } from '../hooks/useWordPath';
 export const LetterGrid: React.FC = () => {
   const { state } = useGamePlay();
   const { 
-    selectTile, 
+    selectTilesForWord,
     isPositionInAnyPath,
-    availablePaths,
     currentWord 
   } = useWordPath();
 
-  const handleLetterClick = useCallback((row: number, col: number) => {
-    selectTile({ row, col });
-  }, [selectTile]);
+  const handleLetterClick = (letter: string) => {
+    selectTilesForWord(currentWord + letter);
+  };
 
-  const getLetterClass = useCallback((row: number, col: number) => {
+  const getLetterClass = (row: number, col: number) => {
     const baseClass = "aspect-square border-2 rounded-lg text-2xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] min-w-[44px]";
     
     const isInAnyPath = isPositionInAnyPath({ row, col });
@@ -27,9 +26,9 @@ export const LetterGrid: React.FC = () => {
     }
     
     return `${baseClass} bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200 hover:shadow-md`;
-  }, [isPositionInAnyPath]);
+  };
 
-  const getGridCols = useCallback(() => {
+  const getGridCols = () => {
     if (!state.grid || state.grid.length === 0) return 'grid-cols-4';
     // Use explicit grid column classes that Tailwind knows about
     switch (state.grid.length) {
@@ -37,14 +36,14 @@ export const LetterGrid: React.FC = () => {
       case 6: return 'grid-cols-6';
       default: return 'grid-cols-4';
     }
-  }, [state.grid]);
+  };
 
-  const getMaxWidth = useCallback(() => {
+  const getMaxWidth = () => {
     if (!state.grid || state.grid.length === 0) return 'max-w-xs';
     if (state.grid.length <= 4) return 'max-w-xs';
     if (state.grid.length <= 6) return 'max-w-sm';
     return 'max-w-sm';
-  }, [state.grid]);
+  };
 
   if (!state.grid || state.grid.length === 0) {
     return (
@@ -73,7 +72,7 @@ export const LetterGrid: React.FC = () => {
               key={`${rowIndex}-${colIndex}`}
               type="button"
               className={getLetterClass(rowIndex, colIndex)}
-              onClick={() => handleLetterClick(rowIndex, colIndex)}
+              onClick={() => handleLetterClick(letter)}
               aria-label={`Letter ${letter} at position ${rowIndex + 1}, ${colIndex + 1}`}
               aria-pressed={isPositionInAnyPath({ row: rowIndex, col: colIndex })}
               tabIndex={0}

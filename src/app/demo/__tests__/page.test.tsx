@@ -58,7 +58,7 @@ describe('DemoPage', () => {
   it('should show current grid size information', () => {
     render(<DemoPage />);
 
-    expect(screen.getByText('Current size: 4×4 grid')).toBeInTheDocument();
+    expect(screen.getByText('Current size: 6×6 grid')).toBeInTheDocument();
     expect(screen.getByText('Grid Size:')).toBeInTheDocument();
     expect(screen.getByText('Total Tiles:')).toBeInTheDocument();
   });
