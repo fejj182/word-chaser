@@ -30,7 +30,7 @@ export interface UseWordPathReturn {
   pathValidation: { isValid: boolean; word: string; error?: string };
   
   // Path manipulation
-  selectTile: (position: GridPosition) => void;
+  selectTileToSubmit: (position: GridPosition) => void;
   selectTilesForWord: (word: string) => GridPosition[][];
   clearSelection: () => void;
   setWordFromPath: (path: GridPosition[]) => void;
@@ -112,14 +112,14 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
   }, [state.grid, pathfindingOptions]);
 
   // Select a tile (add to path)
-  const selectTile = useCallback((position: GridPosition) => {
+  const selectTileToSubmit = useCallback((position: GridPosition) => {
     if (!state.grid || position.row < 0 || position.row >= state.grid.length ||
         position.col < 0 || position.col >= state.grid[0]?.length) {
       return;
     }
 
     if (state.selectedPath.length === 0) {
-      actions.selectTile(position);
+      actions.selectTileToSubmit(position);
       return;
     }
 
@@ -137,7 +137,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
       actions.clearSelection();
     }
 
-    actions.selectTile(position);
+    actions.selectTileToSubmit(position);
   }, [state.selectedPath, actions, isPositionInCurrentPath]);
 
   const clearSelection = useCallback(() => {
@@ -173,7 +173,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     const path = findBestWordPath(state.grid, word, pathfindingOptions);
     if (path) {
       actions.clearSelection();
-      path.forEach(pos => actions.selectTile(pos));
+      path.forEach(pos => actions.selectTileToSubmit(pos));
     } else {
       // Don't clear selection when word cannot be formed - keep the typed word
       // but clear any existing selected path so validation works correctly
@@ -188,27 +188,26 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
   }, [state.grid, pathfindingOptions, actions, state.selectedPath.length]);
 
   const selectTilesForWord = useCallback((word: string) => {
-    if (!word || state.grid.length === 0) return [];
+    if (!word || state.grid.length === 0) {
+      actions.setAvailablePathsToDisplay([]);
+      actions.clearSelection();
+      actions.setCurrentWord('');
+      return [];
+    }
     
     const paths = findWordPaths(state.grid, word, pathfindingOptions);
     
     // If there are paths available, set them and select the first one
     if (paths.length > 0) {
-      actions.setAvailablePaths(paths);
-      // Clear current selected path but preserve available paths
+      actions.setAvailablePathsToDisplay(paths);
       actions.clearSelectedPath();
-      // Select the first path
-      paths[0].forEach(pos => actions.selectTile(pos));
+      // Select the first path to submit
+      paths[0].forEach(pos => actions.selectTileToSubmit(pos));
     } else {
-      // Clear available paths if no paths found
-      actions.setAvailablePaths([]);
-      // Don't clear selection when word cannot be formed - keep the typed word
-      // but clear any existing selected path so validation works correctly
-      if (state.selectedPath.length > 0) {
+        actions.setAvailablePathsToDisplay([]);
         actions.clearSelection();
-        // Restore the current word after clearing selection
         actions.setCurrentWord(word);
-      }
+
     }
     
     return paths;
@@ -228,7 +227,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     pathValidation,
     
     // Path manipulation
-    selectTile,
+    selectTileToSubmit,
     selectTilesForWord,
     clearSelection,
     setWordFromPath,

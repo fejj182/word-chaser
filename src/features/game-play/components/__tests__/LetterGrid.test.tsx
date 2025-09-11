@@ -23,8 +23,8 @@ describe('LetterGrid', () => {
   const defaultMockReturn = {
     selectTilesForWord: mockSelectTilesForWord,
     isPositionInAnyPath: jest.fn(),
-    availablePaths: [],
     currentWord: '',
+    isValidPath: true,
   };
 
   const mockGrid = [
@@ -48,6 +48,7 @@ describe('LetterGrid', () => {
     // Default mock implementations
     defaultMockReturn.isPositionInAnyPath.mockReturnValue(false);
     defaultMockReturn.currentWord = '';
+    defaultMockReturn.isValidPath = true;
     mockUseWordPath.mockReturnValue(defaultMockReturn);
   });
 
@@ -86,9 +87,9 @@ describe('LetterGrid', () => {
     it('should render grid with correct number of buttons', () => {
       renderWithProvider();
 
-      // Should have 16 buttons for a 4x4 grid
+      // Should have 16 buttons for a 4x4 grid + 1 clear button
       const buttons = screen.getAllByRole('button');
-      expect(buttons).toHaveLength(16);
+      expect(buttons).toHaveLength(17);
     });
 
     it('should render correct letters in grid', () => {
@@ -145,6 +146,19 @@ describe('LetterGrid', () => {
       expect(buttonA).toHaveClass('border-blue-600');
     });
 
+    it('should apply correct classes for invalid path tiles', () => {
+      defaultMockReturn.currentWord = 'INVALID';
+      defaultMockReturn.isValidPath = false;
+      defaultMockReturn.isPositionInAnyPath.mockImplementation(({ row, col }) => row === 0 && col === 0);
+      
+      renderWithProvider();
+
+      const buttonA = screen.getByText('A');
+      expect(buttonA).toHaveClass('bg-red-100');
+      expect(buttonA).toHaveClass('border-red-300');
+      expect(buttonA).toHaveClass('text-red-700');
+    });
+
     it('should apply correct classes for unselected tiles', () => {
       defaultMockReturn.isPositionInAnyPath.mockReturnValue(false);
       
@@ -165,7 +179,8 @@ describe('LetterGrid', () => {
 
       renderWithProvider();
 
-      expect(screen.getByText('Current word: CAT')).toBeInTheDocument();
+      expect(screen.getByText('Current word:')).toBeInTheDocument();
+      expect(screen.getByText('CAT')).toBeInTheDocument();
     });
   });
 

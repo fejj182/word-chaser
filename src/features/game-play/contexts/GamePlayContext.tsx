@@ -25,9 +25,9 @@ export interface GamePlayActions {
   setGridSize: (size: GridSize) => void;
   generateGrid: () => void;
   loadGridFromRoom: (grid: string[][], gridSize: GridSize) => void;
-  selectTile: (position: GridPosition) => void;
+  selectTileToSubmit: (position: GridPosition) => void;
   setCurrentWord: (word: string) => void;
-  setAvailablePaths: (paths: GridPosition[][]) => void;
+  setAvailablePathsToDisplay: (paths: GridPosition[][]) => void;
   clearSelection: () => void;
   clearSelectedPath: () => void;
   setValidating: (isValidating: boolean) => void;
@@ -189,7 +189,7 @@ export const GamePlayProvider: React.FC<GamePlayProviderProps> = ({
       dispatch({ type: 'LOAD_GRID_FROM_ROOM', payload: { grid, gridSize } });
     },
 
-    selectTile: (position: GridPosition) => {
+    selectTileToSubmit: (position: GridPosition) => {
       dispatch({ type: 'SELECT_TILE', payload: position });
     },
 
@@ -197,7 +197,7 @@ export const GamePlayProvider: React.FC<GamePlayProviderProps> = ({
       dispatch({ type: 'SET_CURRENT_WORD', payload: word });
     },
 
-    setAvailablePaths: (paths: GridPosition[][]) => {
+    setAvailablePathsToDisplay: (paths: GridPosition[][]) => {
       dispatch({ type: 'SET_AVAILABLE_PATHS', payload: paths });
     },
 

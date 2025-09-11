@@ -124,7 +124,7 @@ export const WordInput: React.FC = () => {
     <div className={`space-y-4`}>
       <h2 className="text-xl font-semibold text-gray-900">Submit Words</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-3" role="form">
+      <form name="submit-words" onSubmit={handleSubmit} className="space-y-3" role="form">
         <div>
           <label htmlFor="word-input" className="form-label">
             Current Word

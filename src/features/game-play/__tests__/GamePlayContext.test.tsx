@@ -36,7 +36,7 @@ const TestComponent: React.FC = () => {
       
       <button 
         data-testid="select-tile" 
-        onClick={() => actions.selectTile({ row: 0, col: 0 })}
+        onClick={() => actions.selectTileToSubmit({ row: 0, col: 0 })}
       >
         Select Tile
       </button>

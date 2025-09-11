@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { useGamePlay } from '../contexts/GamePlayContext';
 import { useWordPath } from '../hooks/useWordPath';
 
@@ -9,7 +9,8 @@ export const LetterGrid: React.FC = () => {
   const { 
     selectTilesForWord,
     isPositionInAnyPath,
-    currentWord 
+    currentWord,
+    isValidPath
   } = useWordPath();
 
   const handleLetterClick = (letter: string) => {
@@ -20,6 +21,10 @@ export const LetterGrid: React.FC = () => {
     const baseClass = "aspect-square border-2 rounded-lg text-2xl font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] min-w-[44px]";
     
     const isInAnyPath = isPositionInAnyPath({ row, col });
+    
+    if (currentWord.length > 0 && !isValidPath) {
+      return `${baseClass} bg-red-100 border-red-300 text-red-700 hover:bg-red-200`;
+    }
     
     if (isInAnyPath) {
       return `${baseClass} bg-blue-500 text-white border-blue-600 shadow-lg transform scale-105`;
@@ -57,6 +62,10 @@ export const LetterGrid: React.FC = () => {
     );
   }
 
+  const handleClear = () => {
+    selectTilesForWord('')
+  };
+
   return (
     <div className={`space-y-4`}>
       <h2 className="text-xl font-semibold text-gray-900 text-center">Letter Grid</h2>
@@ -83,16 +92,26 @@ export const LetterGrid: React.FC = () => {
         )}
       </div>
 
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-3">
+        {/* Current Word Display */}
+        {currentWord && (
+          <div className="text-lg font-mono font-semibold text-gray-700">
+            Current word: <span className="text-blue-600">{currentWord}</span>
+          </div>
+        )}
+        
+        {/* Instructions */}
         <p className="text-sm text-gray-600">
           Click letters to form words. Only adjacent letters can be selected.
         </p>
-        
-        {currentWord && (
-          <div className="text-lg font-mono font-semibold text-blue-700">
-            Current word: {currentWord}
-          </div>
-        )}
+
+        <button
+            type="button"
+            onClick={handleClear}
+            className="btn btn--secondary btn--small"
+          >
+            Clear
+        </button>
       </div>
     </div>
   );

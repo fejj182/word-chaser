@@ -42,7 +42,7 @@ src/features/gameplay/
   - `gridSize: 'small'|'medium'|'large'`
   - `selectedPath: Array<{row:number; col:number}>`
   - `currentWord: string`
-  - Actions: `setGridSize`, `generateGrid`, `selectTile`, `setCurrentWord`, `validateWord`
+  - Actions: `setGridSize`, `generateGrid`, `selectTileToSubmit`, `setCurrentWord`, `validateWord`
 
 ### Performance Strategy
 - **Debounced Input**: 100-200ms delay for typing → grid highlighting

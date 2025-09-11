@@ -38,10 +38,10 @@ describe('useWordPath', () => {
   ];
 
   const mockActions = {
-    selectTile: jest.fn(),
+    selectTileToSubmit: jest.fn(),
     clearSelection: jest.fn(),
     setCurrentWord: jest.fn(),
-    setAvailablePaths: jest.fn(),
+    setAvailablePathsToDisplay: jest.fn(),
     clearSelectedPath: jest.fn(),
   };
 
@@ -211,10 +211,10 @@ describe('useWordPath', () => {
       const { result } = renderHook(() => useWordPath());
 
       act(() => {
-        result.current.selectTile({ row: 0, col: 0 });
+        result.current.selectTileToSubmit({ row: 0, col: 0 });
       });
 
-      expect(mockActions.selectTile).toHaveBeenCalledWith({ row: 0, col: 0 });
+      expect(mockActions.selectTileToSubmit).toHaveBeenCalledWith({ row: 0, col: 0 });
     });
 
     it('should select adjacent tile', () => {
@@ -227,10 +227,10 @@ describe('useWordPath', () => {
       const { result } = renderHook(() => useWordPath());
 
       act(() => {
-        result.current.selectTile({ row: 0, col: 1 });
+        result.current.selectTileToSubmit({ row: 0, col: 1 });
       });
 
-      expect(mockActions.selectTile).toHaveBeenCalledWith({ row: 0, col: 1 });
+      expect(mockActions.selectTileToSubmit).toHaveBeenCalledWith({ row: 0, col: 1 });
     });
 
     it('should clear selection and start new path when non-adjacent tile is clicked', () => {
@@ -243,22 +243,22 @@ describe('useWordPath', () => {
       const { result } = renderHook(() => useWordPath());
 
       act(() => {
-        result.current.selectTile({ row: 2, col: 2 }); // Non-adjacent
+        result.current.selectTileToSubmit({ row: 2, col: 2 }); // Non-adjacent
       });
 
       // The hook should clear selection and start a new path from the non-adjacent tile
       expect(mockActions.clearSelection).toHaveBeenCalled();
-      expect(mockActions.selectTile).toHaveBeenCalledWith({ row: 2, col: 2 });
+      expect(mockActions.selectTileToSubmit).toHaveBeenCalledWith({ row: 2, col: 2 });
     });
 
     it('should not select invalid position', () => {
       const { result } = renderHook(() => useWordPath());
 
       act(() => {
-        result.current.selectTile({ row: -1, col: 0 }); // Invalid position
+        result.current.selectTileToSubmit({ row: -1, col: 0 }); // Invalid position
       });
 
-      expect(mockActions.selectTile).not.toHaveBeenCalled();
+      expect(mockActions.selectTileToSubmit).not.toHaveBeenCalled();
     });
 
     it('should clear selection', () => {
@@ -385,7 +385,7 @@ describe('useWordPath', () => {
       });
       expect(path).toEqual(mockBestPath);
       expect(mockActions.clearSelection).toHaveBeenCalled();
-      expect(mockActions.selectTile).toHaveBeenCalledTimes(3);
+      expect(mockActions.selectTileToSubmit).toHaveBeenCalledTimes(3);
     });
 
     it('should return null for typed word that cannot be formed', () => {
@@ -452,9 +452,9 @@ describe('useWordPath', () => {
         allowReuse: false
       });
       expect(paths).toEqual(mockPaths);
-      expect(mockActions.setAvailablePaths).toHaveBeenCalledWith(mockPaths);
+      expect(mockActions.setAvailablePathsToDisplay).toHaveBeenCalledWith(mockPaths);
       expect(mockActions.clearSelectedPath).toHaveBeenCalled();
-      expect(mockActions.selectTile).toHaveBeenCalledTimes(3); // First path selected
+      expect(mockActions.selectTileToSubmit).toHaveBeenCalledTimes(3); // First path selected
     });
 
     it('should clear available paths when no paths found for typed word', () => {
@@ -465,7 +465,7 @@ describe('useWordPath', () => {
       const paths = result.current.selectTilesForWord('XYZ');
       
       expect(paths).toEqual([]);
-      expect(mockActions.setAvailablePaths).toHaveBeenCalledWith([]);
+      expect(mockActions.setAvailablePathsToDisplay).toHaveBeenCalledWith([]);
     });
 
     it('should clear available paths and restore word when no paths found but existing selection', () => {
@@ -482,7 +482,7 @@ describe('useWordPath', () => {
       const paths = result.current.selectTilesForWord('XYZ');
       
       expect(paths).toEqual([]);
-      expect(mockActions.setAvailablePaths).toHaveBeenCalledWith([]);
+      expect(mockActions.setAvailablePathsToDisplay).toHaveBeenCalledWith([]);
       expect(mockActions.clearSelection).toHaveBeenCalled();
       expect(mockActions.setCurrentWord).toHaveBeenCalledWith('XYZ');
     });

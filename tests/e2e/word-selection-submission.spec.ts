@@ -220,22 +220,25 @@ test.describe('Word Selection and Submission', () => {
     await gridButtons.nth(0).click();
     await gridButtons.nth(1).click();
     
+    // Click clear button closest to input field
+    const gridClearButton = host.getByRole('button', { name: 'Clear' }).first()
+    await gridClearButton.click();
+    
+    // Verify current word display is cleared
+    await expect(host.getByText(/Current word:/)).not.toBeVisible();
+
     // Also type in the input field
     const wordInput = host.getByLabel(/current word/i);
     await wordInput.fill('TEST');
     
     // Wait for debounce
     await host.waitForTimeout(200);
-    
-    // Click clear button
-    const clearButton = host.getByRole('button', { name: /clear/i });
-    await clearButton.click();
-    
-    // Verify input is cleared
+
+    // Click clear button closest to input field
+    const formClearButton = host.getByRole('form').getByRole('button', { name: 'Clear' })
+    await formClearButton.click();
+
     await expect(wordInput).toHaveValue('');
-    
-    // Verify current word display is cleared
-    await expect(host.getByText(/Current word:/)).not.toBeVisible();
   });
 
   test('should show validation feedback for current word', async () => {
