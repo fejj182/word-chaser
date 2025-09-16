@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RoomLobby from '../RoomLobby';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/user-management/hooks/useAuth';
-import { updatePlayerReady, startGame } from '@/lib/firebase/room-utils';
+import { GridSize } from '@/features/game-play/contexts/GamePlayContext';
 
 jest.mock('@/features/room-management/contexts/RoomContext');
 jest.mock('@/features/user-management/hooks/useAuth');
@@ -40,11 +40,11 @@ describe('RoomLobby', () => {
     createdBy: 'user123',
     createdAt: Date.now(),
     status: 'waiting' as const,
-    players: [
-      { id: 'user123', displayName: 'Test User', joinedAt: Date.now(), isHost: true, isReady: true },
-    ],
+    players: {
+      'user123': { displayName: 'Test User', joinedAt: Date.now(), isHost: true, isReady: true },
+    },
     maxPlayers: 4,
-    settings: { roundDuration: 60, maxRounds: 5 },
+    settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" as GridSize },
   };
 
   const mockLeaveRoom = jest.fn();
@@ -57,6 +57,7 @@ describe('RoomLobby', () => {
     isLoading: false,
     error: null,
     createRoom: jest.fn(),
+    loadRoom: jest.fn(),
     joinRoom: jest.fn(),
     leaveRoom: mockLeaveRoom,
     updatePlayerReady: mockUpdatePlayerReady,
@@ -216,26 +217,25 @@ describe('RoomLobby', () => {
       createdBy: 'user123',
       createdAt: Date.now(),
       status: 'waiting' as const,
-      players: [
-        {
-          id: 'user123',
+      players: {
+        'user123': {
           displayName: 'Test User',
           joinedAt: Date.now(),
           isHost: true,
           isReady: false,
         },
-        {
-          id: 'user456',
+        'user456': {
           displayName: 'Another User',
           joinedAt: Date.now(),
           isHost: false,
           isReady: false,
         },
-      ],
+      },
       maxPlayers: 4,
       settings: {
         roundDuration: 60,
         maxRounds: 5,
+        gridSize: "small" as GridSize,
       },
     };
 
@@ -291,10 +291,10 @@ describe('RoomLobby', () => {
     it('shows start game button for host when all conditions are met', () => {
       const roomWithAllReady = {
         ...multiPlayerRoom,
-        players: [
-          { ...multiPlayerRoom.players[0], isReady: true },
-          { ...multiPlayerRoom.players[1], isReady: true },
-        ],
+        players: {
+          'user123': { ...multiPlayerRoom.players['user123'], isReady: true },
+          'user456': { ...multiPlayerRoom.players['user456'], isReady: true },
+        },
       };
 
       mockUseRoom.mockReturnValue(createMockRoomContext({
@@ -319,10 +319,10 @@ describe('RoomLobby', () => {
     it('does not show start game button for non-host users', () => {
       const roomWithNonHost = {
         ...multiPlayerRoom,
-        players: [
-          { ...multiPlayerRoom.players[0], isHost: false },
-          { ...multiPlayerRoom.players[1], isHost: true },
-        ],
+        players: {
+          'user123': { ...multiPlayerRoom.players['user123'], isHost: false },
+          'user456': { ...multiPlayerRoom.players['user456'], isHost: true },
+        },
       };
 
       mockUseRoom.mockReturnValue(createMockRoomContext({
@@ -339,10 +339,10 @@ describe('RoomLobby', () => {
 
       const roomWithAllReady = {
         ...multiPlayerRoom,
-        players: [
-          { ...multiPlayerRoom.players[0], isReady: true },
-          { ...multiPlayerRoom.players[1], isReady: true },
-        ],
+        players: {
+          'user123': { ...multiPlayerRoom.players['user123'], isReady: true },
+          'user456': { ...multiPlayerRoom.players['user456'], isReady: true },
+        },
       };
 
       mockUseRoom.mockReturnValue(createMockRoomContext({

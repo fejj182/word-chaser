@@ -7,6 +7,7 @@ import { useAuth } from '@/features/user-management/hooks/useAuth';
 import { ensureAnonymousWithAlias } from '@/lib/firebase/firebase-utils';
 import { Room } from '@/features/room-management/types/room';
 import { User } from 'firebase/auth';
+import { GridSize } from '@/features/game-play/contexts/GamePlayContext';
 
 // Mock Firebase utilities
 jest.mock('@/lib/firebase/room-utils', () => ({
@@ -45,7 +46,7 @@ const TestComponent = () => {
   
   const handleCreateRoom = async () => {
     try {
-      await createRoom({ maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } }, 'Test User');
+      await createRoom({ maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" } }, 'Test User');
     } catch {
       // Error is handled by the context
     }
@@ -145,11 +146,11 @@ describe('RoomContext', () => {
     createdBy: 'user123',
     createdAt: Date.now(),
     status: 'waiting' as const,
-    players: [
-      { id: 'user123', displayName: 'Test User', joinedAt: Date.now(), isHost: true, isReady: true }
-    ],
+    players: {
+      'user123': { displayName: 'Test User', joinedAt: Date.now(), isHost: true, isReady: true }
+    },
     maxPlayers: 4,
-    settings: { roundDuration: 60, maxRounds: 5 }
+    settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" as GridSize },
   };
 
   beforeEach(() => {
@@ -180,7 +181,7 @@ describe('RoomContext', () => {
       
       await waitFor(() => {
         expect(mockCreateRoom).toHaveBeenCalledWith(
-          { maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5 } },
+          { maxPlayers: 4, settings: { roundDuration: 60, maxRounds: 5, gridSize: "small"} },
           'user123',
           'Test User'
         );

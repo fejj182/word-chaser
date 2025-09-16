@@ -54,7 +54,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
       
       <form onSubmit={handleSubmit} className="spacing--form">
       {error && (
-        <div className="form-error">
+        <div className="form-error" role="alert" aria-live="assertive">
           {error}
         </div>
       )}

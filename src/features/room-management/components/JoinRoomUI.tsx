@@ -28,7 +28,7 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
       </h2>
       
       {error && (
-        <div className="form-error">
+        <div className="form-error" role="alert" aria-live="assertive">
           {error}
         </div>
       )}

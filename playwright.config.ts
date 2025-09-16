@@ -12,7 +12,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
-  globalTeardown: './tests/e2e/global-teardown.ts',
+  globalTeardown: './tests/e2e/fixtures/global-teardown.ts',
   projects: [
     {
       name: 'chromium',

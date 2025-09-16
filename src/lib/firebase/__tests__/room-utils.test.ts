@@ -1,4 +1,4 @@
-import { createRoom, joinRoom, leaveRoom, subscribeToRoom, updatePlayerReady, startGame } from '../room-utils';
+import { createRoom, joinRoom, leaveRoom, subscribeToRoom, updatePlayerReady, startGame, resolveRoomId } from '../room-utils';
 import { ref, push, set, get, onValue, update, DatabaseReference, DataSnapshot } from 'firebase/database';
 import { db } from '../firebase';
 import { CreateRoomParams } from '@/features/room-management/types/room';
@@ -98,13 +98,14 @@ describe('room-utils', () => {
         createdBy: 'user-id',
         createdAt: expect.any(Number),
         status: 'waiting',
-        players: [{
-          id: 'user-id',
-          displayName: 'Test User',
-          joinedAt: expect.any(Number),
-          isHost: true,
-          isReady: true,
-        }],
+        players: {
+          'user-id': {
+            displayName: 'Test User',
+            joinedAt: expect.any(Number),
+            isHost: true,
+            isReady: true,
+          },
+        },
         maxPlayers: 4,
         settings: params.settings,
       });
@@ -117,7 +118,7 @@ describe('room-utils', () => {
       const mockRoomRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
-        players: [{ id: 'existing-user', displayName: 'Existing User' }],
+        players: { 'existing-user': { displayName: 'Existing User' } },
         maxPlayers: 4,
         status: 'waiting',
       });
@@ -131,8 +132,7 @@ describe('room-utils', () => {
       expect(mockRef).toHaveBeenCalledWith(db, 'rooms/test-room-id');
       expect(mockGet).toHaveBeenCalledWith(mockRoomRef);
       expect(mockUpdate).toHaveBeenCalledWith(ref(db), {
-        'rooms/test-room-id/players/1': {
-          id: 'new-user-id',
+        'rooms/test-room-id/players/new-user-id': {
           displayName: 'New User',
           joinedAt: expect.any(Number),
           isHost: false,
@@ -155,10 +155,10 @@ describe('room-utils', () => {
       const mockRoomRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
-        players: [
-          { id: 'user1', displayName: 'User 1' },
-          { id: 'user2', displayName: 'User 2' },
-        ],
+        players: {
+          'user1': { displayName: 'User 1' },
+          'user2': { displayName: 'User 2' },
+        },
         maxPlayers: 2,
         status: 'waiting',
       });
@@ -173,7 +173,7 @@ describe('room-utils', () => {
       const mockRoomRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
-        players: [{ id: 'user1', displayName: 'User 1' }],
+        players: { 'user1': { displayName: 'User 1' } },
         maxPlayers: 4,
         status: 'playing',
       });
@@ -187,26 +187,22 @@ describe('room-utils', () => {
 
   describe('leaveRoom', () => {
     it('removes player from room', async () => {
-      const mockRoomRef = createMockRef();
+      const mockPlayerRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
-        players: [
-          { id: 'user1', displayName: 'User 1', isHost: true },
-          { id: 'user2', displayName: 'User 2', isHost: false },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isHost: true },
+          'user2': { displayName: 'User 2', isHost: false },
+        },
       });
 
-      mockRef.mockReturnValue(mockRoomRef);
+      mockRef.mockReturnValue(mockPlayerRef);
       mockGet.mockResolvedValue(mockSnapshot);
-      mockUpdate.mockResolvedValue(undefined);
+      mockSet.mockResolvedValue(undefined);
 
       await leaveRoom('test-room-id', 'user1');
 
-      expect(mockUpdate).toHaveBeenCalledWith(ref(db), {
-        'rooms/test-room-id/players': [
-          { id: 'user2', displayName: 'User 2', isHost: true },
-        ],
-      });
+      expect(mockSet).toHaveBeenCalledWith(mockPlayerRef, null);
     });
 
     it('deletes room when last player leaves', async () => {
@@ -215,7 +211,7 @@ describe('room-utils', () => {
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         slug: 'test-slug',
-        players: [{ id: 'user1', displayName: 'User 1' }],
+        players: { 'user1': { displayName: 'User 1' } },
       });
 
       mockRef.mockImplementation((database, path) => {
@@ -237,29 +233,118 @@ describe('room-utils', () => {
     });
 
     it('does not delete slug when players remain in room', async () => {
-      const mockRoomRef = createMockRef();
+      const mockPlayerRef = createMockRef();
+      const mockSlugRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         slug: 'test-slug',
-        players: [
-          { id: 'user1', displayName: 'User 1', isHost: true },
-          { id: 'user2', displayName: 'User 2', isHost: false },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isHost: true },
+          'user2': { displayName: 'User 2', isHost: false },
+        },
       });
 
-      mockRef.mockReturnValue(mockRoomRef);
+      mockRef.mockImplementation((_, path) => {
+        if (path === 'rooms/test-room-id/players/user1') {
+          return mockPlayerRef;
+        }
+        return mockSlugRef;
+      });
       mockGet.mockResolvedValue(mockSnapshot);
       mockUpdate.mockResolvedValue(undefined);
 
       await leaveRoom('test-room-id', 'user1');
 
-      expect(mockUpdate).toHaveBeenCalledWith(ref(db), {
-        'rooms/test-room-id/players': [
-          { id: 'user2', displayName: 'User 2', isHost: true },
-        ],
+      expect(mockSet).toHaveBeenCalledWith(mockPlayerRef, null);
+      expect(mockSet).not.toHaveBeenCalledWith(mockSlugRef, null);
+    });
+  });
+
+  describe('resolveRoomId', () => {
+    it('resolves room ID when room exists by ID', async () => {
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        name: 'Test Room'
       });
-      // Should not call set() for slug deletion
-      expect(mockSet).not.toHaveBeenCalled();
+
+      mockRef.mockReturnValue(mockRoomRef);
+      mockGet.mockResolvedValue(mockSnapshot);
+
+      const result = await resolveRoomId('test-room-id');
+
+      expect(mockRef).toHaveBeenCalledWith(db, 'rooms/test-room-id');
+      expect(mockGet).toHaveBeenCalledWith(mockRoomRef);
+      expect(result).toBe('test-room-id');
+    });
+
+    it('resolves room ID when room exists by slug', async () => {
+      const mockRoomRef = createMockRef();
+      const mockSlugRef = createMockRef();
+      const mockRoomSnapshot = createMockSnapshot(false);
+      const mockSlugSnapshot = createMockSnapshot(true, 'actual-room-id');
+
+      mockRef.mockImplementation((database, path) => {
+        if (path === 'rooms/test-slug') {
+          return mockRoomRef;
+        }
+        if (path === 'slugs/test-slug') {
+          return mockSlugRef;
+        }
+        return mockRoomRef;
+      });
+      mockGet
+        .mockResolvedValueOnce(mockRoomSnapshot) // First call for room by ID
+        .mockResolvedValueOnce(mockSlugSnapshot); // Second call for slug
+
+      const result = await resolveRoomId('test-slug');
+
+      expect(mockRef).toHaveBeenCalledWith(db, 'rooms/test-slug');
+      expect(mockRef).toHaveBeenCalledWith(db, 'slugs/test-slug');
+      expect(result).toBe('actual-room-id');
+    });
+
+    it('throws error when room not found by ID or slug', async () => {
+      const mockRoomRef = createMockRef();
+      const mockSlugRef = createMockRef();
+      const mockRoomSnapshot = createMockSnapshot(false);
+      const mockSlugSnapshot = createMockSnapshot(false);
+
+      mockRef.mockImplementation((database, path) => {
+        if (path === 'rooms/nonexistent') {
+          return mockRoomRef;
+        }
+        if (path === 'slugs/nonexistent') {
+          return mockSlugRef;
+        }
+        return mockRoomRef;
+      });
+      mockGet
+        .mockResolvedValueOnce(mockRoomSnapshot) // First call for room by ID
+        .mockResolvedValueOnce(mockSlugSnapshot); // Second call for slug
+
+      await expect(resolveRoomId('nonexistent')).rejects.toThrow('Room not found');
+    });
+
+    it('throws error when room key is empty or whitespace', async () => {
+      await expect(resolveRoomId('')).rejects.toThrow('Room not found');
+      await expect(resolveRoomId('   ')).rejects.toThrow('Room not found');
+    });
+
+    it('trims whitespace from room key', async () => {
+      const mockRoomRef = createMockRef();
+      const mockSnapshot = createMockSnapshot(true, {
+        id: 'test-room-id',
+        name: 'Test Room'
+      });
+
+      mockRef.mockReturnValue(mockRoomRef);
+      mockGet.mockResolvedValue(mockSnapshot);
+
+      const result = await resolveRoomId('  test-room-id  ');
+
+      expect(mockRef).toHaveBeenCalledWith(db, 'rooms/test-room-id');
+      expect(result).toBe('test-room-id');
     });
   });
 
@@ -285,10 +370,10 @@ describe('room-utils', () => {
       const mockRoomRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
-        players: [
-          { id: 'user1', displayName: 'User 1' },
-          { id: 'user2', displayName: 'User 2' },
-        ],
+        players: {
+          'user1': { displayName: 'User 1' },
+          'user2': { displayName: 'User 2' },
+        },
       });
 
       mockRef.mockReturnValue(mockRoomRef);
@@ -298,7 +383,7 @@ describe('room-utils', () => {
       await updatePlayerReady('test-room-id', 'user1', true);
 
       expect(mockUpdate).toHaveBeenCalledWith(ref(db), {
-        'rooms/test-room-id/players/0/isReady': true,
+        'rooms/test-room-id/players/user1/isReady': true,
       });
     });
 
@@ -306,7 +391,7 @@ describe('room-utils', () => {
       const mockRoomRef = createMockRef();
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
-        players: [{ id: 'user1', displayName: 'User 1' }],
+        players: { 'user1': { displayName: 'User 1' } },
       });
 
       mockRef.mockReturnValue(mockRoomRef);
@@ -333,10 +418,10 @@ describe('room-utils', () => {
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         status: 'waiting',
-        players: [
-          { id: 'user1', displayName: 'User 1', isReady: true },
-          { id: 'user2', displayName: 'User 2', isReady: true },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isReady: true },
+          'user2': { displayName: 'User 2', isReady: true },
+        },
         settings: {
           roundDuration: 60,
           maxRounds: 5,
@@ -381,10 +466,10 @@ describe('room-utils', () => {
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         status: 'playing',
-        players: [
-          { id: 'user1', displayName: 'User 1', isReady: true },
-          { id: 'user2', displayName: 'User 2', isReady: true },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isReady: true },
+          'user2': { displayName: 'User 2', isReady: true },
+        },
       });
 
       mockRef.mockReturnValue(mockRoomRef);
@@ -398,10 +483,10 @@ describe('room-utils', () => {
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         status: 'waiting',
-        players: [
-          { id: 'user1', displayName: 'User 1', isReady: true },
-          { id: 'user2', displayName: 'User 2', isReady: false },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isReady: true },
+          'user2': { displayName: 'User 2', isReady: false },
+        },
       });
 
       mockRef.mockReturnValue(mockRoomRef);
@@ -415,9 +500,9 @@ describe('room-utils', () => {
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         status: 'waiting',
-        players: [
-          { id: 'user1', displayName: 'User 1', isReady: true },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isReady: true },
+        },
         settings: {
           roundDuration: 60,
           maxRounds: 5,
@@ -448,9 +533,9 @@ describe('room-utils', () => {
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         status: 'waiting',
-        players: [
-          { id: 'user1', displayName: 'User 1', isReady: true },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isReady: true },
+        },
         settings: {
           roundDuration: 60,
           maxRounds: 5,
@@ -490,9 +575,9 @@ describe('room-utils', () => {
       const mockSnapshot = createMockSnapshot(true, {
         id: 'test-room-id',
         status: 'waiting',
-        players: [
-          { id: 'user1', displayName: 'User 1', isReady: true },
-        ],
+        players: {
+          'user1': { displayName: 'User 1', isReady: true },
+        },
         settings: {
           roundDuration: 60,
           maxRounds: 5,
@@ -543,7 +628,7 @@ describe('room-utils', () => {
 
       // Check that set was called with a room object
       const setCall = mockSet.mock.calls.find(call => 
-        call[0] === mockRoomRef && typeof call[1] === 'object' && (call[1] as Record<string, unknown>)?.name
+        typeof call[1] === 'object' && call[1] && (call[1] as Record<string, unknown>)?.name
       );
       expect(setCall).toBeDefined();
       
@@ -592,7 +677,7 @@ describe('room-utils', () => {
       
       // Verify the final slug was stored
       const setCall = mockSet.mock.calls.find(call => 
-        call[0] === mockRoomRef && typeof call[1] === 'object' && (call[1] as Record<string, unknown>)?.name
+        typeof call[1] === 'object' && call[1] && (call[1] as Record<string, unknown>)?.name
       );
       expect(setCall).toBeDefined();
       
@@ -627,7 +712,7 @@ describe('room-utils', () => {
       
       // Verify the fallback slug was stored
       const setCall = mockSet.mock.calls.find(call => 
-        call[0] === mockRoomRef && typeof call[1] === 'object' && (call[1] as Record<string, unknown>)?.name
+        typeof call[1] === 'object' && call[1] && (call[1] as Record<string, unknown>)?.name
       );
       expect(setCall).toBeDefined();
       
@@ -661,7 +746,7 @@ describe('room-utils', () => {
       
       // Find the slug mapping call
       const slugMappingCall = mockSet.mock.calls.find(call => 
-        call[0] !== mockRoomRef && typeof call[1] === 'string'
+        typeof call[1] === 'string'
       );
       expect(slugMappingCall).toBeDefined();
       expect(slugMappingCall![1]).toBe('test-room-id');

@@ -29,6 +29,7 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.0",
     "@eslint/eslintrc": "^3",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "@playwright/test": "^1.55.0",
     "@storybook/addon-a11y": "^9.1.0",
     "@storybook/nextjs-vite": "^9.1.0",
@@ -43,7 +44,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.4",
     "eslint-plugin-storybook": "^9.1.0",
-    "firebase-tools": "^14.14.0",
+    "firebase-tools": "^14.16.0",
     "husky": "^9.1.7",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",

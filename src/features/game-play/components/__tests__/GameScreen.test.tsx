@@ -28,15 +28,14 @@ describe('GameScreen', () => {
     createdBy: 'user1',
     createdAt: Date.now(),
     status: 'playing' as const,
-    players: [
-      {
-        id: 'user1',
+    players: {
+      'user1': {
         displayName: 'Test User',
         joinedAt: Date.now(),
         isHost: true,
         isReady: true,
       }
-    ],
+    },
     maxPlayers: 4,
     settings: {
       roundDuration: 60,
@@ -151,7 +150,7 @@ describe('GameScreen', () => {
     mockUseRoom.mockReturnValue({
       currentRoom: {
         ...mockRoom,
-        players: [], // No players
+        players: {}, // No players
       },
       leaveRoom: jest.fn(),
       loadRoom: jest.fn(),

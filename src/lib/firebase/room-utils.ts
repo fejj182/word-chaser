@@ -1,31 +1,12 @@
 import { ref, push, set, get, onValue, off, update } from 'firebase/database';
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import { Room, Player, CreateRoomParams } from '@/features/room-management/types/room';
 import { generateLetterGrid, getGridSizeConfig } from '@/lib/utils/grid-generation';
+import { slugify, generateGlaswegianSlug } from '@/lib/utils/slug-utils';
 
 const ROOMS_PATH = 'rooms';
 const SLUGS_PATH = 'slugs';
 
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
-
-function generateGlaswegianSlug(): string {
-  const glaswegianWords = [
-    'wee', 'daftie', 'bampot', 'heid', 'bawbag', 'gallus', 'pure', 'dead', 'manky', 'scunner',
-    'boggin', 'mingin', 'braw', 'bonnie', 'crabbit', 'dreich', 'fankle', 'glaikit', 'witnaw', 'tube',
-    'malky', 'numpty', 'tadger', 'chap', 'scunner', 'awrite', 'skelf', 'jaiket', 'stoater', 'rapid'
-  ];
-  const word1 = glaswegianWords[Math.floor(Math.random() * glaswegianWords.length)];
-  const word2 = glaswegianWords[Math.floor(Math.random() * glaswegianWords.length)];
-  const number = Math.floor(100 + Math.random() * 900); // 3 digits
-  return `${word1}-${word2}-${number}`;
-}
 
 async function generateUniqueGlaswegianSlug(): Promise<{ name: string; slug: string }> {
   let attempts = 0;
@@ -55,13 +36,14 @@ export const createRoom = async (params: CreateRoomParams, userId: string, displ
     createdBy: userId,
     createdAt: Date.now(),
     status: 'waiting',
-    players: [{
-      id: userId,
-      displayName,
-      joinedAt: Date.now(),
-      isHost: true,
-      isReady: true,
-    }],
+    players: {
+      [userId]: {
+        displayName,
+        joinedAt: Date.now(),
+        isHost: true,
+        isReady: true,
+      }
+    },
     maxPlayers: params.maxPlayers,
     settings: params.settings,
   };
@@ -81,7 +63,7 @@ export const joinRoom = async (roomId: string, userId: string, displayName: stri
 
   const room: Room = roomSnapshot.val();
   
-  if (room.players.length >= room.maxPlayers) {
+  if (Object.keys(room.players).length >= room.maxPlayers) {
     throw new Error('Room is full');
   }
 
@@ -90,7 +72,6 @@ export const joinRoom = async (roomId: string, userId: string, displayName: stri
   }
 
   const newPlayer: Player = {
-    id: userId,
     displayName,
     joinedAt: Date.now(),
     isHost: false,
@@ -98,7 +79,7 @@ export const joinRoom = async (roomId: string, userId: string, displayName: stri
   };
 
   const updates: Record<string, Player> = {};
-  updates[`${ROOMS_PATH}/${roomId}/players/${room.players.length}`] = newPlayer;
+  updates[`${ROOMS_PATH}/${roomId}/players/${userId}`] = newPlayer;
   
   await update(ref(db), updates);
 };
@@ -119,24 +100,24 @@ export const resolveRoomId = async (roomKey: string): Promise<string> => {
 };
 
 const deleteRoomAndSlug = async (roomRef: ReturnType<typeof ref>, room: Room): Promise<void> => {
-  await set(roomRef, null);
-  
   if (room.slug) {
     const slugRef = ref(db, `${SLUGS_PATH}/${room.slug}`);
     await set(slugRef, null);
   }
+  await set(roomRef, null);
 };
 
-const updateRoomPlayers = async (roomId: string, updatedPlayers: Player[]): Promise<void> => {
-  const updates: Record<string, Player[]> = {};
-  updates[`${ROOMS_PATH}/${roomId}/players`] = updatedPlayers;
-  
-  await update(ref(db), updates);
+
+const removePlayerFromRoom = async (roomId: string, userId: string): Promise<void> => {
+  const playerRef = ref(db, `${ROOMS_PATH}/${roomId}/players/${userId}`);
+  await set(playerRef, null);
 };
 
-const transferHostIfNeeded = (leavingPlayer: Player | undefined, remainingPlayers: Player[]): void => {
-  if (leavingPlayer?.isHost && remainingPlayers.length > 0) {
-    remainingPlayers[0].isHost = true;
+const makeFirstRemainingPlayerHost = async (roomId: string, remainingPlayers: Record<string, Player>): Promise<void> => {
+  if (Object.keys(remainingPlayers).length > 0) {
+    const firstPlayerId = Object.keys(remainingPlayers)[0];
+    const hostRef = ref(db, `${ROOMS_PATH}/${roomId}/players/${firstPlayerId}/isHost`);
+    await set(hostRef, true);
   }
 };
 
@@ -149,14 +130,15 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
     }
   
     const room: Room = roomSnapshot.val();
-    const updatedPlayers = room.players.filter(player => player.id !== userId);
+    const { [userId]: leavingPlayer, ...updatedPlayers } = room.players;
     
-    if (updatedPlayers.length === 0) {
+    if (Object.keys(updatedPlayers).length === 0) {
       await deleteRoomAndSlug(roomRef, room);
     } else {
-      const leavingPlayer = room.players.find(p => p.id === userId);
-      transferHostIfNeeded(leavingPlayer, updatedPlayers);
-      await updateRoomPlayers(roomId, updatedPlayers);
+      if (leavingPlayer?.isHost) {
+        await makeFirstRemainingPlayerHost(roomId, updatedPlayers);
+      }
+      await removePlayerFromRoom(roomId, userId);
     }
 };
 
@@ -186,14 +168,13 @@ export const updatePlayerReady = async (roomId: string, userId: string, isReady:
   }
 
   const room: Room = roomSnapshot.val();
-  const playerIndex = room.players.findIndex(p => p.id === userId);
   
-  if (playerIndex === -1) {
+  if (!room.players[userId]) {
     throw new Error('Player not found in room');
   }
 
   const updates: Record<string, boolean> = {};
-  updates[`${ROOMS_PATH}/${roomId}/players/${playerIndex}/isReady`] = isReady;
+  updates[`${ROOMS_PATH}/${roomId}/players/${userId}/isReady`] = isReady;
   
   await update(ref(db), updates);
 };
@@ -212,7 +193,7 @@ export const startGame = async (roomId: string): Promise<void> => {
     throw new Error('Game has already started');
   }
 
-  const allReady = room.players.every(p => p.isReady);
+  const allReady = Object.values(room.players).every(p => p.isReady);
   if (!allReady) {
     throw new Error('Not all players are ready');
   }

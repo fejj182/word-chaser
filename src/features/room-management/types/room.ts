@@ -7,7 +7,7 @@ export interface Room {
   createdBy: string;
   createdAt: number;
   status: 'waiting' | 'playing' | 'finished';
-  players: Player[];
+  players: Record<string, Player>;
   maxPlayers: number;
   settings: RoomSettings;
   gameData?: {
@@ -17,7 +17,6 @@ export interface Room {
 }
 
 export interface Player {
-  id: string;
   displayName: string;
   joinedAt: number;
   isHost: boolean;

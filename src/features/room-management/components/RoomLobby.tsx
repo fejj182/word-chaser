@@ -14,10 +14,10 @@ const RoomLobby: React.FC = () => {
     return null;
   }
 
-  const currentPlayer = currentRoom.players.find(p => p.id === user.uid);
+  const currentPlayer = currentRoom.players[user.uid];
   const isHost = currentPlayer?.isHost || false;
-  const allPlayersReady = currentRoom.players.every(p => p.isReady);
-  const canStartGame = isHost && allPlayersReady && currentRoom.players.length >= 2;
+  const allPlayersReady = Object.values(currentRoom.players).every(p => p.isReady);
+  const canStartGame = isHost && allPlayersReady && Object.keys(currentRoom.players).length >= 2;
 
   const handleReadyToggle = async () => {
     if (!currentPlayer) return;
@@ -58,7 +58,7 @@ const RoomLobby: React.FC = () => {
     }
   };
 
-  const readyCount = currentRoom.players.filter(p => p.isReady).length;
+  const readyCount = Object.values(currentRoom.players).filter(p => p.isReady).length;
 
   return (
     <div className="card card--lobby" aria-busy={isLoading}>
@@ -110,26 +110,26 @@ const RoomLobby: React.FC = () => {
 
       {/* Players List */}
       <div className="spacing--section">
-        <h3 className="text--section-title mb-2" data-testid="players-count">Players ({currentRoom.players.length}/{currentRoom.maxPlayers})</h3>
+        <h3 className="text--section-title mb-2" data-testid="players-count">Players ({Object.keys(currentRoom.players).length}/{currentRoom.maxPlayers})</h3>
         <div className="mb-4">
           <div className="flex justify-between text-xs text-gray-600 mb-1">
-            <span>{readyCount}/{currentRoom.players.length} ready</span>
+            <span>{readyCount}/{Object.keys(currentRoom.players).length} ready</span>
             {!allPlayersReady && <span>Waiting for players…</span>}
           </div>
           <div className="progress-bar" aria-hidden="true">
                           <div
                 className="progress-bar--fill"
-                style={{ width: `${(readyCount / currentRoom.players.length) * 100}%` }}
+                style={{ width: `${(readyCount / Object.keys(currentRoom.players).length) * 100}%` }}
               />
           </div>
         </div>
         <div className="space-y-2">
-          {currentRoom.players.map((player) => (
+          {Object.entries(currentRoom.players).map(([playerId, player]) => (
             <div
-              key={player.id}
-              data-testid={`player-row-${player.id}`}
+              key={playerId}
+              data-testid={`player-row-${playerId}`}
               className={`flex items-center justify-between p-3 rounded-lg border ${
-                player.id === user.uid ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
+                playerId === user.uid ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
               }`}
             >
               <div className="layout--flex-center-3">
@@ -148,7 +148,7 @@ const RoomLobby: React.FC = () => {
                 ) : (
                   <span className="text--status-not-ready">Not Ready</span>
                 )}
-                {player.id === user.uid && (
+                {playerId === user.uid && (
                   <button
                     onClick={handleReadyToggle}
                     disabled={isLoading}
@@ -203,7 +203,7 @@ const RoomLobby: React.FC = () => {
               Waiting for all players to be ready...
             </p>
           )}
-          {currentRoom.players.length < 2 && (
+          {Object.keys(currentRoom.players).length < 2 && (
             <p className="text--info">
               Need at least 2 players to start the game
             </p>

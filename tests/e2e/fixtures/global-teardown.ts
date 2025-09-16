@@ -5,6 +5,9 @@ async function globalTeardown() {
   try {
     const context = await request.newContext();
     await context.put('http://127.0.0.1:9000/.json?ns=demo-word-chaser', {
+      headers: {
+        'Authorization': `Bearer owner`
+      },
       data: null
     });
     await context.dispose();

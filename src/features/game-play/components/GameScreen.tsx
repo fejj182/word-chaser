@@ -21,7 +21,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
   const { actions: { loadGridFromRoom } } = useGamePlay();
   const router = useRouter();
 
-  const currentPlayer = currentRoom?.players.find(p => p.id === user?.uid);
+  const currentPlayer = user?.uid ? currentRoom?.players[user.uid] : undefined;
 
   useEffect(() => {
     loadRoom(roomId);

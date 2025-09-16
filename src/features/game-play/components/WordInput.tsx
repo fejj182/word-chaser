@@ -175,7 +175,7 @@ export const WordInput: React.FC = () => {
       </form>
 
       {error && (
-        <div className="form-error">
+        <div className="form-error" role="alert" aria-live="assertive">
           <button
             type="button"
             onClick={clearError}

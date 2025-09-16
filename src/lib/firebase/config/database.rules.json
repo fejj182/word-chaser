@@ -1,8 +1,25 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true
+    "rooms": {
+      "$roomId": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.child('createdBy').val() === auth.uid) || (data.exists() && root.child('rooms/' + $roomId + '/players/' + auth.uid + '/isHost').val() === true))",
+        "players": {
+          "$uid": {
+            ".write": "auth.uid === $uid"
+          }
+        },
+        "settings": {
+          ".write": "data.parent().child('createdBy').val() === auth.uid"
+        }
+      }
+    },
+    "slugs": {
+      "$slugId": {
+        ".read": "auth != null",
+      	".write": "auth != null && root.child('rooms/' + (newData.exists() ? newData.val() : data.val()) + '/players/' + auth.uid + '/isHost').val() === true",
+        ".validate": "newData.isString()"
+      }
+    }
   }
 }
-
-

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import RoomManager from '../RoomManager';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
+import { GridSize } from '@/features/game-play/contexts/GamePlayContext';
 
 jest.mock('@/features/room-management/contexts/RoomContext');
 jest.mock('next/navigation', () => ({
@@ -35,11 +36,12 @@ describe('RoomManager', () => {
     createdBy: 'user123',
     createdAt: Date.now(),
     status: 'waiting' as const,
-    players: [],
+    players: {},
     maxPlayers: 4,
     settings: {
       roundDuration: 60,
       maxRounds: 5,
+      gridSize: "small" as GridSize,
     },
   });
 
@@ -142,11 +144,12 @@ describe('RoomManager', () => {
         createdBy: 'user123',
         createdAt: Date.now(),
         status: 'waiting' as const,
-        players: [],
+        players: {},
         maxPlayers: 4,
         settings: {
           roundDuration: 60,
           maxRounds: 5,
+          gridSize: "small" as GridSize,
         },
       };
 
