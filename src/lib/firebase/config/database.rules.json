@@ -6,7 +6,10 @@
         ".write": "auth != null && ((!data.exists() && newData.child('createdBy').val() === auth.uid) || (data.exists() && root.child('rooms/' + $roomId + '/players/' + auth.uid + '/isHost').val() === true))",
         "players": {
           "$uid": {
-            ".write": "auth.uid === $uid"
+            ".write": "auth.uid === $uid && newData.child('isHost').val() !== true",
+            "isHost": {
+              ".write": "root.child('rooms/' + $roomId + '/createdBy').val() === auth.uid"
+            }
           }
         },
         "settings": {

@@ -175,25 +175,6 @@ describe('RTDB security rules integration tests', () => {
       await expect(set(ref(user2Db, 'rooms/test-room-leave/players/user-2'), null)).resolves.not.toThrow()
     })
 
-    test('room creator can transfer host status', async () => {
-      // Setup: Create a room as user-1
-      const user1Db = testEnv.authenticatedContext('user-1').database()
-      const roomData = {
-        id: 'test-room-transfer',
-        name: 'Test Room',
-        createdBy: 'user-1',
-        players: {
-          'user-1': { displayName: 'User 1', isHost: true },
-          'user-2': { displayName: 'User 2', isHost: false }
-        },
-        maxPlayers: 4,
-        settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" }
-      }
-      await set(ref(user1Db, 'rooms/test-room-transfer'), roomData)
-      
-      // user-1 (creator) should be able to transfer host to user-2
-      await expect(set(ref(user1Db, 'rooms/test-room-transfer/players/user-2/isHost'), true)).resolves.not.toThrow()
-    })
 
     test('room creator can update the status of the room', async () => {
       const user1Db = testEnv.authenticatedContext('user-1').database()
@@ -362,6 +343,74 @@ describe('RTDB security rules integration tests', () => {
       
       // But user-2 can modify their own data
       await expect(set(ref(user2Db, 'rooms/test-room-players/players/user-2/isReady'), true)).resolves.not.toThrow()
+    })
+
+    test('prevents host privilege escalation by non-host players', async () => {
+      const user1Db = testEnv.authenticatedContext('user-1').database()
+      const roomData = {
+        id: 'test-room-privilege-escalation',
+        name: 'Test Room',
+        createdBy: 'user-1',
+        players: {
+          'user-1': { displayName: 'User 1', isHost: true },
+          'user-2': { displayName: 'User 2', isHost: false }
+        },
+        maxPlayers: 4,
+        settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" }
+      }
+      await set(ref(user1Db, 'rooms/test-room-privilege-escalation'), roomData)
+
+      const user2Db = testEnv.authenticatedContext('user-2').database()
+      
+      // Test: user-2 (non-host) cannot set themselves as host
+      await expect(set(ref(user2Db, 'rooms/test-room-privilege-escalation/players/user-2/isHost'), true)).rejects.toThrow()
+      
+      // Test: user-2 (non-host) cannot set another player as host
+      await expect(set(ref(user2Db, 'rooms/test-room-privilege-escalation/players/user-1/isHost'), false)).rejects.toThrow()
+    })
+
+    test('comprehensive host privilege management', async () => {
+      // Test 1: Room creator can transfer host privileges
+      const user1Db = testEnv.authenticatedContext('user-1').database()
+      const roomData = {
+        id: 'test-room-host-management',
+        name: 'Test Room',
+        createdBy: 'user-1',
+        players: {
+          'user-1': { displayName: 'User 1', isHost: true },
+          'user-2': { displayName: 'User 2', isHost: false },
+          'user-3': { displayName: 'User 3', isHost: false }
+        },
+        maxPlayers: 4,
+        settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" }
+      }
+      await set(ref(user1Db, 'rooms/test-room-host-management'), roomData)
+
+      // Test: user-1 (creator) can transfer host to user-2
+      await expect(set(ref(user1Db, 'rooms/test-room-host-management/players/user-2/isHost'), true)).resolves.not.toThrow()
+      await expect(set(ref(user1Db, 'rooms/test-room-host-management/players/user-1/isHost'), false)).resolves.not.toThrow()
+      
+      // Test: user-1 (former host but still creator) can still modify host flags
+      await expect(set(ref(user1Db, 'rooms/test-room-host-management/players/user-3/isHost'), true)).resolves.not.toThrow()
+
+      // Test 2: Creator can modify host flags even when not current host
+      const user2Db = testEnv.authenticatedContext('user-2').database()
+      const roomData2 = {
+        id: 'test-room-creator-override',
+        name: 'Test Room 2',
+        createdBy: 'user-2',
+        players: {
+          'user-1': { displayName: 'User 1', isHost: true },
+          'user-2': { displayName: 'User 2', isHost: false }
+        },
+        maxPlayers: 4,
+        settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" }
+      }
+      await set(ref(user2Db, 'rooms/test-room-creator-override'), roomData2)
+      
+      // Test: user-2 (creator but not host) can modify host flags
+      await expect(set(ref(user2Db, 'rooms/test-room-creator-override/players/user-2/isHost'), true)).resolves.not.toThrow()
+      await expect(set(ref(user2Db, 'rooms/test-room-creator-override/players/user-1/isHost'), false)).resolves.not.toThrow()
     })
   })
 
