@@ -198,7 +198,7 @@ export const WordInput: React.FC = () => {
       )}
 
       {submittedWords.length > 0 && (
-        <div className="mt-4">
+        <div className="mt-4" role="region" aria-label="Submitted words">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Submitted Words</h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {submittedWords.map((submission) => (

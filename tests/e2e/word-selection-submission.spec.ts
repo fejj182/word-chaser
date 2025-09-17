@@ -202,8 +202,9 @@ test.describe('Word Selection and Submission', () => {
     // Verify player score has increased
     await expect(p2.getByText('Score: 40')).toBeVisible();
     
-    // Verify player 1 score has increased on player 2's scoreboard
-    await expect(p2.getByText('30')).toBeVisible();
+    // Verify player 1's word submission was successful
+    await expect(p2.getByRole('region', { name: 'Live scoreboard' }).getByText('30')).toBeVisible();
+    await expect(p2.getByText('Score: 30 points')).toBeVisible();
   });
 
   test('should not allow submitting the same word twice', async () => {
@@ -215,7 +216,7 @@ test.describe('Word Selection and Submission', () => {
 
     // Verify the word is submitted and score is updated
     await expect(host.getByText('Submitted Words')).toBeVisible();
-    await expect(host.getByText('DOGS')).toBeVisible();
+    await expect(host.getByRole('region', { name: 'Submitted words' }).getByText('DOGS')).toBeVisible();
     await expect(host.getByText('Score: 40')).toBeVisible();
 
     // Player 1 tries to submit the same word again
