@@ -34,12 +34,18 @@ jest.mock('../../hooks/useSubmittedWords', () => ({
   useSubmittedWords: jest.fn()
 }));
 
+// Mock the useToast hook
+jest.mock('../../hooks/useToast', () => ({
+  useToast: jest.fn()
+}));
+
 const mockUseWordSubmission = require('../../hooks/useWordSubmission').useWordSubmission;
 const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
 const mockUseGamePlay = require('../../contexts/GamePlayContext').useGamePlay;
 const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
 const mockUseAuth = require('@/features/user-management/hooks/useAuth').useAuth;
 const mockUseSubmittedWords = require('../../hooks/useSubmittedWords').useSubmittedWords;
+const mockUseToast = require('../../hooks/useToast').useToast;
 
 // Mock board letters for testing
 const mockBoardLetters = [
@@ -100,6 +106,15 @@ describe('WordInput', () => {
     mockUseSubmittedWords.mockReturnValue({
       submittedWords: [],
       isWordSubmitted: jest.fn().mockReturnValue(false)
+    });
+
+    mockUseToast.mockReturnValue({
+      toast: { message: '', type: 'info', isVisible: false },
+      showToast: jest.fn(),
+      hideToast: jest.fn(),
+      showSuccess: jest.fn(),
+      showError: jest.fn(),
+      showInfo: jest.fn()
     });
   });
 
@@ -240,6 +255,88 @@ describe('WordInput', () => {
     expect(screen.getByText('Score: 25 points')).toBeInTheDocument();
     expect(screen.getByText('by Player One')).toBeInTheDocument();
     expect(screen.getByText('by Player Two')).toBeInTheDocument();
+  });
+
+  it('shows success toast for valid word submission', async () => {
+    const mockShowSuccess = jest.fn();
+    mockUseToast.mockReturnValue({
+      toast: { message: '', type: 'info', isVisible: false },
+      showToast: jest.fn(),
+      hideToast: jest.fn(),
+      showSuccess: mockShowSuccess,
+      showError: jest.fn(),
+      showInfo: jest.fn()
+    });
+
+    mockSubmitWord.mockResolvedValue({
+      success: true,
+      result: { isValid: true, score: 30 }
+    });
+
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'VALID',
+      setCurrentWord: mockSetCurrentWord,
+      selectTilesForWord: mockSelectTilesForWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
+
+    const input = screen.getByLabelText('Current Word');
+    const submitButton = screen.getByRole('button', { name: 'Submit Word' });
+
+    fireEvent.change(input, { target: { value: 'valid' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockShowSuccess).toHaveBeenCalledWith('"VALID" - 30 points!');
+    });
+  });
+
+  it('shows error toast for invalid word submission', async () => {
+    const mockShowError = jest.fn();
+    mockUseToast.mockReturnValue({
+      toast: { message: '', type: 'info', isVisible: false },
+      showToast: jest.fn(),
+      hideToast: jest.fn(),
+      showSuccess: jest.fn(),
+      showError: mockShowError,
+      showInfo: jest.fn()
+    });
+
+    mockSubmitWord.mockResolvedValue({
+      success: true,
+      result: { isValid: false, score: 0, reason: 'Word not found in dictionary' }
+    });
+
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'INVALID',
+      setCurrentWord: mockSetCurrentWord,
+      selectTilesForWord: mockSelectTilesForWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
+
+    const input = screen.getByLabelText('Current Word');
+    const submitButton = screen.getByRole('button', { name: 'Submit Word' });
+
+    fireEvent.change(input, { target: { value: 'invalid' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockShowError).toHaveBeenCalledWith('"INVALID" - Word not found in dictionary');
+    });
   });
 
   it('prevents submission of already submitted words', () => {

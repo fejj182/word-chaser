@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWordSubmission } from '../hooks/useWordSubmission';
-import { WordValidationResponse } from '../types/word';
 import { useGamePlay } from '../contexts/GamePlayContext';
 import { useWordPath } from '../hooks/useWordPath';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/user-management/hooks/useAuth';
 import { useSubmittedWords } from '../hooks/useSubmittedWords';
+import { useToast } from '../hooks/useToast';
+import { Toast } from './Toast';
 
 export const WordInput: React.FC = () => {
   const { state } = useGamePlay();
@@ -23,6 +24,7 @@ export const WordInput: React.FC = () => {
   
   const { submittedWords, isWordSubmitted } = useSubmittedWords();
   const { submitWord, isLoading, error, clearError } = useWordSubmission();
+  const { toast, showError, showSuccess, hideToast } = useToast();
 
   // Debounced word input handler
   const [inputValue, setInputValue] = useState('');
@@ -70,13 +72,23 @@ export const WordInput: React.FC = () => {
       try {
         const result = await submitWord(currentWord.trim(), state.grid, currentRoom.id, user.uid);
         
-        // Clear the input on successful submission
-        setCurrentWord('');
-        setInputValue('');
-        clearSelection();
+        if (result.result.isValid) {
+          // Show success toast for valid words
+          showSuccess(`"${currentWord.trim().toUpperCase()}" - ${result.result.score} points!`);
+          
+          // Clear the input on successful submission
+          setCurrentWord('');
+          setInputValue('');
+          clearSelection();
+        } else {
+          // Show error toast for invalid words
+          const reason = result.result.reason || 'Invalid word';
+          showError(`"${currentWord.trim().toUpperCase()}" - ${reason}`);
+        }
         
       } catch (error) {
-        // Error is handled by the hook
+        // Show error toast for submission failures
+        showError(`"${currentWord.trim().toUpperCase()}" - Submission failed`);
         console.error('Failed to submit word:', error);
       }
     }
@@ -87,20 +99,6 @@ export const WordInput: React.FC = () => {
     setInputValue('');
     clearSelection();
     clearError();
-  };
-
-  const getWordStatusClass = (result: WordValidationResponse) => {
-    if (result.result.isValid) {
-      return 'text-green-600 bg-green-50 border-green-200';
-    }
-    return 'text-red-600 bg-red-50 border-red-200';
-  };
-
-  const getWordStatusIcon = (result: WordValidationResponse) => {
-    if (result.result.isValid) {
-      return '✓';
-    }
-    return '✗';
   };
 
   // Get validation status for current word (for submission)
@@ -120,8 +118,15 @@ export const WordInput: React.FC = () => {
   const validationStatus = getValidationStatus();
 
   return (
-    <div className={`space-y-4`}>
-      <h2 className="text-xl font-semibold text-gray-900">Submit Words</h2>
+    <>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+      <div className={`space-y-4`}>
+        <h2 className="text-xl font-semibold text-gray-900">Submit Words</h2>
       
       <form name="submit-words" onSubmit={handleSubmit} className="space-y-3" role="form">
         <div>
@@ -214,6 +219,7 @@ export const WordInput: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
