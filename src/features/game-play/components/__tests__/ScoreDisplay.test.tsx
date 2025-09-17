@@ -44,9 +44,8 @@ describe('ScoreDisplay', () => {
     render(<ScoreDisplay />);
 
     expect(screen.getByText('150')).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('Score')).toBeInTheDocument();
-    expect(screen.getByText('Words')).toBeInTheDocument();
+    expect(screen.getByText('5 words')).toBeInTheDocument();
+    expect(screen.getByText('Your Score:')).toBeInTheDocument();
   });
 
   it('displays zero values when player not found', () => {
@@ -66,9 +65,9 @@ describe('ScoreDisplay', () => {
 
     render(<ScoreDisplay />);
 
-    expect(screen.getAllByText('0')).toHaveLength(2);
-    expect(screen.getByText('Score')).toBeInTheDocument();
-    expect(screen.getByText('Words')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('0 words')).toBeInTheDocument();
+    expect(screen.getByText('Your Score:')).toBeInTheDocument();
   });
 
   it('displays zero values when no user is logged in', () => {
@@ -91,9 +90,9 @@ describe('ScoreDisplay', () => {
 
     render(<ScoreDisplay />);
 
-    expect(screen.getAllByText('0')).toHaveLength(2);
-    expect(screen.getByText('Score')).toBeInTheDocument();
-    expect(screen.getByText('Words')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('0 words')).toBeInTheDocument();
+    expect(screen.getByText('Your Score:')).toBeInTheDocument();
   });
 
   it('displays zero values when no room is available', () => {
@@ -110,8 +109,8 @@ describe('ScoreDisplay', () => {
 
     render(<ScoreDisplay />);
 
-    expect(screen.getAllByText('0')).toHaveLength(2);
-    expect(screen.getByText('Score')).toBeInTheDocument();
-    expect(screen.getByText('Words')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('0 words')).toBeInTheDocument();
+    expect(screen.getByText('Your Score:')).toBeInTheDocument();
   });
 });

@@ -13,12 +13,15 @@ export const ScoreDisplay: React.FC = () => {
   const wordsFound = currentPlayer?.wordsFound ?? 0;
 
   return (
-    <div className="flex items-center gap-3 text-sm" role="region" aria-label="Score">
-      <span className="text-gray-600">Score</span>
-      <span className="font-mono bg-blue-100 text-blue-700 px-2 py-0.5 rounded">{score}</span>
-      <span className="text-gray-400" aria-hidden="true">|</span>
-      <span className="text-gray-600">Words</span>
-      <span className="font-mono bg-green-100 text-green-700 px-2 py-0.5 rounded">{wordsFound}</span>
+    <div className="flex items-center gap-2 text-sm" role="region" aria-label="Your current score">
+      <span className="text-gray-600 dark:text-gray-400">Your Score:</span>
+      <span className="font-mono bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs">
+        {score}
+      </span>
+      <span className="text-gray-400 dark:text-gray-500" aria-hidden="true">•</span>
+      <span className="font-mono bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs">
+        {wordsFound} words
+      </span>
     </div>
   );
 };

@@ -189,6 +189,21 @@ test.describe('Word Selection and Submission', () => {
 
     // Verify player score has increased
     await expect(host.getByText('Score: 30')).toBeVisible();
+
+    // Player 2 types a valid word that exists in our test grid
+    const p2WordInput = p2.getByLabel(/current word/i);
+    await p2WordInput.fill('DOGS');
+
+    // Player 2 submits the word
+    const p2SubmitButton = p2.getByRole('button', { name: /submit word/i });
+    await expect(p2SubmitButton).toBeEnabled();
+    await p2SubmitButton.click();
+
+    // Verify player score has increased
+    await expect(p2.getByText('Score: 40')).toBeVisible();
+    
+    // Verify player 1 score has increased on player 2's scoreboard
+    await expect(p2.getByText('30')).toBeVisible();
   });
 
   test('should handle invalid word submissions with no-words grid', async () => {

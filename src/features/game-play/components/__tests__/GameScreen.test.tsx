@@ -34,6 +34,8 @@ describe('GameScreen', () => {
         joinedAt: Date.now(),
         isHost: true,
         isReady: true,
+        score: 0,
+        wordsFound: 0,
       }
     },
     maxPlayers: 4,
@@ -86,7 +88,7 @@ describe('GameScreen', () => {
     );
 
     expect(await screen.findByText('Test Room')).toBeInTheDocument();
-    expect(await screen.findByText('Test User')).toBeInTheDocument();
+    expect(await screen.getAllByText('Test User')).toHaveLength(2); // One in header, one in scoreboard
   });
 
   it('should load grid from room data', async () => {
