@@ -19,11 +19,14 @@ jest.mock('@/lib/word-validation', () => ({
 
 // Mock the admin room utils function
 jest.mock('@/lib/firebase/admin-room-utils', () => ({
-  updatePlayerScoreAdmin: jest.fn()
+  updatePlayerScoreAdmin: jest.fn(),
+  addSubmittedWordAdmin: jest.fn(),
+  isWordAlreadySubmittedAdmin: jest.fn(),
+  getRoom: jest.fn()
 }));
 
 import { validateWordSubmission } from '@/lib/word-validation';
-import { updatePlayerScoreAdmin } from '@/lib/firebase/admin-room-utils';
+import { updatePlayerScoreAdmin, addSubmittedWordAdmin, isWordAlreadySubmittedAdmin, getRoom } from '@/lib/firebase/admin-room-utils';
 
 describe('/api/validate-word', () => {
   beforeEach(() => {
@@ -38,6 +41,16 @@ describe('/api/validate-word', () => {
     };
 
     (validateWordSubmission as jest.Mock).mockReturnValue(mockValidation);
+    (isWordAlreadySubmittedAdmin as jest.Mock).mockResolvedValue(false);
+    (getRoom as jest.Mock).mockResolvedValue({
+      players: {
+        'user123': {
+          displayName: 'Test User'
+        }
+      }
+    });
+    (addSubmittedWordAdmin as jest.Mock).mockResolvedValue(undefined);
+    (updatePlayerScoreAdmin as jest.Mock).mockResolvedValue(undefined);
 
     const requestBody = {
       word: 'cat',
@@ -59,11 +72,40 @@ describe('/api/validate-word', () => {
     expect(data.result.isValid).toBe(mockValidation.isValid);
     expect(data.result.score).toBe(mockValidation.score);
     expect(data.result.path).toBeDefined();
+    expect(isWordAlreadySubmittedAdmin).toHaveBeenCalledWith('room123', 'cat');
     expect(validateWordSubmission).toHaveBeenCalledWith('cat', requestBody.boardLetters, {
       allowReuse: false,
       minLength: 3
     });
+    expect(addSubmittedWordAdmin).toHaveBeenCalledWith('room123', 'cat', 'user123', 'Test User', 30);
     expect(updatePlayerScoreAdmin).toHaveBeenCalledWith('room123', 'user123', 30);
+  });
+
+  it('returns error when word is already submitted', async () => {
+    (isWordAlreadySubmittedAdmin as jest.Mock).mockResolvedValue(true);
+
+    const requestBody = {
+      word: 'cat',
+      roomId: 'room123',
+      userId: 'user123',
+      boardLetters: [['A', 'B', 'C', 'D'], ['E', 'F', 'G', 'H']]
+    };
+
+    const request = {
+      method: 'POST',
+      json: async () => requestBody
+    } as unknown as NextRequest;
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.success).toBe(false);
+    expect(data.result.isValid).toBe(false);
+    expect(data.result.reason).toBe('Word has already been submitted');
+    expect(data.error).toBe('Word has already been submitted');
+    expect(validateWordSubmission).not.toHaveBeenCalled();
+    expect(updatePlayerScoreAdmin).not.toHaveBeenCalled();
   });
 
   it('returns error for missing required fields', async () => {
@@ -115,6 +157,7 @@ describe('/api/validate-word', () => {
     };
 
     (validateWordSubmission as jest.Mock).mockReturnValue(mockValidation);
+    (isWordAlreadySubmittedAdmin as jest.Mock).mockResolvedValue(false);
 
     const requestBody = {
       word: 'invalid',
@@ -139,6 +182,7 @@ describe('/api/validate-word', () => {
   });
 
   it('handles internal server errors', async () => {
+    (isWordAlreadySubmittedAdmin as jest.Mock).mockResolvedValue(false);
     (validateWordSubmission as jest.Mock).mockImplementation(() => {
       throw new Error('Internal error');
     });

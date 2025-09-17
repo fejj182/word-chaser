@@ -29,11 +29,17 @@ jest.mock('@/features/user-management/hooks/useAuth', () => ({
   useAuth: jest.fn()
 }));
 
+// Mock the useSubmittedWords hook
+jest.mock('../../hooks/useSubmittedWords', () => ({
+  useSubmittedWords: jest.fn()
+}));
+
 const mockUseWordSubmission = require('../../hooks/useWordSubmission').useWordSubmission;
 const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
 const mockUseGamePlay = require('../../contexts/GamePlayContext').useGamePlay;
 const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
 const mockUseAuth = require('@/features/user-management/hooks/useAuth').useAuth;
+const mockUseSubmittedWords = require('../../hooks/useSubmittedWords').useSubmittedWords;
 
 // Mock board letters for testing
 const mockBoardLetters = [
@@ -89,6 +95,11 @@ describe('WordInput', () => {
         uid: 'test-user-id',
         displayName: 'Test User'
       }
+    });
+
+    mockUseSubmittedWords.mockReturnValue({
+      submittedWords: [],
+      isWordSubmitted: jest.fn().mockReturnValue(false)
     });
   });
 
@@ -194,14 +205,53 @@ describe('WordInput', () => {
     expect(mockClearError).toHaveBeenCalled();
   });
 
-  it('shows submitted words list', async () => {
-    mockSubmitWord.mockResolvedValue({
-      success: true,
-      result: { isValid: true, score: 30 }
+  it('shows submitted words list', () => {
+    const mockSubmittedWords = [
+      {
+        word: 'FIRST',
+        playerId: 'player1',
+        playerName: 'Player One',
+        score: 30,
+        submittedAt: Date.now() - 1000
+      },
+      {
+        word: 'SECOND',
+        playerId: 'player2',
+        playerName: 'Player Two',
+        score: 25,
+        submittedAt: Date.now()
+      }
+    ];
+
+    mockUseSubmittedWords.mockReturnValue({
+      submittedWords: mockSubmittedWords,
+      isWordSubmitted: jest.fn().mockReturnValue(false)
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
+
+    expect(screen.getByText('FIRST')).toBeInTheDocument();
+    expect(screen.getByText('SECOND')).toBeInTheDocument();
+    expect(screen.getByText('Score: 30 points')).toBeInTheDocument();
+    expect(screen.getByText('Score: 25 points')).toBeInTheDocument();
+    expect(screen.getByText('by Player One')).toBeInTheDocument();
+    expect(screen.getByText('by Player Two')).toBeInTheDocument();
+  });
+
+  it('prevents submission of already submitted words', () => {
+    const mockIsWordSubmitted = jest.fn().mockReturnValue(true);
+    
+    mockUseSubmittedWords.mockReturnValue({
+      submittedWords: [],
+      isWordSubmitted: mockIsWordSubmitted
     });
 
     mockUseWordPath.mockReturnValue({
-      currentWord: 'FIRST',
+      currentWord: 'ALREADY',
       setCurrentWord: mockSetCurrentWord,
       selectTilesForWord: mockSelectTilesForWord,
       clearSelection: mockClearSelection,
@@ -217,28 +267,9 @@ describe('WordInput', () => {
     const input = screen.getByLabelText('Current Word');
     const submitButton = screen.getByRole('button', { name: 'Submit Word' });
 
-    fireEvent.change(input, { target: { value: 'first' } });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(mockSubmitWord).toHaveBeenCalledWith('FIRST', mockBoardLetters, 'test-room-id', 'test-user-id');
-    });
-
-    mockUseWordPath.mockReturnValue({
-      currentWord: 'SECOND',
-      setCurrentWord: mockSetCurrentWord,
-      selectTilesForWord: mockSelectTilesForWord,
-      clearSelection: mockClearSelection,
-      isValidPath: true
-    });
-
-    fireEvent.change(input, { target: { value: 'second' } });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('FIRST')).toBeInTheDocument();
-      expect(screen.getByText('SECOND')).toBeInTheDocument();
-    });
+    expect(input).toHaveValue('ALREADY');
+    expect(submitButton).toBeDisabled();
+    expect(screen.getByText('Word has already been submitted')).toBeInTheDocument();
   });
 
   it('handles form submission with enter key', async () => {
@@ -359,7 +390,8 @@ describe('WordInput', () => {
     );
 
     const input = screen.getByLabelText('Current Word');
-    expect(input).toHaveClass('border-red-500', 'bg-red-50');
+    expect(input).toHaveClass('border-red-500');
+    expect(input).toHaveClass('bg-red-50');
     expect(input).toHaveAttribute('aria-invalid', 'true');
   });
 });

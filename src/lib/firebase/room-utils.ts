@@ -209,7 +209,8 @@ export const startGame = async (roomId: string): Promise<void> => {
   updates[`${ROOMS_PATH}/${roomId}/status`] = 'playing';
   updates[`${ROOMS_PATH}/${roomId}/gameData`] = {
     grid,
-    currentRound: 1
+    currentRound: 1,
+    submittedWords: {}
   };
   
   await update(ref(db), updates);

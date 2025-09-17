@@ -206,6 +206,28 @@ test.describe('Word Selection and Submission', () => {
     await expect(p2.getByText('30')).toBeVisible();
   });
 
+  test('should not allow submitting the same word twice', async () => {
+    await setupGameWithTestGrid('COMMON_WORDS');
+
+    // Player 1 submits the word
+    await host.getByLabel(/current word/i).fill('DOGS');
+    await host.getByRole('button', { name: /submit word/i }).click();
+
+    // Verify the word is submitted and score is updated
+    await expect(host.getByText('Submitted Words')).toBeVisible();
+    await expect(host.getByText('DOGS')).toBeVisible();
+    await expect(host.getByText('Score: 40')).toBeVisible();
+
+    // Player 1 tries to submit the same word again
+    await host.getByLabel(/current word/i).fill('DOGS');
+    // button to be disabled
+    await expect(host.getByRole('button', { name: /submit word/i })).toBeDisabled();
+
+    // Player 2 submits the same word
+    await p2.getByLabel(/current word/i).fill('DOGS');
+    await expect(p2.getByRole('button', { name: /submit word/i })).toBeDisabled();
+  });
+
   test('should handle invalid word submissions with no-words grid', async () => {
     await setupGameWithTestGrid('NO_WORDS');
 

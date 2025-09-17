@@ -13,6 +13,7 @@ export interface Room {
   gameData?: {
     grid: string[][];
     currentRound?: number;
+    submittedWords?: Record<string, SubmittedWord>;
   };
 }
 
@@ -34,6 +35,14 @@ export interface RoomSettings {
 export interface CreateRoomParams {
   maxPlayers: number;
   settings: RoomSettings;
+}
+
+export interface SubmittedWord {
+  word: string;
+  playerId: string;
+  playerName: string;
+  score: number;
+  submittedAt: number;
 }
 
 export interface RoomState {

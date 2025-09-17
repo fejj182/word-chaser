@@ -450,7 +450,8 @@ describe('room-utils', () => {
             ['I', 'J', 'K', 'L'],
             ['M', 'N', 'O', 'P']
           ],
-          currentRound: 1
+          currentRound: 1,
+          submittedWords: {}
         },
       });
     });
@@ -602,7 +603,8 @@ describe('room-utils', () => {
         'rooms/test-room-id/status': 'playing',
         'rooms/test-room-id/gameData': {
           grid: mockGrid,
-          currentRound: 1
+          currentRound: 1,
+          submittedWords: {}
         },
       });
     });

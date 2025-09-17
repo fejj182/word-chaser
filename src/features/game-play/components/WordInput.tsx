@@ -7,6 +7,7 @@ import { useGamePlay } from '../contexts/GamePlayContext';
 import { useWordPath } from '../hooks/useWordPath';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/user-management/hooks/useAuth';
+import { useSubmittedWords } from '../hooks/useSubmittedWords';
 
 export const WordInput: React.FC = () => {
   const { state } = useGamePlay();
@@ -20,12 +21,7 @@ export const WordInput: React.FC = () => {
     isValidPath
   } = useWordPath();
   
-  const [submittedWords, setSubmittedWords] = useState<Array<{
-    word: string;
-    result: WordValidationResponse;
-    timestamp: number;
-  }>>([]);
-  
+  const { submittedWords, isWordSubmitted } = useSubmittedWords();
   const { submitWord, isLoading, error, clearError } = useWordSubmission();
 
   // Debounced word input handler
@@ -74,13 +70,7 @@ export const WordInput: React.FC = () => {
       try {
         const result = await submitWord(currentWord.trim(), state.grid, currentRoom.id, user.uid);
         
-        const newSubmission = {
-          word: currentWord.trim().toUpperCase(),
-          result,
-          timestamp: Date.now()
-        };
-        
-        setSubmittedWords(prev => [newSubmission, ...prev]);
+        // Clear the input on successful submission
         setCurrentWord('');
         setInputValue('');
         clearSelection();
@@ -117,6 +107,11 @@ export const WordInput: React.FC = () => {
   const getValidationStatus = () => {
     if (!currentWord || currentWord.length < 3 || !isValidPath) {
       return { isValid: false };
+    }
+    
+    // Check if word has already been submitted
+    if (isWordSubmitted(currentWord)) {
+      return { isValid: false, reason: 'Word has already been submitted' };
     }
     
     return { isValid: true };
@@ -156,6 +151,11 @@ export const WordInput: React.FC = () => {
           <p id="word-help" className="text-sm text-gray-600 mt-1">
             Use at least 3 letters. Type or click letters on the grid.
           </p>
+          {currentWord.length >= 3 && !validationStatus.isValid && validationStatus.reason && (
+            <p id="word-validation" className="text-sm text-red-600 mt-1" role="alert">
+              {validationStatus.reason}
+            </p>
+          )}
         </div>
         
         <div className="flex space-x-2">
@@ -196,24 +196,19 @@ export const WordInput: React.FC = () => {
         <div className="mt-4">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Submitted Words</h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
-            {submittedWords.map((submission, index) => (
+            {submittedWords.map((submission) => (
               <div 
-                key={index} 
-                className={`p-3 rounded-lg border text-sm font-mono ${getWordStatusClass(submission.result)}`}
+                key={`${submission.word}-${submission.submittedAt}`} 
+                className="p-3 rounded-lg border text-sm font-mono text-green-600 bg-green-50 border-green-200"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">{submission.word}</span>
-                  <span className="text-lg">{getWordStatusIcon(submission.result)}</span>
+                  <span className="text-lg">✓</span>
                 </div>
-                {submission.result.result.isValid ? (
-                  <div className="text-xs mt-1">
-                    Score: {submission.result.result.score} points
-                  </div>
-                ) : (
-                  <div className="text-xs mt-1">
-                    {submission.result.result.reason}
-                  </div>
-                )}
+                <div className="text-xs mt-1">
+                  <div>Score: {submission.score} points</div>
+                  <div className="text-gray-500">by {submission.playerName}</div>
+                </div>
               </div>
             ))}
           </div>
