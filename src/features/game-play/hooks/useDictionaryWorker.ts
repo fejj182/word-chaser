@@ -148,7 +148,7 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
     } catch (error) {
       console.warn('Worker validation failed, falling back to main thread:', error);
       // Fallback to main thread validation
-      const { isValidWord } = await import('@/lib/dictionary');
+      const { isValidWord } = await import('@/lib/dictionary/dictionary');
       return isValidWord(word);
     }
   }, [sendMessage]);
@@ -210,7 +210,7 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
       for (const operation of operations) {
         switch (operation.type) {
           case 'VALIDATE_WORD':
-            const { isValidWord } = await import('@/lib/dictionary');
+            const { isValidWord } = await import('@/lib/dictionary/dictionary');
             results.push(isValidWord(operation.payload.word));
             break;
           case 'FIND_PATHS':

@@ -1,4 +1,4 @@
-import { isValidWord, calculateWordScore } from './dictionary';
+import { isValidWord, calculateWordScore } from './dictionary/dictionary';
 
 export interface BoardPosition {
   row: number;

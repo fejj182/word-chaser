@@ -3,7 +3,7 @@ import {
   calculateWordScore,
   initializeDictionary,
   getDictionary
-} from '../dictionary';
+} from '../dictionary/dictionary';
 
 describe('Dictionary', () => {
   beforeEach(() => {

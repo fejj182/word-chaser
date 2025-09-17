@@ -2,33 +2,33 @@ import { validateWordOnBoard, validateWordSubmission } from '../word-validation'
 
 describe('Word Validation', () => {
   const testBoard = [
-    ['A', 'B', 'C', 'D'],
-    ['E', 'F', 'G', 'H'],
-    ['I', 'J', 'K', 'L'],
-    ['M', 'N', 'O', 'P']
+    ['C', 'A', 'T', 'S'],
+    ['D', 'O', 'G', 'E'],
+    ['B', 'A', 'Y', 'W'],
+    ['M', 'A', 'N', 'Y']
   ];
 
   describe('validateWordOnBoard', () => {
     it('validates valid words that can be formed on the board', () => {
       // Test horizontal word
-      const result1 = validateWordOnBoard('ABC', testBoard);
+      const result1 = validateWordOnBoard('CAT', testBoard);
       expect(result1.isValid).toBe(true);
       expect(result1.path).toBeDefined();
 
       // Test vertical word
-      const result2 = validateWordOnBoard('AEI', testBoard);
+      const result2 = validateWordOnBoard('SEW', testBoard);
       expect(result2.isValid).toBe(true);
       expect(result2.path).toBeDefined();
 
       // Test diagonal word
-      const result3 = validateWordOnBoard('AFK', testBoard);
+      const result3 = validateWordOnBoard('COY', testBoard);
       expect(result3.isValid).toBe(true);
       expect(result3.path).toBeDefined();
     });
 
     it('rejects words that cannot be formed on the board', () => {
       // Use a word that exists in dictionary but can't be formed on board
-      const result = validateWordOnBoard('zed', testBoard);
+      const result = validateWordOnBoard('DOOR', testBoard);
       expect(result.isValid).toBe(false);
       expect(result.reason).toBe('Word cannot be formed on the board');
     });
@@ -49,7 +49,7 @@ describe('Word Validation', () => {
   describe('validateWordSubmission', () => {
     it('returns validation result with score for valid words', () => {
       // Use a word that exists in our dictionary and can be formed on the board
-      const result = validateWordSubmission('abc', testBoard);
+      const result = validateWordSubmission('CAT', testBoard);
       expect(result.isValid).toBe(true);
       expect(result.score).toBeGreaterThan(0);
       expect(result.path).toBeDefined();
@@ -65,7 +65,7 @@ describe('Word Validation', () => {
 
   describe('board path finding', () => {
     it('finds horizontal paths', () => {
-      const result = validateWordOnBoard('ABC', testBoard);
+      const result = validateWordOnBoard('CAT', testBoard);
       expect(result.isValid).toBe(true);
       expect(result.path).toEqual([
         { row: 0, col: 0 },
@@ -75,17 +75,17 @@ describe('Word Validation', () => {
     });
 
     it('finds vertical paths', () => {
-      const result = validateWordOnBoard('AEI', testBoard);
+      const result = validateWordOnBoard('SEW', testBoard);
       expect(result.isValid).toBe(true);
       expect(result.path).toEqual([
-        { row: 0, col: 0 },
-        { row: 1, col: 0 },
-        { row: 2, col: 0 }
+        { row: 0, col: 3 },
+        { row: 1, col: 3 },
+        { row: 2, col: 3 }
       ]);
     });
 
     it('finds diagonal paths', () => {
-      const result = validateWordOnBoard('AFK', testBoard);
+      const result = validateWordOnBoard('COY', testBoard);
       expect(result.isValid).toBe(true);
       expect(result.path).toEqual([
         { row: 0, col: 0 },
@@ -97,20 +97,20 @@ describe('Word Validation', () => {
 
   describe('edge cases', () => {
     it('handles empty board', () => {
-      const result = validateWordOnBoard('ABC', []);
+      const result = validateWordOnBoard('CAT', []);
       expect(result.isValid).toBe(false);
       expect(result.reason).toBe('Word cannot be formed on the board');
     });
 
     it('handles single row board', () => {
-      const singleRowBoard = [['A', 'B', 'C', 'D']];
-      const result = validateWordOnBoard('ABC', singleRowBoard);
+      const singleRowBoard = [['C', 'A', 'T', 'S']];
+      const result = validateWordOnBoard('CAT', singleRowBoard);
       expect(result.isValid).toBe(true);
       expect(result.reason).toBeUndefined();
     });
 
     it('handles case insensitive matching', () => {
-      const result = validateWordOnBoard('abc', testBoard);
+      const result = validateWordOnBoard('cat', testBoard);
       expect(result.isValid).toBe(true);
       expect(result.reason).toBeUndefined();
     });
