@@ -104,6 +104,8 @@ describe('room-utils', () => {
             joinedAt: expect.any(Number),
             isHost: true,
             isReady: true,
+            score: 0,
+            wordsFound: 0,
           },
         },
         maxPlayers: 4,
@@ -137,6 +139,8 @@ describe('room-utils', () => {
           joinedAt: expect.any(Number),
           isHost: false,
           isReady: false,
+          score: 0,
+          wordsFound: 0,
         },
       });
     });

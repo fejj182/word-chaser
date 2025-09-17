@@ -47,6 +47,9 @@ hub-debug.log
 # vercel
 .vercel
 
+# firebase
+word-chaser-firebase-adminsdk.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

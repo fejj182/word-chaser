@@ -1,11 +1,16 @@
 'use client';
 
 import React from 'react';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
 
 export const ScoreDisplay: React.FC = () => {
-  // Placeholder score data
-  const score = 1250;
-  const wordsFound = 8;
+  const { currentRoom } = useRoom();
+  const { user } = useAuth();
+  
+  const currentPlayer = user && currentRoom ? currentRoom.players[user.uid] : null;
+  const score = currentPlayer?.score ?? 0;
+  const wordsFound = currentPlayer?.wordsFound ?? 0;
 
   return (
     <div className="flex items-center gap-3 text-sm" role="region" aria-label="Score">

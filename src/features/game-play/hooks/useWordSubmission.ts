@@ -14,14 +14,18 @@ export const useWordSubmission = () => {
 
   const submitWord = useCallback(async (
     word: string,
-    boardLetters: string[][]
+    boardLetters: string[][],
+    roomId: string,
+    userId: string
   ): Promise<WordValidationResponse> => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
       const request: WordValidationRequest = {
         word: word.trim(),
-        boardLetters
+        boardLetters,
+        roomId,
+        userId
       };
 
       const response = await fetch('/api/validate-word', {

@@ -17,7 +17,13 @@ jest.mock('@/lib/word-validation', () => ({
   validateWordSubmission: jest.fn()
 }));
 
+// Mock the admin room utils function
+jest.mock('@/lib/firebase/admin-room-utils', () => ({
+  updatePlayerScoreAdmin: jest.fn()
+}));
+
 import { validateWordSubmission } from '@/lib/word-validation';
+import { updatePlayerScoreAdmin } from '@/lib/firebase/admin-room-utils';
 
 describe('/api/validate-word', () => {
   beforeEach(() => {
@@ -36,8 +42,7 @@ describe('/api/validate-word', () => {
     const requestBody = {
       word: 'cat',
       roomId: 'room123',
-      playerId: 'player123',
-      playerName: 'TestPlayer',
+      userId: 'user123',
       boardLetters: [['A', 'B', 'C', 'D'], ['E', 'F', 'G', 'H']]
     };
 
@@ -58,12 +63,13 @@ describe('/api/validate-word', () => {
       allowReuse: false,
       minLength: 3
     });
+    expect(updatePlayerScoreAdmin).toHaveBeenCalledWith('room123', 'user123', 30);
   });
 
   it('returns error for missing required fields', async () => {
     const requestBody = {
       word: 'cat',
-      // Missing roomId, playerId, playerName, boardLetters
+      // Missing roomId, userId, boardLetters
     };
 
     const request = {
@@ -84,8 +90,7 @@ describe('/api/validate-word', () => {
     const requestBody = {
       word: '',
       roomId: 'room123',
-      playerId: 'player123',
-      playerName: 'TestPlayer',
+      userId: 'user123',
       boardLetters: [['A', 'B', 'C', 'D']]
     };
 
@@ -114,8 +119,7 @@ describe('/api/validate-word', () => {
     const requestBody = {
       word: 'invalid',
       roomId: 'room123',
-      playerId: 'player123',
-      playerName: 'TestPlayer',
+      userId: 'user123',
       boardLetters: [['A', 'B', 'C', 'D']]
     };
 
@@ -131,6 +135,7 @@ describe('/api/validate-word', () => {
     expect(data.success).toBe(true);
     expect(data.result.isValid).toBe(mockValidation.isValid);
     expect(data.result.score).toBe(mockValidation.score);
+    expect(updatePlayerScoreAdmin).not.toHaveBeenCalled();
   });
 
   it('handles internal server errors', async () => {
@@ -141,8 +146,7 @@ describe('/api/validate-word', () => {
     const requestBody = {
       word: 'cat',
       roomId: 'room123',
-      playerId: 'player123',
-      playerName: 'TestPlayer',
+      userId: 'user123',
       boardLetters: [['A', 'B', 'C', 'D']]
     };
 

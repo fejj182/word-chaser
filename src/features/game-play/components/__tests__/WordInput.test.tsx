@@ -19,9 +19,21 @@ jest.mock('../../contexts/GamePlayContext', () => ({
   GamePlayProvider: ({ children }: { children: React.ReactNode }) => children
 }));
 
+// Mock the RoomContext
+jest.mock('@/features/room-management/contexts/RoomContext', () => ({
+  useRoom: jest.fn()
+}));
+
+// Mock the useAuth hook
+jest.mock('@/features/user-management/hooks/useAuth', () => ({
+  useAuth: jest.fn()
+}));
+
 const mockUseWordSubmission = require('../../hooks/useWordSubmission').useWordSubmission;
 const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
 const mockUseGamePlay = require('../../contexts/GamePlayContext').useGamePlay;
+const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
+const mockUseAuth = require('@/features/user-management/hooks/useAuth').useAuth;
 
 // Mock board letters for testing
 const mockBoardLetters = [
@@ -61,6 +73,21 @@ describe('WordInput', () => {
     mockUseGamePlay.mockReturnValue({
       state: {
         grid: mockBoardLetters
+      }
+    });
+
+    mockUseRoom.mockReturnValue({
+      currentRoom: {
+        id: 'test-room-id',
+        name: 'Test Room',
+        status: 'playing'
+      }
+    });
+
+    mockUseAuth.mockReturnValue({
+      user: {
+        uid: 'test-user-id',
+        displayName: 'Test User'
       }
     });
   });
@@ -140,7 +167,7 @@ describe('WordInput', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockSubmitWord).toHaveBeenCalledWith('TEST', mockBoardLetters);
+      expect(mockSubmitWord).toHaveBeenCalledWith('TEST', mockBoardLetters, 'test-room-id', 'test-user-id');
     });
 
     // The input should be cleared after successful submission
@@ -194,7 +221,7 @@ describe('WordInput', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockSubmitWord).toHaveBeenCalledWith('FIRST', mockBoardLetters);
+      expect(mockSubmitWord).toHaveBeenCalledWith('FIRST', mockBoardLetters, 'test-room-id', 'test-user-id');
     });
 
     mockUseWordPath.mockReturnValue({
@@ -240,7 +267,7 @@ describe('WordInput', () => {
     fireEvent.submit(screen.getByRole('form'));
 
     await waitFor(() => {
-      expect(mockSubmitWord).toHaveBeenCalledWith('TEST', mockBoardLetters);
+      expect(mockSubmitWord).toHaveBeenCalledWith('TEST', mockBoardLetters, 'test-room-id', 'test-user-id');
     });
 
     // The input should be cleared after successful submission

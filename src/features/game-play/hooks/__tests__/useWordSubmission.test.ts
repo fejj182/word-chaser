@@ -67,7 +67,7 @@ describe('useWordSubmission', () => {
     const { result } = renderHook(() => useWordSubmission());
 
     await act(async () => {
-      const response = await result.current.submitWord('cat', mockBoardLetters);
+      const response = await result.current.submitWord('cat', mockBoardLetters, 'room123', 'user123');
       expect(response).toEqual(mockResponse);
     });
 
@@ -80,7 +80,9 @@ describe('useWordSubmission', () => {
       },
       body: JSON.stringify({
         word: 'cat',
-        boardLetters: mockBoardLetters
+        boardLetters: mockBoardLetters,
+        roomId: 'room123',
+        userId: 'user123'
       })
     });
   });
@@ -92,7 +94,7 @@ describe('useWordSubmission', () => {
 
     await act(async () => {
       try {
-        await result.current.submitWord('cat', mockBoardLetters);
+        await result.current.submitWord('cat', mockBoardLetters, 'room123', 'user123');
       } catch (error) {
         // Expected to throw
       }
@@ -112,7 +114,7 @@ describe('useWordSubmission', () => {
 
     await act(async () => {
       try {
-        await result.current.submitWord('cat', mockBoardLetters);
+        await result.current.submitWord('cat', mockBoardLetters, 'room123', 'user123');
       } catch (error) {
         // Expected to throw
       }
@@ -153,7 +155,7 @@ describe('useWordSubmission', () => {
     const { result } = renderHook(() => useWordSubmission());
 
     await act(async () => {
-      await result.current.submitWord('  cat  ', mockBoardLetters);
+      await result.current.submitWord('  cat  ', mockBoardLetters, 'room123', 'user123');
     });
 
     expect(mockFetch).toHaveBeenCalledWith('/api/validate-word', {
@@ -163,7 +165,9 @@ describe('useWordSubmission', () => {
       },
       body: JSON.stringify({
         word: 'cat', // Should be trimmed
-        boardLetters: mockBoardLetters
+        boardLetters: mockBoardLetters,
+        roomId: 'room123',
+        userId: 'user123'
       })
     });
   });

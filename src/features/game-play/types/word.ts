@@ -16,6 +16,8 @@ export interface WordValidationResult {
 export interface WordValidationRequest {
   word: string;
   boardLetters: string[][];
+  roomId: string;
+  userId: string;
 }
 
 export interface WordValidationResponse {

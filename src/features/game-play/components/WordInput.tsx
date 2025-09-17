@@ -5,9 +5,13 @@ import { useWordSubmission } from '../hooks/useWordSubmission';
 import { WordValidationResponse } from '../types/word';
 import { useGamePlay } from '../contexts/GamePlayContext';
 import { useWordPath } from '../hooks/useWordPath';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
 
 export const WordInput: React.FC = () => {
   const { state } = useGamePlay();
+  const { currentRoom } = useRoom();
+  const { user } = useAuth();
   const { 
     currentWord, 
     setCurrentWord,
@@ -66,9 +70,9 @@ export const WordInput: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentWord.trim() && !isLoading && isValidPath) {
+    if (currentWord.trim() && !isLoading && isValidPath && currentRoom && user) {
       try {
-        const result = await submitWord(currentWord.trim(), state.grid);
+        const result = await submitWord(currentWord.trim(), state.grid, currentRoom.id, user.uid);
         
         const newSubmission = {
           word: currentWord.trim().toUpperCase(),

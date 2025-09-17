@@ -42,6 +42,8 @@ export const createRoom = async (params: CreateRoomParams, userId: string, displ
         joinedAt: Date.now(),
         isHost: true,
         isReady: true,
+        score: 0,
+        wordsFound: 0,
       }
     },
     maxPlayers: params.maxPlayers,
@@ -76,6 +78,8 @@ export const joinRoom = async (roomId: string, userId: string, displayName: stri
     joinedAt: Date.now(),
     isHost: false,
     isReady: false,
+    score: 0,
+    wordsFound: 0,
   };
 
   const updates: Record<string, Player> = {};

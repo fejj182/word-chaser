@@ -186,6 +186,9 @@ test.describe('Word Selection and Submission', () => {
     
     // Verify input is cleared after submission
     await expect(wordInput).toHaveValue('');
+
+    // Verify player score has increased
+    await expect(host.getByText('Score: 30')).toBeVisible();
   });
 
   test('should handle invalid word submissions with no-words grid', async () => {

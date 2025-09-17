@@ -21,6 +21,8 @@ export interface Player {
   joinedAt: number;
   isHost: boolean;
   isReady: boolean;
+  score: number;
+  wordsFound: number;
 }
 
 export interface RoomSettings {

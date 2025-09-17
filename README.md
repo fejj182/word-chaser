@@ -78,6 +78,14 @@ NEXT_PUBLIC_FIREBASE_DATABASE_URL=http://127.0.0.1:9000?ns=demo-word-chaser
 npm run dev
 ```
 
+### Firebase Admin SDK Setup
+
+For production deployments, the application uses Firebase Admin SDK for server-side operations. See [ADR 011](../docs/adrs/adr-011-firebase-admin-sdk-for-serverless-operations.md) for detailed setup instructions.
+
+**Quick Setup:**
+- **Development**: No additional setup needed (uses emulators)
+- **Production**: Set `GOOGLE_APPLICATION_CREDENTIALS` to your service account JSON file path
+
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ## Development
