@@ -6,6 +6,7 @@ import { GridDebugControls } from '@/features/development/components/GridDebugCo
 import { GridSizeSelector } from '@/features/game-play/components/GridSizeSelector';
 import { GamePlayProvider } from '@/features/game-play/contexts/GamePlayContext';
 import { GridSize } from '@/features/game-play/contexts/GamePlayContext';
+import { RoomProvider } from '@/features/room-management/contexts/RoomContext';
 
 /**
  * Demo page for debugging grid-related issues
@@ -88,10 +89,12 @@ export default function DemoPage() {
           </div>
           
           <div className="p-6 space-y-6">
-            <GamePlayProvider initialGridSize={gridSize}>
-              <GridDebugControls />
-              <WordGridDemo gridSize={gridSize} />
-            </GamePlayProvider>
+            <RoomProvider>
+              <GamePlayProvider initialGridSize={gridSize}>
+                <GridDebugControls />
+                <WordGridDemo gridSize={gridSize} />
+              </GamePlayProvider>
+            </RoomProvider>
           </div>
         </div>
 

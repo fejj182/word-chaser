@@ -2,6 +2,14 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import DemoPage from '../page';
 
+// Mock Firebase auth
+jest.mock('@/features/user-management/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false
+  })
+}));
+
 // Mock the components to avoid complex dependencies
 jest.mock('@/features/development/components/WordGridDemo', () => ({
   WordGridDemo: ({ gridSize }: { gridSize: string }) => (
@@ -32,6 +40,25 @@ jest.mock('@/features/game-play/components/GridSizeSelector', () => ({
 jest.mock('@/features/game-play/contexts/GamePlayContext', () => ({
   GamePlayProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="game-play-provider">{children}</div>
+  )
+}));
+
+// Mock UserProvider to provide required context
+jest.mock('@/features/user-management/contexts/UserContext', () => ({
+  UserProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="user-provider">{children}</div>
+  ),
+  useUser: () => ({
+    userId: 'test-user-id',
+    displayName: 'Test User',
+    setUser: jest.fn()
+  })
+}));
+
+// Mock RoomProvider to avoid Firebase dependencies
+jest.mock('@/features/room-management/contexts/RoomContext', () => ({
+  RoomProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="room-provider">{children}</div>
   )
 }));
 
