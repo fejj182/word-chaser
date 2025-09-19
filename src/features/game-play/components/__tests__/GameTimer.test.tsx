@@ -1,10 +1,52 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { GameTimer } from '../GameTimer';
+import { useRoom } from '@/features/room-management/contexts/RoomContext';
+import { useAuth } from '@/features/user-management/hooks/useAuth';
+import { getRemainingTime } from '@/lib/firebase/round-utils';
+
+// Mock the dependencies
+jest.mock('@/features/room-management/contexts/RoomContext');
+jest.mock('@/features/user-management/hooks/useAuth');
+jest.mock('@/lib/firebase/round-utils');
+
+const mockUseRoom = useRoom as jest.MockedFunction<typeof useRoom>;
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockGetRemainingTime = getRemainingTime as jest.MockedFunction<typeof getRemainingTime>;
 
 describe('GameTimer', () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.clearAllMocks();
+
+    // Default mocks
+    mockUseAuth.mockReturnValue({
+      user: { uid: 'test-user', displayName: 'Test User' },
+      loading: false,
+    } as any);
+
+    mockUseRoom.mockReturnValue({
+      currentRoom: {
+        id: 'test-room',
+        players: {
+          'test-user': {
+            displayName: 'Test User',
+            isHost: true,
+            score: 0,
+            joinedAt: Date.now(),
+            isReady: true,
+            wordsFound: 0,
+          },
+        },
+        gameData: {
+          currentRound: 1,
+          timerStatus: 'running',
+        },
+      },
+      loading: false,
+    } as any);
+
+    mockGetRemainingTime.mockReturnValue(180); // 3 minutes
   });
 
   afterEach(() => {
@@ -14,17 +56,15 @@ describe('GameTimer', () => {
   it('renders timer with initial time', () => {
     render(<GameTimer />);
 
+    expect(screen.getByText('Round 1')).toBeInTheDocument();
     expect(screen.getByText('Time')).toBeInTheDocument();
     expect(screen.getByText('3:00')).toBeInTheDocument();
   });
 
   it('updates timer countdown', () => {
-    render(<GameTimer />);
-
-    // Advance timer by 30 seconds
-    act(() => {
-      jest.advanceTimersByTime(30000);
-    });
+    // Mock time decreasing
+    mockGetRemainingTime.mockReturnValue(150); // 2:30
+    const { rerender } = render(<GameTimer />);
 
     expect(screen.getByText('2:30')).toBeInTheDocument();
   });

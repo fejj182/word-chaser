@@ -443,7 +443,7 @@ describe('room-utils', () => {
       expect(mockGenerateLetterGrid).toHaveBeenCalledWith({ size: 4 });
       expect(mockUpdate).toHaveBeenCalledWith(ref(db), {
         'rooms/test-room-id/status': 'playing',
-        'rooms/test-room-id/gameData': {
+        'rooms/test-room-id/gameData': expect.objectContaining({
           grid: [
             ['A', 'B', 'C', 'D'],
             ['E', 'F', 'G', 'H'],
@@ -451,8 +451,11 @@ describe('room-utils', () => {
             ['M', 'N', 'O', 'P']
           ],
           currentRound: 1,
-          submittedWords: {}
-        },
+          submittedWords: {},
+          roundStartTime: expect.any(Number),
+          roundEndTime: expect.any(Number),
+          timerStatus: 'running'
+        }),
       });
     });
 
@@ -595,17 +598,18 @@ describe('room-utils', () => {
       mockGet.mockResolvedValue(mockSnapshot);
       mockUpdate.mockResolvedValue(undefined);
 
-      const beforeTime = Date.now();
       await startGame('test-room-id');
-      const afterTime = Date.now();
 
       expect(mockUpdate).toHaveBeenCalledWith(ref(db), {
         'rooms/test-room-id/status': 'playing',
-        'rooms/test-room-id/gameData': {
+        'rooms/test-room-id/gameData': expect.objectContaining({
           grid: mockGrid,
           currentRound: 1,
-          submittedWords: {}
-        },
+          submittedWords: {},
+          roundStartTime: expect.any(Number),
+          roundEndTime: expect.any(Number),
+          timerStatus: 'running'
+        }),
       });
     });
 

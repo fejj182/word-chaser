@@ -14,6 +14,10 @@ export interface Room {
     grid: string[][];
     currentRound?: number;
     submittedWords?: Record<string, SubmittedWord>;
+    roundStartTime?: number;
+    roundEndTime?: number;
+    timerStatus?: 'running' | 'paused' | 'ended';
+    roundResults?: Record<number, RoundResult>;
   };
 }
 
@@ -43,6 +47,17 @@ export interface SubmittedWord {
   playerName: string;
   score: number;
   submittedAt: number;
+}
+
+export interface RoundResult {
+  roundNumber: number;
+  roundScores: Record<string, number>;
+  roundWords: Record<string, SubmittedWord[]>;
+  roundWinner?: {
+    playerId: string;
+    playerName: string;
+    score: number;
+  };
 }
 
 export interface RoomState {

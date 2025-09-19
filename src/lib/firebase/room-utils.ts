@@ -205,12 +205,20 @@ export const startGame = async (roomId: string): Promise<void> => {
   const gridSize = getGridSizeConfig(room.settings.gridSize);
   const grid = generateLetterGrid(gridSize);
 
+  // Initialize timer for first round
+  const roundDuration = room.settings.roundDuration * 1000; // Convert to ms
+  const roundStartTime = Date.now();
+  const roundEndTime = roundStartTime + roundDuration;
+
   const updates: Record<string, any> = {};
   updates[`${ROOMS_PATH}/${roomId}/status`] = 'playing';
   updates[`${ROOMS_PATH}/${roomId}/gameData`] = {
     grid,
     currentRound: 1,
-    submittedWords: {}
+    submittedWords: {},
+    roundStartTime,
+    roundEndTime,
+    timerStatus: 'running'
   };
   
   await update(ref(db), updates);

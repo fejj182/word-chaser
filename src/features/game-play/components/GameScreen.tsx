@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/user-management/hooks/useAuth';
@@ -11,6 +11,7 @@ import { ScoreDisplay } from './ScoreDisplay';
 import { GameTimer } from './GameTimer';
 import { GameHeader } from './GameHeader';
 import { RealTimeScoreboard } from './RealTimeScoreboard';
+import { RoundResults } from './RoundResults';
 
 interface GameScreenProps {
   roomId: string;
@@ -33,7 +34,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
     if (currentRoom?.gameData?.grid && currentRoom.settings?.gridSize) {
       loadGridFromRoom(currentRoom.gameData.grid, currentRoom.settings.gridSize);
     }
-  }, [currentRoom?.status, loadGridFromRoom]);
+  }, [currentRoom?.gameData?.grid, currentRoom?.settings?.gridSize]);
 
   // Redirect to lobby if room is not in playing status
   useEffect(() => {
@@ -102,6 +103,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
           </div>
         </div>
       </div>
+      
+      <RoundResults />
     </div>
   );
 };

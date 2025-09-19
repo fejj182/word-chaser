@@ -105,7 +105,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [user]);
+  }, [user?.uid]);
 
   const joinRoomHandler = useCallback(async (roomId: string, alias: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
@@ -126,7 +126,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [user]);
+  }, [user?.uid]);
 
   const leaveRoomHandler = useCallback(async (): Promise<void> => {
     if (!state.currentRoom || !user) {
@@ -148,9 +148,9 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [state.currentRoom, user]);
+  }, [state.currentRoom?.id, user?.uid]);
 
-  const loadSessionHandler = async (sessionId: string): Promise<void> => {
+  const loadSessionHandler = useCallback(async (sessionId: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
@@ -164,7 +164,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }
+  }, [state.currentRoom?.id, user?.uid]);
 
 
   const updatePlayerReadyHandler = useCallback(async (isReady: boolean): Promise<void> => {
@@ -181,7 +181,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw err;
     }
-  }, [state.currentRoom, user]);
+  }, [state.currentRoom?.id, user?.uid]);
 
   const startGameHandler = useCallback(async (): Promise<void> => {
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -197,7 +197,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw err;
     }
-  }, [state.currentRoom]);
+  }, [state.currentRoom?.id]);
 
   // Effect to handle room subscription when roomId changes
   useEffect(() => {
