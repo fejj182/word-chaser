@@ -53,11 +53,11 @@ export interface RoundResult {
   roundNumber: number;
   roundScores: Record<string, number>;
   roundWords: Record<string, SubmittedWord[]>;
-  roundWinner?: {
+  roundWinner: {
     playerId: string;
     playerName: string;
     score: number;
-  };
+  } | null;
 }
 
 export interface RoomState {

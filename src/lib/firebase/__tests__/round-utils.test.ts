@@ -173,7 +173,7 @@ describe('round-utils', () => {
         'host-123': [],
         'player-456': [],
       });
-      expect(result.roundWinner).toBeUndefined();
+      expect(result.roundWinner).toBeNull();
     });
 
     it('should handle tie scores correctly', () => {
@@ -193,8 +193,25 @@ describe('round-utils', () => {
         'host-123': 3,
         'player-456': 3,
       });
-      // In case of tie, first player alphabetically should win
-      expect(result.roundWinner?.playerId).toBe('host-123');
+      // In case of tie, it should be a draw
+      expect(result.roundWinner).toBeNull();
+    });
+
+    it('should handle no scores correctly', () => {
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!
+        },
+      });
+
+      const result = calculateRoundResults(room, 1);
+
+      expect(result.roundScores).toEqual({
+        'host-123': 0,
+        'player-456': 0,
+      });
+      // In case of no scores, it should be a draw
+      expect(result.roundWinner).toBeNull();
     });
   });
 

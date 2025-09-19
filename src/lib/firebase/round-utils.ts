@@ -101,18 +101,24 @@ export const calculateRoundResults = (room: Room, roundNumber: number): RoundRes
     }
   });
 
-  let roundWinner: RoundResult['roundWinner'] | undefined;
+  let roundWinner: RoundResult['roundWinner'] | null = null;
   const sortedPlayers = Object.entries(roundScores)
     .sort(([,a], [,b]) => b - a);
   
   if (sortedPlayers.length > 0 && sortedPlayers[0][1] > 0) {
     const [winnerId, winnerScore] = sortedPlayers[0];
     const winnerPlayer = players[winnerId];
-    roundWinner = {
-      playerId: winnerId,
-      playerName: winnerPlayer.displayName,
-      score: winnerScore
-    };
+    
+    // Check if there's a tie for first place
+    const tiedPlayers = sortedPlayers.filter(([, score]) => score === winnerScore);
+    
+    if (tiedPlayers.length === 1) {
+      roundWinner = {
+        playerId: winnerId,
+        playerName: winnerPlayer.displayName,
+        score: winnerScore
+      };
+    }
   }
 
   return {

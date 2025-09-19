@@ -46,7 +46,7 @@ export const RoundResults: React.FC = () => {
                 <span className="font-medium">{player.displayName}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">
-                    {roundResult.roundWords[playerId]?.length || 0} words
+                    {roundResult.roundWords?.[playerId]?.length || 0} words
                   </span>
                   <span className="font-mono font-bold">{score} pts</span>
                 </div>
