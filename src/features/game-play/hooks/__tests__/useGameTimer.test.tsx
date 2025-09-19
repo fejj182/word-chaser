@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useGameTimer } from '../useGameTimer';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/user-management/hooks/useAuth';

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { GridSizeSelector } from '../GridSizeSelector';
 import { useState } from 'react';
 import { GridSize } from '../../contexts/GamePlayContext';
@@ -35,7 +35,7 @@ export default meta;
 type Story = StoryObj<typeof GridSizeSelector>;
 
 // Interactive story with state management
-const InteractiveTemplate = (args: any) => {
+const InteractiveTemplate = (args: Partial<React.ComponentProps<typeof GridSizeSelector>>) => {
   const [value, setValue] = useState<GridSize>('small');
   
   return (

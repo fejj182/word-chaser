@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { LetterGrid } from '../LetterGrid';
 import { GridSize } from '../../contexts/GamePlayContext';
 
@@ -14,8 +14,8 @@ jest.mock('../../hooks/useWordPath', () => ({
   useWordPath: jest.fn(),
 }));
 
-const mockUseGamePlay = require('../../contexts/GamePlayContext').useGamePlay;
-const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
+const mockUseGamePlay = jest.mocked(jest.requireMock('../../contexts/GamePlayContext').useGamePlay);
+const mockUseWordPath = jest.mocked(jest.requireMock('../../hooks/useWordPath').useWordPath);
 
 describe('LetterGrid', () => {
   const mockSelectTilesForWord = jest.fn();
@@ -256,13 +256,6 @@ describe('LetterGrid', () => {
 
       expect(screen.getByText('No grid generated yet.')).toBeInTheDocument();
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    });
-
-    it('should handle undefined grid gracefully', () => {
-      const undefinedGridState = { ...mockGamePlayState, grid: undefined as any };
-      renderWithProvider(undefinedGridState);
-
-      expect(screen.getByText('No grid generated yet.')).toBeInTheDocument();
     });
 
     it('should handle malformed grid gracefully', () => {

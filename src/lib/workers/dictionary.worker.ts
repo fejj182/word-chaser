@@ -15,14 +15,14 @@ import {
 interface WorkerMessage {
   id: string;
   type: 'VALIDATE_WORD' | 'FIND_PATHS' | 'FIND_BEST_PATH' | 'CAN_FORM_WORD' | 'BATCH_OPERATIONS';
-  payload: any;
+  payload: unknown;
 }
 
 interface WorkerResponse {
   id: string;
   type: string;
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 
@@ -46,19 +46,19 @@ interface CanFormWordPayload {
 interface BatchOperationsPayload {
   operations: Array<{
     type: 'VALIDATE_WORD' | 'FIND_PATHS' | 'FIND_BEST_PATH' | 'CAN_FORM_WORD';
-    payload: any;
+    payload: unknown;
   }>;
 }
 
 // Simple dictionary for worker (will be loaded from main thread)
-let dictionary: Set<string> = new Set();
+const dictionary: Set<string> = new Set();
 
 // Load dictionary from main thread
 self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
   const { id, type, payload } = event.data;
 
   try {
-    let result: any;
+    let result: unknown;
 
     switch (type) {
       case 'VALIDATE_WORD':
@@ -129,25 +129,25 @@ async function canFormWordOperation(payload: CanFormWordPayload): Promise<boolea
 }
 
 // Batch operations for efficiency
-async function batchOperations(payload: BatchOperationsPayload): Promise<any[]> {
+async function batchOperations(payload: BatchOperationsPayload): Promise<unknown[]> {
   const { operations } = payload;
   const results = [];
 
   for (const operation of operations) {
-    let result: any;
+    let result: unknown;
 
     switch (operation.type) {
       case 'VALIDATE_WORD':
-        result = await validateWord(operation.payload);
+        result = await validateWord(operation.payload as ValidateWordPayload);
         break;
       case 'FIND_PATHS':
-        result = await findPaths(operation.payload);
+        result = await findPaths(operation.payload as FindPathsPayload);
         break;
       case 'FIND_BEST_PATH':
-        result = await findBestPath(operation.payload);
+        result = await findBestPath(operation.payload as FindPathsPayload);
         break;
       case 'CAN_FORM_WORD':
-        result = await canFormWordOperation(operation.payload);
+        result = await canFormWordOperation(operation.payload as CanFormWordPayload);
         break;
       default:
         throw new Error(`Unknown batch operation type: ${operation.type}`);

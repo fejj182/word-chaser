@@ -95,7 +95,7 @@ describe('useWordSubmission', () => {
     await act(async () => {
       try {
         await result.current.submitWord('cat', mockBoardLetters, 'room123', 'user123');
-      } catch (error) {
+      } catch {
         // Expected to throw
       }
     });
@@ -115,7 +115,7 @@ describe('useWordSubmission', () => {
     await act(async () => {
       try {
         await result.current.submitWord('cat', mockBoardLetters, 'room123', 'user123');
-      } catch (error) {
+      } catch {
         // Expected to throw
       }
     });

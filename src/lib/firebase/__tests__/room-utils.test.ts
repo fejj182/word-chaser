@@ -31,7 +31,7 @@ const mockOnValue = onValue as jest.MockedFunction<typeof onValue>;
 const mockUpdate = update as jest.MockedFunction<typeof update>;
 
 // Import mocked grid generation functions
-const { generateLetterGrid, getGridSizeConfig } = require('@/lib/utils/grid-generation');
+const { generateLetterGrid, getGridSizeConfig } = jest.requireMock('@/lib/utils/grid-generation');
 const mockGenerateLetterGrid = generateLetterGrid as jest.MockedFunction<typeof generateLetterGrid>;
 const mockGetGridSizeConfig = getGridSizeConfig as jest.MockedFunction<typeof getGridSizeConfig>;
 

@@ -50,7 +50,7 @@ export const LetterGrid: React.FC = () => {
     return 'max-w-sm';
   };
 
-  if (!state.grid || state.grid.length === 0) {
+  if (state.grid.length === 0) {
     return (
       <div className={`space-y-4`}>
         <h2 className="text-xl font-semibold text-gray-900 text-center">Letter Grid</h2>

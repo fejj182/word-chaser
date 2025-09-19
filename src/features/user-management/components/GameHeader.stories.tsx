@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { GameHeader } from '../GameHeader';
+import { GameHeader } from './GameHeader';
 
 const meta: Meta<typeof GameHeader> = {
   title: 'Features/Guest Auth/GameHeader',

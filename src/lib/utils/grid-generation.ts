@@ -62,7 +62,7 @@ export function generateLetterGrid(
   size: number,
   options: GridGenerationOptions = {}
 ): string[][] {
-  const { seedWords = []} = options;
+  const { seedWords: _seedWords = []} = options;
   
   const testGrid = getTestGridFromUrl();
   if (testGrid) {

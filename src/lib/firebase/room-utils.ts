@@ -1,5 +1,5 @@
 import { ref, push, set, get, onValue, off, update } from 'firebase/database';
-import { db, auth } from './firebase';
+import { db } from './firebase';
 import { Room, Player, CreateRoomParams } from '@/features/room-management/types/room';
 import { generateLetterGrid, getGridSizeConfig } from '@/lib/utils/grid-generation';
 import { slugify, generateGlaswegianSlug } from '@/lib/utils/slug-utils';
@@ -210,7 +210,7 @@ export const startGame = async (roomId: string): Promise<void> => {
   const roundStartTime = Date.now();
   const roundEndTime = roundStartTime + roundDuration;
 
-  const updates: Record<string, any> = {};
+  const updates: Record<string, unknown> = {};
   updates[`${ROOMS_PATH}/${roomId}/status`] = 'playing';
   updates[`${ROOMS_PATH}/${roomId}/gameData`] = {
     grid,

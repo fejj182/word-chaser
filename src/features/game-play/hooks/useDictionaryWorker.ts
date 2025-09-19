@@ -7,20 +7,20 @@ import { PathfindingOptions } from '@/lib/utils/pathfinding';
 interface WorkerMessage {
   id: string;
   type: 'VALIDATE_WORD' | 'FIND_PATHS' | 'FIND_BEST_PATH' | 'CAN_FORM_WORD' | 'BATCH_OPERATIONS';
-  payload: any;
+  payload: unknown;
 }
 
 interface WorkerResponse {
   id: string;
   type: string;
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 
-interface PendingOperation {
+interface PendingOperation<T = unknown> {
   id: string;
-  resolve: (value: any) => void;
+  resolve: (value: T) => void;
   reject: (error: Error) => void;
   timestamp: number;
 }
@@ -31,7 +31,7 @@ export interface UseDictionaryWorkerReturn {
   findPaths: (grid: string[][], word: string, options?: PathfindingOptions) => Promise<GridPosition[][]>;
   findBestPath: (grid: string[][], word: string, options?: PathfindingOptions) => Promise<GridPosition[] | null>;
   canFormWord: (grid: string[][], word: string, options?: PathfindingOptions) => Promise<boolean>;
-  batchOperations: (operations: Array<{ type: string; payload: any }>) => Promise<any[]>;
+  batchOperations: (operations: Array<{ type: string; payload: unknown }>) => Promise<unknown[]>;
 }
 
 /**
@@ -39,7 +39,7 @@ export interface UseDictionaryWorkerReturn {
  */
 export function useDictionaryWorker(): UseDictionaryWorkerReturn {
   const workerRef = useRef<Worker | null>(null);
-  const pendingOperationsRef = useRef<Map<string, PendingOperation>>(new Map());
+  const pendingOperationsRef = useRef<Map<string, PendingOperation<unknown>>>(new Map());
   const [isWorkerReady, setIsWorkerReady] = useState(false);
   const operationIdRef = useRef(0);
 
@@ -74,7 +74,7 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
       worker.onerror = (error) => {
         console.error('Worker error:', error);
         // Reject all pending operations
-        for (const [id, operation] of pendingOperationsRef.current) {
+        for (const [, operation] of pendingOperationsRef.current) {
           operation.reject(new Error('Worker error'));
         }
         pendingOperationsRef.current.clear();
@@ -87,10 +87,11 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
       // Cleanup function
       return () => {
         // Reject all pending operations
-        for (const [id, operation] of pendingOperationsRef.current) {
+        const pendingOps = pendingOperationsRef.current;
+        for (const [, operation] of pendingOps) {
           operation.reject(new Error('Worker terminated'));
         }
-        pendingOperationsRef.current.clear();
+        pendingOps.clear();
         
         worker.terminate();
         workerRef.current = null;
@@ -120,7 +121,7 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
   }, []);
 
   // Send message to worker
-  const sendMessage = useCallback(<T>(type: WorkerMessage['type'], payload: any): Promise<T> => {
+  const sendMessage = useCallback(<T>(type: WorkerMessage['type'], payload: unknown): Promise<T> => {
     return new Promise((resolve, reject) => {
       if (!workerRef.current || !isWorkerReady) {
         reject(new Error('Worker not ready'));
@@ -132,7 +133,7 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
 
       pendingOperationsRef.current.set(id, {
         id,
-        resolve,
+        resolve: resolve as (value: unknown) => void,
         reject,
         timestamp: Date.now()
       });
@@ -199,10 +200,10 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
   }, [sendMessage]);
 
   const batchOperations = useCallback(async (
-    operations: Array<{ type: string; payload: any }>
-  ): Promise<any[]> => {
+    operations: Array<{ type: string; payload: unknown }>
+  ): Promise<unknown[]> => {
     try {
-      return await sendMessage<any[]>('BATCH_OPERATIONS', { operations });
+      return await sendMessage<unknown[]>('BATCH_OPERATIONS', { operations });
     } catch (error) {
       console.warn('Worker batch operations failed, falling back to main thread:', error);
       // Fallback to sequential main thread operations
@@ -211,19 +212,22 @@ export function useDictionaryWorker(): UseDictionaryWorkerReturn {
         switch (operation.type) {
           case 'VALIDATE_WORD':
             const { isValidWord } = await import('@/lib/dictionary/dictionary');
-            results.push(isValidWord(operation.payload.word));
+            results.push(isValidWord((operation.payload as { word: string }).word));
             break;
           case 'FIND_PATHS':
             const { findWordPaths } = await import('@/lib/utils/pathfinding');
-            results.push(findWordPaths(operation.payload.grid, operation.payload.word, operation.payload.options));
+            const findPathsPayload = operation.payload as { grid: string[][]; word: string; options?: PathfindingOptions };
+            results.push(findWordPaths(findPathsPayload.grid, findPathsPayload.word, findPathsPayload.options));
             break;
           case 'FIND_BEST_PATH':
             const { findBestWordPath } = await import('@/lib/utils/pathfinding');
-            results.push(findBestWordPath(operation.payload.grid, operation.payload.word, operation.payload.options));
+            const findBestPayload = operation.payload as { grid: string[][]; word: string; options?: PathfindingOptions };
+            results.push(findBestWordPath(findBestPayload.grid, findBestPayload.word, findBestPayload.options));
             break;
           case 'CAN_FORM_WORD':
             const { canFormWord: canFormWordMain } = await import('@/lib/utils/pathfinding');
-            results.push(canFormWordMain(operation.payload.grid, operation.payload.word, operation.payload.options));
+            const canFormPayload = operation.payload as { grid: string[][]; word: string; options?: PathfindingOptions };
+            results.push(canFormWordMain(canFormPayload.grid, canFormPayload.word, canFormPayload.options));
             break;
           default:
             results.push(null);

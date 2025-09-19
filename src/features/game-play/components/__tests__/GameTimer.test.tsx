@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { GameTimer } from '../GameTimer';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/user-management/hooks/useAuth';
 import { getRemainingTime } from '@/lib/firebase/round-utils';
+import { User } from 'firebase/auth';
 
 // Mock the dependencies
 jest.mock('@/features/room-management/contexts/RoomContext');
@@ -21,9 +22,9 @@ describe('GameTimer', () => {
 
     // Default mocks
     mockUseAuth.mockReturnValue({
-      user: { uid: 'test-user', displayName: 'Test User' },
+      user: { uid: 'test-user', displayName: 'Test User' } as User,
       loading: false,
-    } as any);
+    });
 
     mockUseRoom.mockReturnValue({
       currentRoom: {
@@ -39,12 +40,13 @@ describe('GameTimer', () => {
           },
         },
         gameData: {
+          grid: [[]],
           currentRound: 1,
           timerStatus: 'running',
         },
       },
       loading: false,
-    } as any);
+    });
 
     mockGetRemainingTime.mockReturnValue(180); // 3 minutes
   });
@@ -64,7 +66,7 @@ describe('GameTimer', () => {
   it('updates timer countdown', () => {
     // Mock time decreasing
     mockGetRemainingTime.mockReturnValue(150); // 2:30
-    const { rerender } = render(<GameTimer />);
+    render(<GameTimer />);
 
     expect(screen.getByText('2:30')).toBeInTheDocument();
   });

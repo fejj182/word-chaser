@@ -56,15 +56,15 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     minLength = 1,
     maxLength = 16,
     allowReuse = false,
-    debounceMs = 150
+    debounceMs: _debounceMs = 150
   } = options;
 
-  const pathfindingOptions: PathfindingOptions = {
+  const pathfindingOptions: PathfindingOptions = useMemo(() => ({
     allowDiagonals,
     minLength,
     maxLength,
     allowReuse
-  };
+  }), [allowDiagonals, minLength, maxLength, allowReuse]);
 
   const canFormWordOnGrid = useCallback((word: string) => {
     if (!word || !state.grid || state.grid.length === 0) return false;
@@ -138,7 +138,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     }
 
     actions.selectTileToSubmit(position);
-  }, [state.selectedPath, actions, isPositionInCurrentPath]);
+  }, [state.grid, state.selectedPath, actions, isPositionInCurrentPath]);
 
   const clearSelection = useCallback(() => {
     actions.clearSelection();
@@ -211,7 +211,7 @@ export function useWordPath(options: UseWordPathOptions = {}): UseWordPathReturn
     }
     
     return paths;
-  }, [state.grid, pathfindingOptions, actions, state.selectedPath.length]);
+  }, [state.grid, pathfindingOptions, actions]);
 
   return {
     // Path operations

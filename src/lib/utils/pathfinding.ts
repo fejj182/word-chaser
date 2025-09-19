@@ -118,20 +118,6 @@ function findAllPathsFromPosition(
 }
 
 /**
- * Find a path starting from a specific position (legacy function)
- */
-function findPathFromPosition(
-  grid: string[][],
-  targetWord: string,
-  currentPath: GridPosition[],
-  allowDiagonals: boolean,
-  allowReuse: boolean
-): GridPosition[] {
-  const allPaths = findAllPathsFromPosition(grid, targetWord, currentPath, allowDiagonals, allowReuse);
-  return allPaths.length > 0 ? allPaths[0] : currentPath;
-}
-
-/**
  * Get only orthogonal (non-diagonal) adjacent positions
  */
 function getOrthogonalPositions(row: number, col: number): GridPosition[] {

@@ -6,7 +6,7 @@ jest.mock('@/features/room-management/contexts/RoomContext', () => ({
   useRoom: jest.fn()
 }));
 
-const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
+const mockUseRoom = jest.mocked(jest.requireMock('@/features/room-management/contexts/RoomContext').useRoom);
 
 describe('useSubmittedWords', () => {
   beforeEach(() => {

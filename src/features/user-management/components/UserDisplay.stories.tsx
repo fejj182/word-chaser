@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { UserDisplay } from '../UserDisplay';
+import { UserDisplay } from './UserDisplay';
 
 const meta: Meta<typeof UserDisplay> = {
   title: 'Features/Guest Auth/UserDisplay',

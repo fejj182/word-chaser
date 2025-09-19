@@ -12,8 +12,8 @@ jest.mock('@/features/user-management/hooks/useAuth', () => ({
   useAuth: jest.fn()
 }));
 
-const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
-const mockUseAuth = require('@/features/user-management/hooks/useAuth').useAuth;
+const mockUseRoom = jest.mocked(jest.requireMock('@/features/room-management/contexts/RoomContext').useRoom);
+const mockUseAuth = jest.mocked(jest.requireMock('@/features/user-management/hooks/useAuth').useAuth);
 
 describe('ScoreDisplay', () => {
   beforeEach(() => {

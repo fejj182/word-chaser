@@ -644,7 +644,7 @@ describe('RoomContext', () => {
       mockWindowRemoveEventListener.mockRestore();
       mockDocumentAddEventListener.mockRestore();
       mockDocumentRemoveEventListener.mockRestore();
-      delete (navigator as any).sendBeacon;
+      delete (navigator as { sendBeacon?: unknown }).sendBeacon;
     });
 
     it('should set up beforeunload and visibilitychange listeners when in a room', async () => {
@@ -679,8 +679,8 @@ describe('RoomContext', () => {
         const windowAddEventListenerCalls = mockWindowAddEventListener.mock.calls;
         const documentAddEventListenerCalls = mockDocumentAddEventListener.mock.calls;
         const allEventTypes = [
-          ...windowAddEventListenerCalls.map((call: any) => call[0]),
-          ...documentAddEventListenerCalls.map((call: any) => call[0])
+          ...windowAddEventListenerCalls.map((call: unknown[]) => call[0]),
+          ...documentAddEventListenerCalls.map((call: unknown[]) => call[0])
         ];
         expect(allEventTypes).toContain('beforeunload');
         expect(allEventTypes).toContain('visibilitychange');
@@ -740,8 +740,8 @@ describe('RoomContext', () => {
         const windowAddEventListenerCalls = mockWindowAddEventListener.mock.calls;
         const documentAddEventListenerCalls = mockDocumentAddEventListener.mock.calls;
         const allEventTypes = [
-          ...windowAddEventListenerCalls.map((call: any) => call[0]),
-          ...documentAddEventListenerCalls.map((call: any) => call[0])
+          ...windowAddEventListenerCalls.map((call: unknown[]) => call[0]),
+          ...documentAddEventListenerCalls.map((call: unknown[]) => call[0])
         ];
         expect(allEventTypes).toContain('beforeunload');
         expect(allEventTypes).toContain('visibilitychange');
@@ -755,8 +755,8 @@ describe('RoomContext', () => {
         const windowRemoveEventListenerCalls = mockWindowRemoveEventListener.mock.calls;
         const documentRemoveEventListenerCalls = mockDocumentRemoveEventListener.mock.calls;
         const allEventTypes = [
-          ...windowRemoveEventListenerCalls.map((call: any) => call[0]),
-          ...documentRemoveEventListenerCalls.map((call: any) => call[0])
+          ...windowRemoveEventListenerCalls.map((call: unknown[]) => call[0]),
+          ...documentRemoveEventListenerCalls.map((call: unknown[]) => call[0])
         ];
         expect(allEventTypes).toContain('beforeunload');
         expect(allEventTypes).toContain('visibilitychange');
@@ -767,7 +767,7 @@ describe('RoomContext', () => {
       let beforeUnloadHandler: (event: Event) => void;
       let subscriptionCallback: (room: Room | null) => void;
       
-      mockWindowAddEventListener.mockImplementation((event: string, handler: any) => {
+      mockWindowAddEventListener.mockImplementation((event: string, handler: EventListener) => {
         if (event === 'beforeunload') {
           beforeUnloadHandler = handler;
         }
@@ -819,7 +819,7 @@ describe('RoomContext', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       
       // Capture the visibilitychange handler
-      mockDocumentAddEventListener.mockImplementation((event: string, handler: any) => {
+      mockDocumentAddEventListener.mockImplementation((event: string, handler: EventListener) => {
         if (event === 'visibilitychange') {
           visibilityChangeHandler = handler;
         }
@@ -875,7 +875,7 @@ describe('RoomContext', () => {
       let subscriptionCallback: (room: Room | null) => void;
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
-      mockWindowAddEventListener.mockImplementation((event: string, handler: any) => {
+      mockWindowAddEventListener.mockImplementation((event: string, handler: EventListener) => {
         if (event === 'beforeunload') {
           beforeUnloadHandler = handler;
         }

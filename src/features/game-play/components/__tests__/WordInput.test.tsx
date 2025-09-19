@@ -39,13 +39,13 @@ jest.mock('../../hooks/useToast', () => ({
   useToast: jest.fn()
 }));
 
-const mockUseWordSubmission = require('../../hooks/useWordSubmission').useWordSubmission;
-const mockUseWordPath = require('../../hooks/useWordPath').useWordPath;
-const mockUseGamePlay = require('../../contexts/GamePlayContext').useGamePlay;
-const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
-const mockUseAuth = require('@/features/user-management/hooks/useAuth').useAuth;
-const mockUseSubmittedWords = require('../../hooks/useSubmittedWords').useSubmittedWords;
-const mockUseToast = require('../../hooks/useToast').useToast;
+const mockUseWordSubmission = jest.mocked(jest.requireMock('../../hooks/useWordSubmission').useWordSubmission);
+const mockUseWordPath = jest.mocked(jest.requireMock('../../hooks/useWordPath').useWordPath);
+const mockUseGamePlay = jest.mocked(jest.requireMock('../../contexts/GamePlayContext').useGamePlay);
+const mockUseRoom = jest.mocked(jest.requireMock('@/features/room-management/contexts/RoomContext').useRoom);
+const mockUseAuth = jest.mocked(jest.requireMock('@/features/user-management/hooks/useAuth').useAuth);
+const mockUseSubmittedWords = jest.mocked(jest.requireMock('../../hooks/useSubmittedWords').useSubmittedWords);
+const mockUseToast = jest.mocked(jest.requireMock('../../hooks/useToast').useToast);
 
 // Mock board letters for testing
 const mockBoardLetters = [

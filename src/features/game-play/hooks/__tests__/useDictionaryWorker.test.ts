@@ -51,7 +51,7 @@ describe('useDictionaryWorker (Simplified)', () => {
   it('should handle worker not supported', () => {
     // Mock Worker as undefined
     const originalWorker = global.Worker;
-    // @ts-ignore
+    // @ts-expect-error - Testing worker not supported scenario
     global.Worker = undefined;
 
     const { result } = renderHook(() => useDictionaryWorker());

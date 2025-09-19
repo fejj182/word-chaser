@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { LetterGrid } from '../LetterGrid';
 
 const meta: Meta<typeof LetterGrid> = {

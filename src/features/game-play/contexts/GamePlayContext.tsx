@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useReducer, useMemo } from 'react';
 import { generateLetterGrid, getGridSizeConfig } from '@/lib/utils/grid-generation';
 
 // Types

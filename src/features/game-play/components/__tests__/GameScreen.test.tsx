@@ -17,8 +17,8 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-const mockUseRoom = require('@/features/room-management/contexts/RoomContext').useRoom;
-const mockUseAuth = require('@/features/user-management/hooks/useAuth').useAuth;
+const mockUseRoom = jest.mocked(jest.requireMock('@/features/room-management/contexts/RoomContext').useRoom);
+const mockUseAuth = jest.mocked(jest.requireMock('@/features/user-management/hooks/useAuth').useAuth);
 
 describe('GameScreen', () => {
   const mockRoom = {

@@ -30,7 +30,7 @@ describe('RoundResults', () => {
     });
 
     it('should not render when current round is 1 (no previous rounds)', () => {
-      const room = createMockRoom({
+      const room = createMockRoom({ 
         gameData: {
           ...createMockRoom().gameData!,
           currentRound: 1,
@@ -90,7 +90,7 @@ describe('RoundResults', () => {
 
     it('should handle round with no winner (tie)', () => {
       const roundResult = createMockRoundResult(1);
-      roundResult.roundWinner = undefined; // No winner
+      roundResult.roundWinner = null; // No winner
       roundResult.roundScores = {
         'host-123': 3,
         'player-456': 3,
@@ -122,7 +122,7 @@ describe('RoundResults', () => {
       const roundResult = createMockRoundResult(1);
       roundResult.roundScores = {};
       roundResult.roundWords = {};
-      roundResult.roundWinner = undefined;
+      roundResult.roundWinner = null;
 
       const room = createMockRoom({
         gameData: {
@@ -263,10 +263,10 @@ describe('RoundResults', () => {
                 'unknown-player': [
                   {
                     word: 'TEST',
-                    path: [[0, 0], [0, 1], [0, 2], [0, 3]],
                     score: 5,
+                    playerName: 'Unknown Player',
                     playerId: 'unknown-player',
-                    timestamp: Date.now(),
+                    submittedAt: Date.now(),
                   },
                 ],
               },
