@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { RoundResults } from '../RoundResults';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import {
@@ -218,8 +218,16 @@ describe('RoundResults', () => {
     });
   });
 
-  describe('call to action', () => {
-    it('should display the correct call to action', () => {
+  describe('countdown and auto-close', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should display countdown timer', () => {
       const room = createMockRoomWithRoundResults();
       mockUseRoom.mockReturnValue({
         currentRoom: room,
@@ -228,7 +236,112 @@ describe('RoundResults', () => {
 
       render(<RoundResults />);
 
-      expect(screen.getByText('Continue to Round 2')).toBeInTheDocument();
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+    });
+
+    it('should countdown from 5 to 1', async () => {
+      const room = createMockRoomWithRoundResults();
+      mockUseRoom.mockReturnValue({
+        currentRoom: room,
+        loading: false,
+      } as any);
+
+      render(<RoundResults />);
+
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 4 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 more second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 3 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 more second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 2 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 more second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 1 seconds...')).toBeInTheDocument();
+    });
+
+    it('should auto-close after 5 seconds', async () => {
+      const room = createMockRoomWithRoundResults();
+      mockUseRoom.mockReturnValue({
+        currentRoom: room,
+        loading: false,
+      } as any);
+
+      const { container } = render(<RoundResults />);
+
+      expect(screen.getByText('Round 1 Results')).toBeInTheDocument();
+
+      // Fast forward 5 seconds
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      await waitFor(() => {
+        expect(container.firstChild).toBeNull();
+      });
+    });
+
+    it('should reset countdown when new round results appear', () => {
+      const room1 = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 2,
+          roundResults: {
+            1: createMockRoundResult(1),
+          },
+        },
+      });
+
+      const room2 = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 3,
+          roundResults: {
+            1: createMockRoundResult(1),
+            2: createMockRoundResult(2),
+          },
+        },
+      });
+
+      mockUseRoom.mockReturnValue({
+        currentRoom: room1,
+        loading: false,
+      } as any);
+
+      const { rerender } = render(<RoundResults />);
+
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+
+      // Fast forward 2 seconds
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+      expect(screen.getByText('Next round starts in 3 seconds...')).toBeInTheDocument();
+
+      // Update to show round 2 results - countdown should reset
+      mockUseRoom.mockReturnValue({
+        currentRoom: room2,
+        loading: false,
+      } as any);
+
+      rerender(<RoundResults />);
+
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
     });
   });
 
