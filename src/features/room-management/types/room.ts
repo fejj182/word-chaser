@@ -16,8 +16,8 @@ export interface Room {
     submittedWords?: Record<string, SubmittedWord>;
     roundStartTime?: number;
     roundEndTime?: number;
-    timerStatus?: 'running' | 'paused' | 'ended';
-    roundResults?: Record<number, RoundResult>;
+    timerStatus?: 'running' | 'ended';
+    roundResults?: Record<string, RoundResult>;
   };
 }
 

@@ -284,22 +284,6 @@ describe('useGameTimer', () => {
       expect(result.current.isTimerRunning).toBe(true);
     });
 
-    it('should return false for isTimerRunning when timer is paused', () => {
-      const room = createMockRoom({
-        gameData: {
-          ...createMockRoom().gameData!,
-          timerStatus: 'paused',
-        },
-      });
-      mockUseRoom.mockReturnValue({
-        currentRoom: room,
-        loading: false,
-      } as any);
-
-      const { result } = renderHook(() => useGameTimer());
-
-      expect(result.current.isTimerRunning).toBe(false);
-    });
 
     it('should return false for isTimerRunning when timer is ended', () => {
       const room = createMockRoom({
@@ -603,19 +587,6 @@ describe('useGameTimer', () => {
   });
 
   describe('different room scenarios', () => {
-    it('should work with timer paused', () => {
-      const room = roundTestScenarios.timerPaused();
-      mockUseRoom.mockReturnValue({
-        currentRoom: room,
-        loading: false,
-      } as any);
-
-      mockGetRemainingTime.mockReturnValue(0);
-
-      const { result } = renderHook(() => useGameTimer());
-
-      expect(result.current.timeLeft).toBe(0);
-    });
 
     it('should work with timer ended', () => {
       const room = roundTestScenarios.timerEnded();

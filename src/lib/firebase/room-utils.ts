@@ -215,7 +215,6 @@ export const startGame = async (roomId: string): Promise<void> => {
   updates[`${ROOMS_PATH}/${roomId}/gameData`] = {
     grid,
     currentRound: 1,
-    submittedWords: {},
     roundStartTime,
     roundEndTime,
     timerStatus: 'running'

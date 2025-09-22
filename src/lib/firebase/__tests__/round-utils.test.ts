@@ -1,6 +1,7 @@
 import {
   startRoundTimer,
   endCurrentRound,
+  startNextRound,
   calculateRoundResults,
   shouldRoundEnd,
   getRemainingTime,
@@ -77,6 +78,14 @@ describe('round-utils', () => {
   });
 
   describe('endCurrentRound', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should end current round and calculate results', async () => {
       const roomId = 'test-room';
       const room = createMockRoomWithSubmittedWords();
@@ -93,13 +102,13 @@ describe('round-utils', () => {
       expect(mockUpdate).toHaveBeenCalled();
       const updateCall = mockUpdate.mock.calls[0][1]; // Second argument is the updates object
       
-      // Should save round results
-      expect(updateCall).toHaveProperty('rooms/test-room/gameData/roundResults/1');
-      // Should start next round (timer status becomes 'running' for next round)
-      expect(updateCall).toHaveProperty('rooms/test-room/gameData/timerStatus', 'running');
+      // Should save round results as an object
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/roundResults/round-1');
+      // Should set timer status to 'ended' (not start next round immediately)
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/timerStatus', 'ended');
     });
 
-    it('should start next round if not final round', async () => {
+    it('should schedule next round start after 5 seconds if not final round', async () => {
       const roomId = 'test-room';
       const room = createMockRoomWithSubmittedWords();
       
@@ -112,13 +121,21 @@ describe('round-utils', () => {
 
       await endCurrentRound(roomId);
 
-      const updateCall = mockUpdate.mock.calls[0][1]; // Second argument is the updates object
-      
-      // Should start next round
-      expect(updateCall).toHaveProperty('rooms/test-room/gameData/currentRound', 2);
-      expect(updateCall).toHaveProperty('rooms/test-room/gameData/roundStartTime');
-      expect(updateCall).toHaveProperty('rooms/test-room/gameData/roundEndTime');
-      expect(updateCall).toHaveProperty('rooms/test-room/gameData/timerStatus', 'running');
+      // Should not start next round immediately
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
+      const updateCall = mockUpdate.mock.calls[0][1];
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/timerStatus', 'ended');
+      expect(updateCall).not.toHaveProperty('rooms/test-room/gameData/currentRound', 2);
+
+      // Fast forward 5 seconds
+      jest.advanceTimersByTime(5000);
+      await Promise.resolve(); // Allow setTimeout to execute
+
+      // Should now start next round
+      expect(mockUpdate).toHaveBeenCalledTimes(2);
+      const nextRoundCall = mockUpdate.mock.calls[1][1];
+      expect(nextRoundCall).toHaveProperty('rooms/test-room/gameData/currentRound', 2);
+      expect(nextRoundCall).toHaveProperty('rooms/test-room/gameData/timerStatus', 'running');
     });
 
     it('should end game if final round', async () => {
@@ -140,6 +157,75 @@ describe('round-utils', () => {
       expect(updateCall).toHaveProperty('rooms/test-room/status', 'finished');
       // Should not start next round
       expect(updateCall).not.toHaveProperty('rooms/test-room/gameData/currentRound');
+    });
+  });
+
+  describe('startNextRound', () => {
+    it('should start next round with new grid and timer', async () => {
+      const roomId = 'test-room';
+      const room = createMockRoomWithSubmittedWords();
+      
+      mockRef.mockReturnValue({} as any);
+      mockGet.mockResolvedValue({
+        exists: () => true,
+        val: () => room,
+      } as any);
+      mockUpdate.mockResolvedValue(undefined);
+
+      await startNextRound(roomId);
+
+      expect(mockUpdate).toHaveBeenCalled();
+      const updateCall = mockUpdate.mock.calls[0][1];
+      
+      // Should start next round
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/currentRound', 2);
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/roundStartTime');
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/roundEndTime');
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/timerStatus', 'running');
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/submittedWords', {});
+      expect(updateCall).toHaveProperty('rooms/test-room/gameData/grid');
+    });
+
+    it('should not start next round if at max rounds', async () => {
+      const roomId = 'test-room';
+      const room = createMockRoomInFinalRound();
+      
+      mockRef.mockReturnValue({} as any);
+      mockGet.mockResolvedValue({
+        exists: () => true,
+        val: () => room,
+      } as any);
+      mockUpdate.mockResolvedValue(undefined);
+
+      await startNextRound(roomId);
+
+      // Should not update anything
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should throw error if room not found', async () => {
+      const roomId = 'non-existent-room';
+      
+      mockRef.mockReturnValue({} as any);
+      mockGet.mockResolvedValue({
+        exists: () => false,
+      } as any);
+
+      await expect(startNextRound(roomId)).rejects.toThrow('Room not found');
+    });
+
+    it('should throw error if room not in playing state', async () => {
+      const roomId = 'test-room';
+      const room = createMockRoom();
+      room.status = 'waiting';
+      
+      mockRef.mockReturnValue({} as any);
+      mockGet.mockResolvedValue({
+        exists: () => true,
+        val: () => room,
+      } as any);
+
+      await expect(startNextRound(roomId)).rejects.toThrow('Room is not in playing state');
     });
   });
 
@@ -226,15 +312,6 @@ describe('round-utils', () => {
       expect(shouldRoundEnd(room)).toBe(false);
     });
 
-    it('should return false when timer is paused', () => {
-      const room = createMockRoom({
-        gameData: {
-          ...createMockRoom().gameData!,
-          timerStatus: 'paused',
-        },
-      });
-      expect(shouldRoundEnd(room)).toBe(false);
-    });
 
     it('should return false when timer is already ended', () => {
       const room = createMockRoom({
@@ -276,11 +353,11 @@ describe('round-utils', () => {
       expect(remaining).toBe(0);
     });
 
-    it('should return 0 when timer is not running', () => {
+    it('should return 0 when timer is ended', () => {
       const room = createMockRoom({
         gameData: {
           ...createMockRoom().gameData!,
-          timerStatus: 'paused',
+          timerStatus: 'ended',
         },
       });
 

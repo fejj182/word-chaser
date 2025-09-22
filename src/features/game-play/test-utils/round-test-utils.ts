@@ -169,13 +169,6 @@ export const roundTestScenarios = {
   // Room in final round
   finalRound: () => createMockRoomInFinalRound(),
 
-  // Room with paused timer
-  timerPaused: () => createMockRoom({
-    gameData: {
-      ...createMockRoom().gameData!,
-      timerStatus: 'paused' as const,
-    },
-  }),
 
   // Room with ended timer
   timerEnded: () => createMockRoom({

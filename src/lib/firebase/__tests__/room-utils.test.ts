@@ -451,7 +451,6 @@ describe('room-utils', () => {
             ['M', 'N', 'O', 'P']
           ],
           currentRound: 1,
-          submittedWords: {},
           roundStartTime: expect.any(Number),
           roundEndTime: expect.any(Number),
           timerStatus: 'running'
@@ -605,7 +604,6 @@ describe('room-utils', () => {
         'rooms/test-room-id/gameData': expect.objectContaining({
           grid: mockGrid,
           currentRound: 1,
-          submittedWords: {},
           roundStartTime: expect.any(Number),
           roundEndTime: expect.any(Number),
           timerStatus: 'running'

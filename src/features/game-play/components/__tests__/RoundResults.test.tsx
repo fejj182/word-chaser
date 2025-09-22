@@ -3,7 +3,6 @@ import { RoundResults } from '../RoundResults';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import {
   createMockRoom,
-  createMockRoomWithRoundResults,
   createMockRoundResult,
 } from '../../test-utils/round-test-utils';
 
@@ -46,11 +45,40 @@ describe('RoundResults', () => {
       const { container } = render(<RoundResults />);
       expect(container.firstChild).toBeNull();
     });
+
+    it('should not render if current round is different from the round results', () => {
+      const room = createMockRoom({ 
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 2,
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
+
+      mockUseRoom.mockReturnValue({
+        currentRoom: room,
+        loading: false,
+      } as any);
+
+      const { container } = render(<RoundResults />);
+      expect(container.firstChild).toBeNull();
+    });
   });
 
   describe('when round results exist', () => {
     it('should display results for the previous round', () => {
-      const room = createMockRoomWithRoundResults();
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
       mockUseRoom.mockReturnValue({
         currentRoom: room,
         loading: false,
@@ -62,7 +90,16 @@ describe('RoundResults', () => {
     });
 
     it('should display player scores correctly', () => {
-      const room = createMockRoomWithRoundResults();
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
       mockUseRoom.mockReturnValue({
         currentRoom: room,
         loading: false,
@@ -77,7 +114,16 @@ describe('RoundResults', () => {
     });
 
     it('should display round winner', () => {
-      const room = createMockRoomWithRoundResults();
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
       mockUseRoom.mockReturnValue({
         currentRoom: room,
         loading: false,
@@ -99,9 +145,10 @@ describe('RoundResults', () => {
       const room = createMockRoom({
         gameData: {
           ...createMockRoom().gameData!,
-          currentRound: 2,
+          currentRound: 1,
+          timerStatus: 'ended',
           roundResults: {
-            1: roundResult,
+            'round-1': roundResult,
           },
         },
       });
@@ -127,9 +174,10 @@ describe('RoundResults', () => {
       const room = createMockRoom({
         gameData: {
           ...createMockRoom().gameData!,
-          currentRound: 2,
+          currentRound: 1,
+          timerStatus: 'ended',
           roundResults: {
-            1: roundResult,
+            'round-1': roundResult,
           },
         },
       });
@@ -151,9 +199,10 @@ describe('RoundResults', () => {
       const room1 = createMockRoom({
         gameData: {
           ...createMockRoom().gameData!,
-          currentRound: 2,
+          currentRound: 1,
+          timerStatus: 'ended',
           roundResults: {
-            1: createMockRoundResult(1),
+            'round-1': createMockRoundResult(1),
           },
         },
       });
@@ -161,10 +210,11 @@ describe('RoundResults', () => {
       const room2 = createMockRoom({
         gameData: {
           ...createMockRoom().gameData!,
-          currentRound: 3,
+          currentRound: 2,
+          timerStatus: 'ended',
           roundResults: {
-            1: createMockRoundResult(1),
-            2: createMockRoundResult(2),
+            'round-1': createMockRoundResult(1),
+            'round-2': createMockRoundResult(2),
           },
         },
       });
@@ -192,7 +242,16 @@ describe('RoundResults', () => {
     });
 
     it('should reset when room changes to no results', async () => {
-      const roomWithResults = createMockRoomWithRoundResults();
+      const roomWithResults = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
       const roomWithoutResults = createMockRoom();
 
       mockUseRoom.mockReturnValue({
@@ -218,17 +277,19 @@ describe('RoundResults', () => {
     });
   });
 
-  describe('countdown and auto-close', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
+  describe('modal visibility', () => {
+    it('should show modal when timer status is ended', () => {
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
 
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('should display countdown timer', () => {
-      const room = createMockRoomWithRoundResults();
       mockUseRoom.mockReturnValue({
         currentRoom: room,
         loading: false,
@@ -236,47 +297,22 @@ describe('RoundResults', () => {
 
       render(<RoundResults />);
 
-      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+      expect(screen.getByText('Round 1 Results')).toBeInTheDocument();
+      expect(screen.getByText('Next round starting soon...')).toBeInTheDocument();
     });
 
-    it('should countdown from 5 to 1', async () => {
-      const room = createMockRoomWithRoundResults();
-      mockUseRoom.mockReturnValue({
-        currentRoom: room,
-        loading: false,
-      } as any);
-
-      render(<RoundResults />);
-
-      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
-
-      // Fast forward 1 second
-      act(() => {
-        jest.advanceTimersByTime(1000);
+    it('should hide modal when timer status is running', () => {
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'running',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
       });
-      expect(screen.getByText('Next round starts in 4 seconds...')).toBeInTheDocument();
 
-      // Fast forward 1 more second
-      act(() => {
-        jest.advanceTimersByTime(1000);
-      });
-      expect(screen.getByText('Next round starts in 3 seconds...')).toBeInTheDocument();
-
-      // Fast forward 1 more second
-      act(() => {
-        jest.advanceTimersByTime(1000);
-      });
-      expect(screen.getByText('Next round starts in 2 seconds...')).toBeInTheDocument();
-
-      // Fast forward 1 more second
-      act(() => {
-        jest.advanceTimersByTime(1000);
-      });
-      expect(screen.getByText('Next round starts in 1 seconds...')).toBeInTheDocument();
-    });
-
-    it('should auto-close after 5 seconds', async () => {
-      const room = createMockRoomWithRoundResults();
       mockUseRoom.mockReturnValue({
         currentRoom: room,
         loading: false,
@@ -284,70 +320,23 @@ describe('RoundResults', () => {
 
       const { container } = render(<RoundResults />);
 
-      expect(screen.getByText('Round 1 Results')).toBeInTheDocument();
-
-      // Fast forward 5 seconds
-      act(() => {
-        jest.advanceTimersByTime(5000);
-      });
-
-      await waitFor(() => {
-        expect(container.firstChild).toBeNull();
-      });
+      expect(container.firstChild).toBeNull();
     });
 
-    it('should reset countdown when new round results appear', () => {
-      const room1 = createMockRoom({
-        gameData: {
-          ...createMockRoom().gameData!,
-          currentRound: 2,
-          roundResults: {
-            1: createMockRoundResult(1),
-          },
-        },
-      });
-
-      const room2 = createMockRoom({
-        gameData: {
-          ...createMockRoom().gameData!,
-          currentRound: 3,
-          roundResults: {
-            1: createMockRoundResult(1),
-            2: createMockRoundResult(2),
-          },
-        },
-      });
-
-      mockUseRoom.mockReturnValue({
-        currentRoom: room1,
-        loading: false,
-      } as any);
-
-      const { rerender } = render(<RoundResults />);
-
-      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
-
-      // Fast forward 2 seconds
-      act(() => {
-        jest.advanceTimersByTime(2000);
-      });
-      expect(screen.getByText('Next round starts in 3 seconds...')).toBeInTheDocument();
-
-      // Update to show round 2 results - countdown should reset
-      mockUseRoom.mockReturnValue({
-        currentRoom: room2,
-        loading: false,
-      } as any);
-
-      rerender(<RoundResults />);
-
-      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
-    });
   });
 
   describe('accessibility', () => {
     it('should have proper heading structure', () => {
-      const room = createMockRoomWithRoundResults();
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
       mockUseRoom.mockReturnValue({
         currentRoom: room,
         loading: false,
@@ -365,9 +354,10 @@ describe('RoundResults', () => {
       const room = createMockRoom({
         gameData: {
           ...createMockRoom().gameData!,
-          currentRound: 2,
+          currentRound: 1,
+          timerStatus: 'ended',
           roundResults: {
-            1: {
+            'round-1': {
               roundNumber: 1,
               roundScores: {
                 'unknown-player': 5,

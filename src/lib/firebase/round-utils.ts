@@ -51,30 +51,60 @@ export const endCurrentRound = async (roomId: string): Promise<void> => {
   const roundResults = calculateRoundResults(room, currentRound);
 
   const updates: Record<string, unknown> = {};
-  updates[`${ROOMS_PATH}/${roomId}/gameData/roundResults/${currentRound}`] = roundResults;
+  updates[`${ROOMS_PATH}/${roomId}/gameData/roundResults/round-${currentRound}`] = roundResults;
   updates[`${ROOMS_PATH}/${roomId}/gameData/timerStatus`] = 'ended';
 
   // Check if game should end
   if (currentRound >= maxRounds) {
     updates[`${ROOMS_PATH}/${roomId}/status`] = 'finished';
   } else {
-    // Start next round
-    const nextRound = currentRound + 1;
-    const roundDuration = room.settings.roundDuration * 1000;
-    const roundStartTime = Date.now();
-    const roundEndTime = roundStartTime + roundDuration;
-
-    // Generate new grid for next round
-    const gridSize = getGridSizeConfig(room.settings.gridSize);
-    const newGrid = generateLetterGrid(gridSize);
-
-    updates[`${ROOMS_PATH}/${roomId}/gameData/currentRound`] = nextRound;
-    updates[`${ROOMS_PATH}/${roomId}/gameData/roundStartTime`] = roundStartTime;
-    updates[`${ROOMS_PATH}/${roomId}/gameData/roundEndTime`] = roundEndTime;
-    updates[`${ROOMS_PATH}/${roomId}/gameData/timerStatus`] = 'running';
-    updates[`${ROOMS_PATH}/${roomId}/gameData/submittedWords`] = {}; // Reset for new round
-    updates[`${ROOMS_PATH}/${roomId}/gameData/grid`] = newGrid; // New grid for next round
+    // Schedule next round to start after 5 seconds
+    setTimeout(() => {
+      startNextRound(roomId).catch(console.error);
+    }, 5000);
   }
+
+  await update(ref(db), updates);
+};
+
+export const startNextRound = async (roomId: string): Promise<void> => {
+  const roomRef = ref(db, `${ROOMS_PATH}/${roomId}`);
+  const roomSnapshot = await get(roomRef);
+  
+  if (!roomSnapshot.exists()) {
+    throw new Error('Room not found');
+  }
+
+  const room: Room = roomSnapshot.val();
+  
+  if (!room || room.status !== 'playing') {
+    throw new Error('Room is not in playing state');
+  }
+
+  const currentRound = room.gameData?.currentRound || 1;
+  const maxRounds = room.settings.maxRounds;
+
+  // Don't start next round if we've reached the max
+  if (currentRound >= maxRounds) {
+    return;
+  }
+
+  const nextRound = currentRound + 1;
+  const roundDuration = room.settings.roundDuration * 1000;
+  const roundStartTime = Date.now();
+  const roundEndTime = roundStartTime + roundDuration;
+
+  // Generate new grid for next round
+  const gridSize = getGridSizeConfig(room.settings.gridSize);
+  const newGrid = generateLetterGrid(gridSize);
+
+  const updates: Record<string, unknown> = {};
+  updates[`${ROOMS_PATH}/${roomId}/gameData/currentRound`] = nextRound;
+  updates[`${ROOMS_PATH}/${roomId}/gameData/roundStartTime`] = roundStartTime;
+  updates[`${ROOMS_PATH}/${roomId}/gameData/roundEndTime`] = roundEndTime;
+  updates[`${ROOMS_PATH}/${roomId}/gameData/timerStatus`] = 'running';
+  updates[`${ROOMS_PATH}/${roomId}/gameData/submittedWords`] = {}; // Reset for new round
+  updates[`${ROOMS_PATH}/${roomId}/gameData/grid`] = newGrid; // New grid for next round
 
   await update(ref(db), updates);
 };
