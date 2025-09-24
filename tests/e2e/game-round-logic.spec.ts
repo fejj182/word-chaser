@@ -42,7 +42,7 @@ test.describe('Game Round Logic', () => {
     await expect(resultsModal).toBeVisible();
     
     await expect(resultsModal).toContainText('Round 1 Results');
-    await expect(host.locator('text=Next round starting soon...')).toBeVisible();
+    await expect(host.locator('text=Next round starts in')).toBeVisible();
     await expect(host.locator('text=Host Player wins this round!')).toBeVisible();
   });
 
@@ -59,7 +59,7 @@ test.describe('Game Round Logic', () => {
     
     const resultsModal = host.locator('text=Round 1 Results');
     await expect(resultsModal).toBeVisible();
-    await expect(host.locator('text=Next round starting soon...')).toBeVisible();
+    await expect(host.locator('text=Next round starts in')).toBeVisible();
     await expect(host.locator('text=No winners this round')).toBeVisible();
   });
 

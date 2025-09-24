@@ -298,7 +298,7 @@ describe('RoundResults', () => {
       render(<RoundResults />);
 
       expect(screen.getByText('Round 1 Results')).toBeInTheDocument();
-      expect(screen.getByText('Next round starting soon...')).toBeInTheDocument();
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
     });
 
     it('should hide modal when timer status is running', () => {
@@ -323,6 +323,134 @@ describe('RoundResults', () => {
       expect(container.firstChild).toBeNull();
     });
 
+  });
+
+  describe('countdown functionality', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should display countdown timer starting at 5', () => {
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
+
+      mockUseRoom.mockReturnValue({
+        currentRoom: room,
+        loading: false,
+      } as any);
+
+      render(<RoundResults />);
+
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+    });
+
+    it('should countdown from 5 to 1', () => {
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
+
+      mockUseRoom.mockReturnValue({
+        currentRoom: room,
+        loading: false,
+      } as any);
+
+      render(<RoundResults />);
+
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 4 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 more second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 3 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 more second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 2 seconds...')).toBeInTheDocument();
+
+      // Fast forward 1 more second
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText('Next round starts in 1 seconds...')).toBeInTheDocument();
+    });
+
+    it('should reset countdown when new round results appear', () => {
+      const room1 = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+          },
+        },
+      });
+
+      const room2 = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 2,
+          timerStatus: 'ended',
+          roundResults: {
+            'round-1': createMockRoundResult(1),
+            'round-2': createMockRoundResult(2),
+          },
+        },
+      });
+
+      mockUseRoom.mockReturnValue({
+        currentRoom: room1,
+        loading: false,
+      } as any);
+
+      const { rerender } = render(<RoundResults />);
+
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+
+      // Fast forward 2 seconds
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+      expect(screen.getByText('Next round starts in 3 seconds...')).toBeInTheDocument();
+
+      // Update to show round 2 results - countdown should reset
+      mockUseRoom.mockReturnValue({
+        currentRoom: room2,
+        loading: false,
+      } as any);
+
+      rerender(<RoundResults />);
+
+      expect(screen.getByText('Next round starts in 5 seconds...')).toBeInTheDocument();
+    });
   });
 
   describe('accessibility', () => {

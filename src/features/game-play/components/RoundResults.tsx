@@ -7,6 +7,7 @@ import { RoundResult } from '@/features/room-management/types/room';
 export const RoundResults: React.FC = () => {
   const { currentRoom } = useRoom();
   const [roundResult, setRoundResult] = useState<RoundResult | null>(null);
+  const [countdown, setCountdown] = useState(5);
 
   const currentRound = currentRoom?.gameData?.currentRound;
   const roundResults = currentRoom?.gameData?.roundResults;
@@ -15,10 +16,26 @@ export const RoundResults: React.FC = () => {
   useEffect(() => {
     if (currentRound && roundResults?.[`round-${currentRound}`] && timerStatus === 'ended') {
       setRoundResult(roundResults?.[`round-${currentRound}`]);
+      setCountdown(5);
     } else {
       setRoundResult(null);
     }
-  }, [roundResults]);
+  }, [roundResults, currentRound, timerStatus]);
+
+  useEffect(() => {
+    if (!roundResult) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [roundResult]);
 
   if (!roundResult) {
     return null;
@@ -69,9 +86,15 @@ export const RoundResults: React.FC = () => {
         )}
         
         <div className="text-center">
-          <p className="text-sm text-gray-600">
-            Next round starting soon...
+          <p className="text-sm text-gray-600 mb-2">
+            Next round starts in {countdown} seconds...
           </p>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-1000 ease-linear"
+              style={{ width: `${(countdown / 5) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
     </div>
