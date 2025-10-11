@@ -18,6 +18,11 @@ export interface Room {
     roundEndTime?: number;
     timerStatus?: 'running' | 'ended';
     roundResults?: Record<string, RoundResult>;
+    gameWinner?: {
+      playerId: string;
+      playerName: string;
+      finalScore: number;
+    };
   };
 }
 

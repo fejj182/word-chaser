@@ -64,7 +64,7 @@ export function generateLetterGrid(
 ): string[][] {
   const { seedWords: _seedWords = []} = options;
   
-  const testGrid = getTestGridFromUrl();
+  const testGrid = getTestGridIfProvided();
   if (testGrid) {
     return testGrid;
   }
@@ -77,11 +77,18 @@ export function generateLetterGrid(
 /**
  * Get test grid from environment variable or URL (for e2e tests)
  */
-function getTestGridFromUrl(): string[][] | null {
-  if (typeof window === 'undefined') return null;
+function getTestGridIfProvided(): string[][] | null {
+  if (typeof window === 'undefined' || !window.location.hostname.includes('localhost')) return null;
   
-  const testGridParam = new URLSearchParams(window.location.search).get('testGrid');
-  if (!testGridParam || window.location.hostname !== 'localhost') return null;
+  let testGridParam = new URLSearchParams(window.location.search).get('testGrid');
+
+  if (!testGridParam) {
+    testGridParam = localStorage.getItem('testGrid');
+  } else {
+    localStorage.setItem('testGrid', testGridParam);
+  }
+
+  if (!testGridParam) return null;
   
   try {
     const grid = JSON.parse(testGridParam);

@@ -39,7 +39,7 @@ describe('Grid Generation', () => {
 
 
     it('should accept options parameter for future enhancements', () => {
-      const grid = generateLetterGrid(4, { seedWords: ['CAT'], minWordLength: 3 });
+      const grid = generateLetterGrid(4, { seedWords: ['CAT'] });
       
       expect(grid).toHaveLength(4);
       grid.forEach(row => {

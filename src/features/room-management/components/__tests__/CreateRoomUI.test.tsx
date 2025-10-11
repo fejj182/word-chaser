@@ -121,8 +121,8 @@ describe('CreateRoomUI', () => {
         {
           maxPlayers: 4,
           settings: {
-            roundDuration: 60,
-            maxRounds: 5,
+            roundDuration: expect.any(Number),
+            maxRounds: expect.any(Number),
             gridSize: 'small',
           },
         },

@@ -1,6 +1,6 @@
 import { ref, get, update } from 'firebase/database';
 import { db } from './firebase';
-import { Room, RoundResult, SubmittedWord } from '@/features/room-management/types/room';
+import { Room, RoundResult, SubmittedWord, Player } from '@/features/room-management/types/room';
 import { generateLetterGrid, getGridSizeConfig } from '@/lib/utils/grid-generation';
 
 const ROOMS_PATH = 'rooms';
@@ -56,7 +56,11 @@ export const endCurrentRound = async (roomId: string): Promise<void> => {
 
   // Check if game should end
   if (currentRound >= maxRounds) {
+    const gameWinner = determineGameWinner(room.players);
     updates[`${ROOMS_PATH}/${roomId}/status`] = 'finished';
+    if (gameWinner) {
+      updates[`${ROOMS_PATH}/${roomId}/gameData/gameWinner`] = gameWinner;
+    }
   } else {
     // Schedule next round to start after 5 seconds
     setTimeout(() => {
@@ -174,4 +178,33 @@ export const getRemainingTime = (room: Room): number => {
   }
   
   return Math.max(0, Math.ceil((room.gameData.roundEndTime - Date.now()) / 1000));
+};
+
+export const determineGameWinner = (players: Record<string, Player>): {
+  playerId: string;
+  playerName: string;
+  finalScore: number;
+} | null => {
+  const playerScores = Object.entries(players).map(([playerId, player]) => ({
+    playerId,
+    playerName: player.displayName,
+    finalScore: player.score
+  }));
+
+  if (playerScores.length === 0) {
+    return null;
+  }
+
+  // Sort by score (highest first)
+  const sortedPlayers = playerScores.sort((a, b) => b.finalScore - a.finalScore);
+  
+  // Check if there's a clear winner (no tie for first place)
+  const topScore = sortedPlayers[0].finalScore;
+  const tiedPlayers = sortedPlayers.filter(p => p.finalScore === topScore);
+  
+  if (tiedPlayers.length === 1 && topScore > 0) {
+    return sortedPlayers[0];
+  }
+  
+  return null; // No winner (tie or all scores are 0)
 };

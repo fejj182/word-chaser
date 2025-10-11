@@ -112,17 +112,14 @@ describe('useGameTimer', () => {
 
       const { result } = renderHook(() => useGameTimer());
 
-      // Initial value
       expect(result.current.timeLeft).toBe(30);
 
-      // Advance timer by 1 second
       act(() => {
         jest.advanceTimersByTime(1000);
       });
 
       expect(result.current.timeLeft).toBe(29);
 
-      // Advance timer by another second
       act(() => {
         jest.advanceTimersByTime(1000);
       });
@@ -381,7 +378,6 @@ describe('useGameTimer', () => {
 
       renderHook(() => useGameTimer());
 
-      // Advance timer by 5 seconds to trigger the expiry check
       act(() => {
         jest.advanceTimersByTime(5000);
       });
@@ -417,7 +413,6 @@ describe('useGameTimer', () => {
 
       renderHook(() => useGameTimer());
 
-      // Advance timer by 5 seconds
       act(() => {
         jest.advanceTimersByTime(5000);
       });
@@ -441,7 +436,6 @@ describe('useGameTimer', () => {
 
       renderHook(() => useGameTimer());
 
-      // Advance timer by 5 seconds
       act(() => {
         jest.advanceTimersByTime(5000);
       });
@@ -460,7 +454,6 @@ describe('useGameTimer', () => {
 
       renderHook(() => useGameTimer());
 
-      // Advance timer by 5 seconds
       act(() => {
         jest.advanceTimersByTime(5000);
       });
@@ -486,10 +479,8 @@ describe('useGameTimer', () => {
       // Verify timer is running
       expect(mockGetRemainingTime).toHaveBeenCalled();
 
-      // Unmount the component
       unmount();
 
-      // Expect that clearInterval was called
       expect(clearIntervalSpy).toHaveBeenCalled();
       
       clearIntervalSpy.mockRestore();
@@ -509,10 +500,8 @@ describe('useGameTimer', () => {
 
       const { unmount } = renderHook(() => useGameTimer());
 
-      // Unmount the component
       unmount();
 
-      // Expect that clearInterval was called
       expect(clearIntervalSpy).toHaveBeenCalled();
       
       clearIntervalSpy.mockRestore();
@@ -531,7 +520,6 @@ describe('useGameTimer', () => {
 
       const { rerender } = renderHook(() => useGameTimer());
 
-      // Change room
       mockUseRoom.mockReturnValue({
         currentRoom: room2,
         loading: false,

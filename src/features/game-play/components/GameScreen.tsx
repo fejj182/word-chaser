@@ -12,6 +12,7 @@ import { GameTimer } from './GameTimer';
 import { GameHeader } from './GameHeader';
 import { RealTimeScoreboard } from './RealTimeScoreboard';
 import { RoundResults } from './RoundResults';
+import { FinalGameResults } from './FinalGameResults';
 
 interface GameScreenProps {
   roomId: string;
@@ -36,9 +37,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
     }
   }, [currentRoom?.gameData?.grid, currentRoom?.settings?.gridSize]);
 
-  // Redirect to lobby if room is not in playing status
+  // Redirect to lobby if room is not in playing or finished status
   useEffect(() => {
-    if (currentRoom && currentRoom.status !== 'playing' && currentPlayer) {
+    if (currentRoom && !['playing', 'finished'].includes(currentRoom.status) && currentPlayer) {
       router.push('/');
     }
   }, [currentRoom, router, currentPlayer]);
@@ -105,6 +106,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
       </div>
       
       <RoundResults />
+      <FinalGameResults />
     </div>
   );
 };

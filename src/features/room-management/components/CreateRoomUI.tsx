@@ -15,7 +15,7 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
     maxPlayers: 4,
     settings: {
       roundDuration: 60,
-      maxRounds: 5,
+      maxRounds: 3,
       gridSize: 'medium',
     },
   });
@@ -145,10 +145,9 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
               className="form-input"
               disabled={isLoading}
             >
+              <option value={1}>1 round</option>
               <option value={3}>3 rounds</option>
               <option value={5}>5 rounds</option>
-              <option value={7}>7 rounds</option>
-              <option value={10}>10 rounds</option>
             </select>
           </div>
         </div>

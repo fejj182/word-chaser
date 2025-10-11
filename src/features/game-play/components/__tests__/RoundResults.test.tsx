@@ -68,7 +68,7 @@ describe('RoundResults', () => {
   });
 
   describe('when round results exist', () => {
-    it('should display results for the previous round', () => {
+    it('should display results', () => {
       const room = createMockRoom({
         gameData: {
           ...createMockRoom().gameData!,
@@ -192,6 +192,27 @@ describe('RoundResults', () => {
       expect(screen.getByText('Round 1 Results')).toBeInTheDocument();
       expect(screen.getByText('No winners this round')).toBeInTheDocument();
     });
+
+    it('should not display if the game is over (final game results will be displayed)', () => {
+      const room = createMockRoom({
+        gameData: {
+          ...createMockRoom().gameData!,
+          currentRound: 1,
+        },
+        settings: {
+          ...createMockRoom().settings,
+          maxRounds: 1,
+        },
+      });
+      mockUseRoom.mockReturnValue({
+        currentRoom: room,
+        loading: false,
+      } as any);
+
+      render(<RoundResults />);
+    });
+
+    expect(screen.queryByText('Round 1 Results')).not.toBeInTheDocument();
   });
 
   describe('when room changes', () => {

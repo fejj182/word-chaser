@@ -5,6 +5,7 @@ import {
   calculateRoundResults,
   shouldRoundEnd,
   getRemainingTime,
+  determineGameWinner,
 } from '../round-utils';
 import {
   createMockRoom,
@@ -385,6 +386,358 @@ describe('round-utils', () => {
       jest.advanceTimersByTime(8000);
       remaining = getRemainingTime(room);
       expect(remaining).toBe(0);
+    });
+  });
+
+  describe('determineGameWinner', () => {
+    it('returns null when no players', () => {
+      const players = {};
+      const winner = determineGameWinner(players);
+      expect(winner).toBeNull();
+    });
+
+    it('returns null when all players have zero score', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 0,
+          wordsFound: 0,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 0,
+          wordsFound: 0,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toBeNull();
+    });
+
+    it('returns winner when one player has highest score', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 50,
+          wordsFound: 3,
+        },
+        'player3': {
+          displayName: 'Player 3',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 25,
+          wordsFound: 2,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toEqual({
+        playerId: 'player1',
+        playerName: 'Player 1',
+        finalScore: 100,
+      });
+    });
+
+    it('returns null when two players tie for first place', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player3': {
+          displayName: 'Player 3',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 50,
+          wordsFound: 3,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toBeNull();
+    });
+
+    it('returns null when three players tie for first place', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player3': {
+          displayName: 'Player 3',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toBeNull();
+    });
+
+    it('returns winner when one player has positive score and others have zero', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 0,
+          wordsFound: 0,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 75,
+          wordsFound: 3,
+        },
+        'player3': {
+          displayName: 'Player 3',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 0,
+          wordsFound: 0,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toEqual({
+        playerId: 'player2',
+        playerName: 'Player 2',
+        finalScore: 75,
+      });
+    });
+
+    it('handles single player correctly', () => {
+      const players = {
+        'player1': {
+          displayName: 'Solo Player',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 150,
+          wordsFound: 8,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toEqual({
+        playerId: 'player1',
+        playerName: 'Solo Player',
+        finalScore: 150,
+      });
+    });
+
+    it('handles single player with zero score', () => {
+      const players = {
+        'player1': {
+          displayName: 'Solo Player',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 0,
+          wordsFound: 0,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toBeNull();
+    });
+
+    it('sorts players correctly by score (highest first)', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 25,
+          wordsFound: 2,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player3': {
+          displayName: 'Player 3',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 50,
+          wordsFound: 3,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toEqual({
+        playerId: 'player2',
+        playerName: 'Player 2',
+        finalScore: 100,
+      });
+    });
+
+    it('handles negative scores correctly', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: -10,
+          wordsFound: 0,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 50,
+          wordsFound: 3,
+        },
+        'player3': {
+          displayName: 'Player 3',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: -5,
+          wordsFound: 0,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toEqual({
+        playerId: 'player2',
+        playerName: 'Player 2',
+        finalScore: 50,
+      });
+    });
+
+    it('returns null when all players have negative scores', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: -10,
+          wordsFound: 0,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: -5,
+          wordsFound: 0,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toBeNull();
+    });
+
+    it('handles large number of players correctly', () => {
+      const players: Record<string, any> = {};
+      
+      // Create 10 players with varying scores
+      for (let i = 1; i <= 10; i++) {
+        players[`player${i}`] = {
+          displayName: `Player ${i}`,
+          joinedAt: Date.now(),
+          isHost: i === 1,
+          isReady: true,
+          score: i * 10, // Scores: 10, 20, 30, ..., 100
+          wordsFound: i,
+        };
+      }
+      
+      const winner = determineGameWinner(players);
+      expect(winner).toEqual({
+        playerId: 'player10',
+        playerName: 'Player 10',
+        finalScore: 100,
+      });
+    });
+
+    it('handles tie between multiple players with same high score', () => {
+      const players = {
+        'player1': {
+          displayName: 'Player 1',
+          joinedAt: Date.now(),
+          isHost: true,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player2': {
+          displayName: 'Player 2',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player3': {
+          displayName: 'Player 3',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 100,
+          wordsFound: 5,
+        },
+        'player4': {
+          displayName: 'Player 4',
+          joinedAt: Date.now(),
+          isHost: false,
+          isReady: true,
+          score: 50,
+          wordsFound: 3,
+        },
+      };
+      const winner = determineGameWinner(players);
+      expect(winner).toBeNull();
     });
   });
 });

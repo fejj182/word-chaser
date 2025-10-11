@@ -12,13 +12,13 @@ jest.mock('@/features/room-management/contexts/RoomContext', () => ({
 
 jest.mock('@/features/user-management/hooks/useAuth');
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-  }),
+  useRouter: jest.fn(),
 }));
 
+const mockPush = jest.fn();
 const mockUseRoom = jest.mocked(jest.requireMock('@/features/room-management/contexts/RoomContext').useRoom);
 const mockUseAuth = jest.mocked(jest.requireMock('@/features/user-management/hooks/useAuth').useAuth);
+const mockUseRouter = jest.mocked(jest.requireMock('next/navigation').useRouter);
 
 describe('GameScreen', () => {
   const mockRoom = {
@@ -69,6 +69,10 @@ describe('GameScreen', () => {
 
     mockUseAuth.mockReturnValue({
       user: mockUser,
+    });
+
+    mockUseRouter.mockReturnValue({
+      push: mockPush,
     });
   });
 
@@ -169,5 +173,25 @@ describe('GameScreen', () => {
     );
 
     expect(screen.queryByText('Test Room')).not.toBeInTheDocument();
+  });
+
+  it('should redirect to lobby when room is not in playing or finished status', () => {
+    mockUseRoom.mockReturnValue({
+      currentRoom: { ...mockRoom, status: 'waiting', players: { ...mockRoom.players, 'user1': { ...mockRoom.players['user1'], uid: 'user1' } } },
+      leaveRoom: jest.fn(),
+      loadRoom: jest.fn(),
+    });
+
+    render(
+      <UserProvider>
+        <RoomProvider>
+          <GamePlayProvider>
+            <GameScreen roomId="test-room" />
+          </GamePlayProvider>
+        </RoomProvider>
+      </UserProvider>
+    );
+
+    expect(mockPush).toHaveBeenCalledWith('/');
   });
 });

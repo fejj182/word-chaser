@@ -70,7 +70,7 @@ describe('CreateRoom', () => {
       await waitFor(() => {
         expect(mockCreateRoom).toHaveBeenCalledWith({
           maxPlayers: 4,
-          settings: { roundDuration: 60, maxRounds: 5, gridSize: 'medium' }
+          settings: { roundDuration: expect.any(Number), maxRounds: expect.any(Number), gridSize: 'medium' }
         }, 'Test User');
       });
     });

@@ -9,12 +9,17 @@ export const RoundResults: React.FC = () => {
   const [roundResult, setRoundResult] = useState<RoundResult | null>(null);
   const [countdown, setCountdown] = useState(5);
 
-  const currentRound = currentRoom?.gameData?.currentRound;
-  const roundResults = currentRoom?.gameData?.roundResults;
-  const timerStatus = currentRoom?.gameData?.timerStatus;
+  if(!currentRoom) {
+    return null;
+  }
+
+  const currentRound = currentRoom.gameData?.currentRound;
+  const roundResults = currentRoom.gameData?.roundResults;
+  const timerStatus = currentRoom.gameData?.timerStatus;
+  const maxRounds = currentRoom.settings.maxRounds;
 
   useEffect(() => {
-    if (currentRound && roundResults?.[`round-${currentRound}`] && timerStatus === 'ended') {
+    if (currentRound && roundResults?.[`round-${currentRound}`] && timerStatus === 'ended' && currentRound < maxRounds) {
       setRoundResult(roundResults?.[`round-${currentRound}`]);
       setCountdown(5);
     } else {
