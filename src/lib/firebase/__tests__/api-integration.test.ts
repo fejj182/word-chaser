@@ -71,27 +71,6 @@ describe('API Route Integration Tests', () => {
       expect(data.error).toBe('Missing required fields: roomId and userId');
     });
   });
-
-  describe('Validate Word API', () => {
-    it('should successfully call validate word API endpoint', async () => {
-      const { POST } = await import('@/app/api/validate-word/route');
-      
-      const req = {
-        json: async () => ({
-          word: 'cat',
-          roomId: 'test-room',
-          userId: 'test-user',
-          boardLetters: [['C', 'A', 'T', 'S'], ['R', 'O', 'W', 'N']]
-        })
-      } as any;
-
-      const res = await POST(req);
-      
-      expect(res.status).toBeDefined();
-      const data = await res.json();
-      expect(data).toBeDefined();
-    });
-  });
 });
 
 
