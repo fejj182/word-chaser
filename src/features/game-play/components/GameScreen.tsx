@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoom } from '@/features/room-management/contexts/RoomContext';
 import { useAuth } from '@/features/user-management/hooks/useAuth';
@@ -37,6 +37,15 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
     }
   }, [currentRoom?.gameData?.grid, currentRoom?.settings?.gridSize]);
 
+  const handleLeaveGame = useCallback(async () => {
+    try {
+      await leaveRoom();
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to leave game:', error);
+    }
+  }, [leaveRoom, router]);
+
   // Redirect to lobby if room is not in playing or finished status
   useEffect(() => {
     if (currentRoom && !['playing', 'finished'].includes(currentRoom.status) && currentPlayer) {
@@ -44,13 +53,59 @@ export const GameScreen: React.FC<GameScreenProps> = ({ roomId }) => {
     }
   }, [currentRoom, router, currentPlayer]);
 
-  const handleLeaveGame = async () => {
-    try {
-      await leaveRoom();
-    } catch (error) {
-      console.error('Failed to leave game:', error);
+  // Handle browser close/refresh during active game
+  useEffect(() => {
+    if (!currentRoom?.id || !user?.uid) {
+      return;
     }
-  };
+
+    const handleBeforeUnload = () => {
+      if (currentRoom?.id && user?.uid) {
+        // Use sendBeacon for reliable cleanup on page unload
+        const data = JSON.stringify({
+          roomId: currentRoom.id,
+          userId: user.uid
+        });
+        
+        try {
+          navigator.sendBeacon('/api/leave-room', data);
+        } catch (error) {
+          console.warn('Failed to send cleanup request:', error);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [currentRoom?.id, user?.uid]);
+
+  // Handle browser back button during active game
+  useEffect(() => {
+    // Only add listener when game is actually playing
+    if (currentRoom?.status !== 'playing') {
+      return;
+    }
+
+    const handlePopState = () => {
+      const shouldLeave = window.confirm('Are you sure you want to leave the game?');
+      if (shouldLeave) {
+        handleLeaveGame();
+      } else {
+        // Push state back to prevent navigation
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [currentRoom?.status, handleLeaveGame]);
+
 
   if (!currentRoom || !user || !currentPlayer) {
     return null;

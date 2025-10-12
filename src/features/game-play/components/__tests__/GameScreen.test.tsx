@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { GameScreen } from '../GameScreen';
 import { RoomProvider } from '@/features/room-management/contexts/RoomContext';
 import { GamePlayProvider } from '../../contexts/GamePlayContext';
@@ -193,5 +193,235 @@ describe('GameScreen', () => {
     );
 
     expect(mockPush).toHaveBeenCalledWith('/');
+  });
+
+  describe('Browser navigation handling', () => {
+    let mockSendBeacon: jest.SpyInstance;
+    let mockConfirm: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Mock navigator.sendBeacon
+      Object.defineProperty(navigator, 'sendBeacon', {
+        writable: true,
+        value: jest.fn().mockImplementation(() => true)
+      });
+      mockSendBeacon = jest.spyOn(navigator, 'sendBeacon');
+      mockConfirm = jest.spyOn(window, 'confirm').mockImplementation(() => true);
+    });
+
+    afterEach(() => {
+      if (mockSendBeacon) {
+        mockSendBeacon.mockRestore();
+      }
+      if (mockConfirm) {
+        mockConfirm.mockRestore();
+      }
+    });
+
+    it('should send beacon on beforeunload during active game', () => {
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      // Simulate beforeunload event
+      fireEvent(window, new Event('beforeunload'));
+
+      expect(mockSendBeacon).toHaveBeenCalledWith(
+        '/api/leave-room',
+        JSON.stringify({
+          roomId: 'test-room',
+          userId: 'user1'
+        })
+      );
+    });
+
+    it('should not send beacon when no room or user', () => {
+      mockUseRoom.mockReturnValue({
+        currentRoom: null,
+        leaveRoom: jest.fn(),
+        loadRoom: jest.fn(),
+      });
+
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      fireEvent(window, new Event('beforeunload'));
+
+      expect(mockSendBeacon).not.toHaveBeenCalled();
+    });
+
+    it('should handle browser back button with confirmation during active game', async () => {
+      const mockLeaveRoom = jest.fn().mockResolvedValue(undefined);
+      mockUseRoom.mockReturnValue({
+        currentRoom: mockRoom,
+        leaveRoom: mockLeaveRoom,
+        loadRoom: jest.fn(),
+      });
+
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      // Simulate browser back button
+      fireEvent(window, new Event('popstate'));
+
+      expect(mockConfirm).toHaveBeenCalledWith('Are you sure you want to leave the game?');
+      
+      await waitFor(() => {
+        expect(mockLeaveRoom).toHaveBeenCalled();
+        expect(mockPush).toHaveBeenCalledWith('/');
+      });
+    });
+
+    it('should add popstate listener when game is playing', () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+      
+      mockUseRoom.mockReturnValue({
+        currentRoom: mockRoom, // status: 'playing'
+        leaveRoom: jest.fn(),
+        loadRoom: jest.fn(),
+      });
+
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      // Should add popstate listener for playing games
+      expect(addEventListenerSpy).toHaveBeenCalledWith('popstate', expect.any(Function));
+      
+      addEventListenerSpy.mockRestore();
+    });
+
+    it('should not add popstate listener when game is not playing', () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+      
+      mockUseRoom.mockReturnValue({
+        currentRoom: { ...mockRoom, status: 'finished' },
+        leaveRoom: jest.fn(),
+        loadRoom: jest.fn(),
+      });
+
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      // Should not add popstate listener for finished games
+      expect(addEventListenerSpy).not.toHaveBeenCalledWith('popstate', expect.any(Function));
+      
+      addEventListenerSpy.mockRestore();
+    });
+
+    it('should prevent navigation when user cancels confirmation', () => {
+      mockConfirm.mockReturnValue(false);
+      const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
+
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      fireEvent(window, new Event('popstate'));
+
+      expect(mockConfirm).toHaveBeenCalled();
+      expect(mockPushState).toHaveBeenCalledWith(null, '', window.location.href);
+
+      mockPushState.mockRestore();
+    });
+  });
+
+  describe('Leave game functionality', () => {
+    it('should call leaveRoom and redirect when leave game is triggered', async () => {
+      const mockLeaveRoom = jest.fn().mockResolvedValue(undefined);
+      mockUseRoom.mockReturnValue({
+        currentRoom: mockRoom,
+        leaveRoom: mockLeaveRoom,
+        loadRoom: jest.fn(),
+      });
+
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      // Find and click the leave button (assuming it's in GameHeader)
+      const leaveButton = screen.getByRole('button', { name: /leave/i });
+      fireEvent.click(leaveButton);
+
+      await waitFor(() => {
+        expect(mockLeaveRoom).toHaveBeenCalled();
+        expect(mockPush).toHaveBeenCalledWith('/');
+      });
+    });
+
+    it('should handle leave room errors gracefully', async () => {
+      const mockLeaveRoom = jest.fn().mockRejectedValue(new Error('Leave failed'));
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      mockUseRoom.mockReturnValue({
+        currentRoom: mockRoom,
+        leaveRoom: mockLeaveRoom,
+        loadRoom: jest.fn(),
+      });
+
+      render(
+        <UserProvider>
+          <RoomProvider>
+            <GamePlayProvider>
+              <GameScreen roomId="test-room" />
+            </GamePlayProvider>
+          </RoomProvider>
+        </UserProvider>
+      );
+
+      const leaveButton = screen.getByRole('button', { name: /leave/i });
+      fireEvent.click(leaveButton);
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to leave game:', expect.any(Error));
+      });
+
+      consoleSpy.mockRestore();
+    });
   });
 });

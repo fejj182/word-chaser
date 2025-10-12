@@ -10,14 +10,14 @@ jest.mock('next/server', () => ({
   NextRequest: jest.fn(),
 }))
 
-jest.mock('@/lib/firebase/room-utils', () => ({
-  leaveRoom: jest.fn(),
+jest.mock('@/lib/firebase/admin-room-utils', () => ({
+  leaveRoomAdmin: jest.fn(),
 }))
 
 import { POST } from '../route'
 
-const { leaveRoom } = jest.requireMock('@/lib/firebase/room-utils') as {
-  leaveRoom: jest.Mock
+const { leaveRoomAdmin } = jest.requireMock('@/lib/firebase/admin-room-utils') as {
+  leaveRoomAdmin: jest.Mock
 }
 
 describe('POST /api/leave-room', () => {
@@ -39,28 +39,28 @@ describe('POST /api/leave-room', () => {
     await expect(res.json()).resolves.toEqual({
       error: 'Missing required fields: roomId and userId',
     })
-    expect(leaveRoom).not.toHaveBeenCalled()
+    expect(leaveRoomAdmin).not.toHaveBeenCalled()
   })
 
-  it('calls leaveRoom and returns success on valid payload', async () => {
-    leaveRoom.mockResolvedValueOnce(undefined)
+  it('calls leaveRoomAdmin and returns success on valid payload', async () => {
+    leaveRoomAdmin.mockResolvedValueOnce(undefined)
 
     const req = createRequest({ roomId: 'room-1', userId: 'user-1' })
 
     const res = await POST(req as NextRequest)
-    expect(leaveRoom).toHaveBeenCalledWith('room-1', 'user-1')
+    expect(leaveRoomAdmin).toHaveBeenCalledWith('room-1', 'user-1')
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toEqual({ success: true })
   })
 
-  it('returns success even when leaveRoom throws (best-effort cleanup)', async () => {
+  it('returns success even when leaveRoomAdmin throws (best-effort cleanup)', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    leaveRoom.mockRejectedValueOnce(new Error('boom'))
+    leaveRoomAdmin.mockRejectedValueOnce(new Error('boom'))
 
     const req = createRequest({ roomId: 'room-1', userId: 'user-1' })
 
     const res = await POST(req as NextRequest)
-    expect(leaveRoom).toHaveBeenCalled()
+    expect(leaveRoomAdmin).toHaveBeenCalled()
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toEqual({ success: true })
 
@@ -80,7 +80,7 @@ describe('POST /api/leave-room', () => {
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toEqual({ success: true })
 
-    expect(leaveRoom).not.toHaveBeenCalled()
+    expect(leaveRoomAdmin).not.toHaveBeenCalled()
     consoleSpy.mockRestore()
   })
 })

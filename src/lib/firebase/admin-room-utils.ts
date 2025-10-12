@@ -116,3 +116,36 @@ export const isWordAlreadySubmittedAdmin = async (
   
   return !!existingWords[wordKey];
 };
+
+/**
+ * Server-side function to remove a player from a room using Firebase Admin SDK
+ * This bypasses security rules since it runs with admin privileges
+ * Used for cleanup operations when user is no longer authenticated (browser close, etc.)
+ */
+export const leaveRoomAdmin = async (roomId: string, userId: string): Promise<void> => {
+  const roomRef = adminDb.ref(`${ROOMS_PATH}/${roomId}`);
+  const roomSnapshot = await roomRef.once('value');
+  
+  if (!roomSnapshot.exists()) {
+    return;
+  }
+
+  const room: Room = roomSnapshot.val();
+  const { [userId]: leavingPlayer, ...updatedPlayers } = room.players;
+  
+  if (Object.keys(updatedPlayers).length === 0) {
+    // Delete room and slug when last player leaves
+    await roomRef.remove();
+    if (room.slug) {
+      await adminDb.ref(`slugs/${room.slug}`).remove();
+    }
+  } else {
+    if (leavingPlayer?.isHost) {
+      // Transfer host to first remaining player
+      const firstRemainingPlayerId = Object.keys(updatedPlayers)[0];
+      await adminDb.ref(`${ROOMS_PATH}/${roomId}/players/${firstRemainingPlayerId}/isHost`).set(true);
+    }
+    // Remove the leaving player
+    await adminDb.ref(`${ROOMS_PATH}/${roomId}/players/${userId}`).remove();
+  }
+};

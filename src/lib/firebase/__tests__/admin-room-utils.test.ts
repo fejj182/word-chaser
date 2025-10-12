@@ -1,4 +1,4 @@
-import { updatePlayerScoreAdmin, addSubmittedWordAdmin, isWordAlreadySubmittedAdmin, getRoom } from '../admin-room-utils';
+import { updatePlayerScoreAdmin, addSubmittedWordAdmin, isWordAlreadySubmittedAdmin, getRoom, leaveRoomAdmin } from '../admin-room-utils';
 
 // Mock Firebase Admin SDK
 jest.mock('../admin', () => ({
@@ -16,18 +16,25 @@ describe('admin-room-utils', () => {
   const mockChild = jest.fn();
   const mockUpdate = jest.fn();
   const mockSet = jest.fn();
+  const mockRemove = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     
-    mockAdminDb.ref.mockReturnValue({
+    // Create a mock ref that can be chained
+    const mockRef = {
       once: mockOnce,
-      child: mockChild
-    } as any);
+      child: mockChild,
+      remove: mockRemove,
+      set: mockSet
+    };
+    
+    mockAdminDb.ref.mockReturnValue(mockRef as any);
     
     mockChild.mockReturnValue({
       update: mockUpdate,
-      set: mockSet
+      set: mockSet,
+      remove: mockRemove
     } as any);
   });
 
@@ -254,6 +261,185 @@ describe('admin-room-utils', () => {
       const result = await isWordAlreadySubmittedAdmin('test-room-id', 'test');
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('leaveRoomAdmin', () => {
+    it('removes player from room when other players remain', async () => {
+      const mockRoomData = {
+        id: 'test-room-id',
+        name: 'Test Room',
+        slug: 'test-room',
+        status: 'playing',
+        players: {
+          'user1': {
+            displayName: 'User 1',
+            isHost: true,
+            score: 50
+          },
+          'user2': {
+            displayName: 'User 2',
+            isHost: false,
+            score: 30
+          }
+        }
+      };
+
+      mockOnce.mockResolvedValue({
+        exists: () => true,
+        val: () => mockRoomData
+      });
+      mockRemove.mockResolvedValue(undefined);
+      mockSet.mockResolvedValue(undefined);
+
+      await leaveRoomAdmin('test-room-id', 'user1');
+
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id');
+      expect(mockOnce).toHaveBeenCalledWith('value');
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id/players/user2/isHost');
+      expect(mockSet).toHaveBeenCalledWith(true);
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id/players/user1');
+      expect(mockRemove).toHaveBeenCalled();
+    });
+
+    it('transfers host when leaving player is host', async () => {
+      const mockRoomData = {
+        id: 'test-room-id',
+        name: 'Test Room',
+        slug: 'test-room',
+        status: 'playing',
+        players: {
+          'user1': {
+            displayName: 'User 1',
+            isHost: true,
+            score: 50
+          },
+          'user2': {
+            displayName: 'User 2',
+            isHost: false,
+            score: 30
+          }
+        }
+      };
+
+      mockOnce.mockResolvedValue({
+        exists: () => true,
+        val: () => mockRoomData
+      });
+      mockRemove.mockResolvedValue(undefined);
+      mockSet.mockResolvedValue(undefined);
+
+      await leaveRoomAdmin('test-room-id', 'user1');
+
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id');
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id/players/user2/isHost');
+      expect(mockSet).toHaveBeenCalledWith(true);
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id/players/user1');
+      expect(mockRemove).toHaveBeenCalled();
+    });
+
+    it('deletes room and slug when last player leaves', async () => {
+      const mockRoomData = {
+        id: 'test-room-id',
+        name: 'Test Room',
+        slug: 'test-room',
+        status: 'playing',
+        players: {
+          'user1': {
+            displayName: 'User 1',
+            isHost: true,
+            score: 50
+          }
+        }
+      };
+
+      mockOnce.mockResolvedValue({
+        exists: () => true,
+        val: () => mockRoomData
+      });
+      mockRemove.mockResolvedValue(undefined);
+
+      await leaveRoomAdmin('test-room-id', 'user1');
+
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id');
+      expect(mockOnce).toHaveBeenCalledWith('value');
+      expect(mockRemove).toHaveBeenCalled(); // Room deletion
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('slugs/test-room');
+      expect(mockRemove).toHaveBeenCalledTimes(2); // Room and slug deletion
+    });
+
+    it('deletes room without slug when room has no slug', async () => {
+      const mockRoomData = {
+        id: 'test-room-id',
+        name: 'Test Room',
+        status: 'playing',
+        players: {
+          'user1': {
+            displayName: 'User 1',
+            isHost: true,
+            score: 50
+          }
+        }
+      };
+
+      mockOnce.mockResolvedValue({
+        exists: () => true,
+        val: () => mockRoomData
+      });
+      mockRemove.mockResolvedValue(undefined);
+
+      await leaveRoomAdmin('test-room-id', 'user1');
+
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id');
+      expect(mockRemove).toHaveBeenCalledTimes(1); // Only room deletion, no slug
+    });
+
+    it('returns early when room does not exist', async () => {
+      mockOnce.mockResolvedValue({
+        exists: () => false
+      });
+
+      await leaveRoomAdmin('non-existent-room', 'user1');
+
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/non-existent-room');
+      expect(mockOnce).toHaveBeenCalledWith('value');
+      expect(mockRemove).not.toHaveBeenCalled();
+    });
+
+    it('handles non-host player leaving without host transfer', async () => {
+      const mockRoomData = {
+        id: 'test-room-id',
+        name: 'Test Room',
+        slug: 'test-room',
+        status: 'playing',
+        players: {
+          'user1': {
+            displayName: 'User 1',
+            isHost: true,
+            score: 50
+          },
+          'user2': {
+            displayName: 'User 2',
+            isHost: false,
+            score: 30
+          }
+        }
+      };
+
+      mockOnce.mockResolvedValue({
+        exists: () => true,
+        val: () => mockRoomData
+      });
+      mockRemove.mockResolvedValue(undefined);
+
+      await leaveRoomAdmin('test-room-id', 'user2');
+
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id');
+      expect(mockOnce).toHaveBeenCalledWith('value');
+      expect(mockAdminDb.ref).toHaveBeenCalledWith('rooms/test-room-id/players/user2');
+      expect(mockRemove).toHaveBeenCalled();
+      // Should not transfer host since user2 is not host
+      expect(mockSet).not.toHaveBeenCalled();
     });
   });
 });
