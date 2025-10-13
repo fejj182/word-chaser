@@ -118,6 +118,75 @@ describe('WordInput', () => {
     });
   });
 
+  it('autofocuses input on component mount', () => {
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
+
+    const input = screen.getByLabelText('Current Word');
+    expect(input).toHaveFocus();
+  });
+
+  it('refocuses input after successful word submission', async () => {
+    mockSubmitWord.mockResolvedValue({
+      success: true,
+      result: { isValid: true, score: 30 }
+    });
+
+    mockUseWordPath.mockReturnValue({
+      currentWord: 'TEST',
+      setCurrentWord: mockSetCurrentWord,
+      selectTilesForWord: mockSelectTilesForWord,
+      clearSelection: mockClearSelection,
+      isValidPath: true
+    });
+
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
+
+    const input = screen.getByLabelText('Current Word');
+    const submitButton = screen.getByRole('button', { name: 'Submit Word' });
+
+    fireEvent.change(input, { target: { value: 'test' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockSubmitWord).toHaveBeenCalledWith('TEST', mockBoardLetters, 'test-room-id', 'test-user-id');
+    });
+
+    // The input should be focused after successful submission
+    await waitFor(() => {
+      expect(input).toHaveFocus();
+    });
+  });
+
+  it('refocuses input after clearing', async () => {
+    render(
+    <GamePlayProvider>
+      <WordInput/>
+    </GamePlayProvider>
+    );
+
+    const input = screen.getByLabelText('Current Word');
+    const clearButton = screen.getByRole('button', { name: 'Clear' });
+
+    // Blur the input first to test refocusing
+    input.blur();
+    expect(input).not.toHaveFocus();
+
+    fireEvent.click(clearButton);
+    
+    // Wait for the setTimeout to execute
+    await waitFor(() => {
+      expect(input).toHaveFocus();
+    });
+  });
+
   it('renders word input form', () => {
     render(
     <GamePlayProvider>

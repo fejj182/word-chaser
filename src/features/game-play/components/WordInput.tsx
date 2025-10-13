@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useWordSubmission } from '../hooks/useWordSubmission';
 import { useGamePlay } from '../contexts/GamePlayContext';
 import { useWordPath } from '../hooks/useWordPath';
@@ -26,6 +26,10 @@ export const WordInput: React.FC = () => {
   const { submitWord, isLoading, error, clearError } = useWordSubmission();
   const { toast, showError, showSuccess, hideToast } = useToast();
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [shouldFocus, setShouldFocus] = useState(true); // Focus on mount
+
   // Debounced word input handler
   const [inputValue, setInputValue] = useState('');
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
@@ -34,6 +38,13 @@ export const WordInput: React.FC = () => {
   useEffect(() => {
     setInputValue(currentWord);
   }, [currentWord]);
+
+  useEffect(() => {
+    if (shouldFocus && inputRef.current) {
+      inputRef.current.focus();
+      setShouldFocus(false); // Reset the flag after focusing
+    }
+  }, [shouldFocus]);
 
   // Debounced handler for typing
   const handleInputChange = useCallback((value: string) => {
@@ -80,14 +91,14 @@ export const WordInput: React.FC = () => {
           setCurrentWord('');
           setInputValue('');
           clearSelection();
+
+          setShouldFocus(true);
         } else {
-          // Show error toast for invalid words
           const reason = result.result.reason || 'Invalid word';
           showError(`"${currentWord.trim().toUpperCase()}" - ${reason}`);
         }
         
       } catch (error) {
-        // Show error toast for submission failures
         showError(`"${currentWord.trim().toUpperCase()}" - Submission failed`);
         console.error('Failed to submit word:', error);
       }
@@ -99,6 +110,7 @@ export const WordInput: React.FC = () => {
     setInputValue('');
     clearSelection();
     clearError();
+    setShouldFocus(true);
   };
 
   // Get validation status for current word (for submission)
@@ -134,6 +146,7 @@ export const WordInput: React.FC = () => {
             Current Word
           </label>
           <input
+            ref={inputRef}
             id="word-input"
             type="text"
             value={inputValue}
