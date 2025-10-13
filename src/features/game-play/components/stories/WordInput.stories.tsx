@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { WordInput } from '../WordInput';
+import { AllProvidersDecorator } from '@/features/development/stories/decorators';
 
 const meta: Meta<typeof WordInput> = {
   title: 'Features/Game Play/WordInput',
   component: WordInput,
+  decorators: [AllProvidersDecorator],
   parameters: {
     layout: 'centered',
   },
