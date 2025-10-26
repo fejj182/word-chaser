@@ -271,5 +271,5 @@ src/lib/
 
 ---
 
-*Spike completed: [Date]*
+*Spike completed: 2025-09-04*
 *Decision: Proceed with Web Worker + Trie dictionary and Boggle-style grid generation*
