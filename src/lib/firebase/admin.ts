@@ -1,36 +1,26 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getDatabase } from 'firebase-admin/database';
 
-// Initialize Firebase Admin SDK
-const initializeAdminApp = () => {
+// Initialize Firebase Admin SDK when endpoint is first called and cache for subsequent calls
+const getAdminApp = () => {
   if (getApps().length > 0) {
     return getApps()[0];
   }
 
-  // For emulator environment, use default credentials
-  if (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
-    return initializeApp({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-word-chaser',
-      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || 'http://127.0.0.1:9000?ns=demo-word-chaser',
-    });
-  }
-
-  // For production, use service account credentials
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
     return initializeApp({
-      credential: cert(process.env.GOOGLE_APPLICATION_CREDENTIALS),
+      credential: cert(serviceAccount),
       databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     });
   }
 
-  // Fallback: use default credentials (for environments like Vercel with built-in Firebase support)
+  // Use environment variables or default values for unit tests
   return initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-word-chaser',
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || 'http://127.0.0.1:9000?ns=demo-word-chaser',
   });
 };
 
-const adminApp = initializeAdminApp();
+const adminApp = getAdminApp();
 export const adminDb = getDatabase(adminApp);
-
-export default adminApp;

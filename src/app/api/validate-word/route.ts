@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateWordSubmission } from '@/lib/word-validation';
-import { updatePlayerScoreAdmin, addSubmittedWordAdmin, isWordAlreadySubmittedAdmin } from '@/lib/firebase/admin-room-utils';
+import { updatePlayerScoreAdmin, addSubmittedWordAdmin as addSubmittedWordToGlobalListAdmin, isWordAlreadySubmittedAdmin } from '@/lib/firebase/admin-room-utils';
 import { WordValidationRequest, WordValidationResponse } from '@/features/game-play/types/word';
 
 export async function POST(request: NextRequest) {
@@ -8,7 +8,6 @@ export async function POST(request: NextRequest) {
     const body: WordValidationRequest = await request.json();
     const { word, boardLetters, roomId, userId } = body;
 
-    // Validate required fields
     if (!word || !boardLetters || !roomId || !userId) {
       return NextResponse.json(
         { 
@@ -20,7 +19,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if word has already been submitted
     const isAlreadySubmitted = await isWordAlreadySubmittedAdmin(roomId, word);
     if (isAlreadySubmitted) {
       return NextResponse.json(
@@ -39,18 +37,10 @@ export async function POST(request: NextRequest) {
       minLength: 3
     });
 
-    // If word is valid, update player score and add to submitted words
     if (validation.isValid) {
       try {
-        // Get player name for the submitted word record
-        const { getRoom } = await import('@/lib/firebase/admin-room-utils');
-        const room = await getRoom(roomId);
-        const playerName = room?.players[userId]?.displayName || 'Unknown Player';
-        
-        // Add word to global submitted words list
-        await addSubmittedWordAdmin(roomId, word, userId, playerName, validation.score);
-        
-        // Update player score
+        const playerName = await getPlayerName(roomId, userId);
+        await addSubmittedWordToGlobalListAdmin(roomId, word, userId, playerName, validation.score);
         await updatePlayerScoreAdmin(roomId, userId, validation.score);
       } catch (error) {
         console.error('Failed to update player score or add submitted word:', error);
@@ -82,3 +72,9 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+async function getPlayerName(roomId: string, userId: string) {
+  const { getRoom } = await import('@/lib/firebase/admin-room-utils');
+  const room = await getRoom(roomId);
+  return room?.players[userId]?.displayName || 'Unknown Player';
+}
+
