@@ -20,8 +20,17 @@ const rules = readFileSync(rulesPath, 'utf8')
 
 describe('RTDB security rules integration tests', () => {
   let testEnv: RulesTestEnvironment
+  const originalConsoleWarn = console.warn
 
   beforeAll(async () => {
+    // Suppress Firebase permission_denied warnings (expected in security rule tests)
+    console.warn = jest.fn((message, ...args) => {
+      if (args.some(arg => String(arg).includes('permission_denied'))) {
+        return
+      }
+      originalConsoleWarn(message, ...args)
+    })
+
     // Initialize test environment with actual security rules
     testEnv = await initializeTestEnvironment({
       projectId: 'demo-word-chaser',
@@ -36,6 +45,7 @@ describe('RTDB security rules integration tests', () => {
 
   afterAll(async () => {
     await testEnv.cleanup()
+    console.warn = originalConsoleWarn // Restore original console.warn
   })
 
   afterEach(async () => {
