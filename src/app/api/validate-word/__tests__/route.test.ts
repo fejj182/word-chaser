@@ -182,6 +182,8 @@ describe('/api/validate-word', () => {
   });
 
   it('handles internal server errors', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     (isWordAlreadySubmittedAdmin as jest.Mock).mockResolvedValue(false);
     (validateWordSubmission as jest.Mock).mockImplementation(() => {
       throw new Error('Internal error');
@@ -205,5 +207,7 @@ describe('/api/validate-word', () => {
     expect(response.status).toBe(500);
     expect(data.success).toBe(false);
     expect(data.error).toBe('Internal server error');
+
+    consoleErrorSpy.mockRestore();
   });
 });
