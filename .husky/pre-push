@@ -1,5 +1,38 @@
 #!/usr/bin/env sh
 
+load_env_file() {
+  if [ ! -f .env.local ]; then
+    return 0
+  fi
+
+  echo "📝 Loading environment variables from .env.local..."
+  failed_lines=0
+  line_num=0
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    line_num=$((line_num + 1))
+    
+    # Skip empty lines and comments
+    [ -z "$line" ] && continue
+    [ "${line#\#}" != "$line" ] && continue
+    
+    # Export the variable, capturing any errors
+    if ! export "$line" 2>/dev/null; then
+      failed_lines=$((failed_lines + 1))
+      echo "⚠️  Warning: Failed to load line $line_num: ${line%%=*}" >&2
+    fi
+  done < .env.local
+
+  if [ $failed_lines -gt 0 ]; then
+    echo "❌ Error: Failed to load $failed_lines environment variable(s) from .env.local" >&2
+    echo "   This may cause tests to fail. Please check your .env.local file." >&2
+    return 1
+  fi
+
+  echo "✅ Successfully loaded environment variables"
+  return 0
+}
+
 echo "🧪 Running all tests before push..."
 
 npm test
@@ -23,10 +56,9 @@ fi
 # Run integration tests if Firebase code changed
 if echo "$CHANGED_FILES" | grep -E '^src/lib/firebase/' >/dev/null 2>&1; then
   echo "🔌 Firebase changes detected. Running RTDB emulator integration tests..."
-  # Load env vars if present
-  if [ -f .env.local ]; then
-    # shellcheck disable=SC2046
-    export $(grep -v '^#' .env.local | xargs) >/dev/null 2>&1
+  if ! load_env_file; then
+    echo "❌ Failed to load environment variables for integration tests. Aborting pre-push hook." >&2
+    exit 1
   fi
   npm run -s test:integration
   if [ $? -ne 0 ]; then
@@ -38,10 +70,9 @@ fi
 # Run E2E tests if UI components, features, or E2E tests changed
 if echo "$CHANGED_FILES" | grep -E '^(src/features|src/components|tests/e2e)/' >/dev/null 2>&1; then
   echo "🎭 UI changes detected. Running E2E tests..."
-  # Load env vars if present
-  if [ -f .env.local ]; then
-    # shellcheck disable=SC2046
-    export $(grep -v '^#' .env.local | xargs) >/dev/null 2>&1
+  if ! load_env_file; then
+    echo "❌ Failed to load environment variables for E2E tests. Aborting pre-push hook." >&2
+    exit 1
   fi
   # Run E2E tests (requires emulator to be running)
   npm run -s e2e
