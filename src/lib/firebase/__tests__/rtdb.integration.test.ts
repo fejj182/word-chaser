@@ -158,6 +158,7 @@ describe('RTDB security rules integration tests', () => {
         isHost: false,
         isReady: false
       })
+      await get(ref(user2Db, 'rooms/test-room-123/players/user-2'))
       
       // Now user-2 should be able to update their ready status
       await expect(set(ref(user2Db, 'rooms/test-room-123/players/user-2/isReady'), true)).resolves.not.toThrow()
@@ -205,6 +206,7 @@ describe('RTDB security rules integration tests', () => {
         isHost: false,
         isReady: false
       })
+      await get(ref(user2Db, 'rooms/test-room-status/players/user-2'))
 
       const updatedRoomData = {
         ...roomData,
@@ -236,6 +238,7 @@ describe('RTDB security rules integration tests', () => {
         isHost: false,
         isReady: false
       })
+      await get(ref(user2Db, 'rooms/test-room-non-host-write/players/user-2'))
       
       // Test: user-2 cannot write to room root (only to their own player data)
       await expect(set(ref(user2Db, 'rooms/test-room-non-host-write/status'), 'playing')).rejects.toThrow()
@@ -263,10 +266,12 @@ describe('RTDB security rules integration tests', () => {
         isHost: false,
         isReady: false
       })
+      await get(ref(user2Db, 'rooms/test-room-creator-loses/players/user-2'))
       
       // Transfer host to user-2
       await set(ref(user1Db, 'rooms/test-room-creator-loses/players/user-2/isHost'), true)
       await set(ref(user1Db, 'rooms/test-room-creator-loses/players/user-1/isHost'), false)
+      await get(ref(user1Db, 'rooms/test-room-creator-loses/players/user-2/isHost'))
       
       // Test: user-1 (creator but not host) cannot write to room root
       await expect(set(ref(user1Db, 'rooms/test-room-creator-loses/status'), 'playing')).rejects.toThrow()
@@ -315,6 +320,7 @@ describe('RTDB security rules integration tests', () => {
         isHost: false,
         isReady: false
       })
+      await get(ref(user2Db, 'rooms/test-room-delete/players/user-2'))
       
       // Test: user-2 (non-host) cannot delete room
       await expect(set(ref(user2Db, 'rooms/test-room-delete'), null)).rejects.toThrow()
@@ -347,6 +353,7 @@ describe('RTDB security rules integration tests', () => {
         isHost: false,
         isReady: false
       })
+      await get(ref(user2Db, 'rooms/test-room-players/players/user-2'))
       
       // Test: user-2 cannot modify user-1's data
       await expect(set(ref(user2Db, 'rooms/test-room-players/players/user-1/isReady'), true)).rejects.toThrow()
@@ -399,6 +406,7 @@ describe('RTDB security rules integration tests', () => {
       // Test: user-1 (creator) can transfer host to user-2
       await expect(set(ref(user1Db, 'rooms/test-room-host-management/players/user-2/isHost'), true)).resolves.not.toThrow()
       await expect(set(ref(user1Db, 'rooms/test-room-host-management/players/user-1/isHost'), false)).resolves.not.toThrow()
+      await get(ref(user1Db, 'rooms/test-room-host-management/players/user-2/isHost'))
       
       // Test: user-1 (former host but still creator) can still modify host flags
       await expect(set(ref(user1Db, 'rooms/test-room-host-management/players/user-3/isHost'), true)).resolves.not.toThrow()
@@ -417,9 +425,11 @@ describe('RTDB security rules integration tests', () => {
         settings: { roundDuration: 60, maxRounds: 5, gridSize: "small" }
       }
       await set(ref(user2Db, 'rooms/test-room-creator-override'), roomData2)
+      await get(ref(user2Db, 'rooms/test-room-creator-override'))
       
       // Test: user-2 (creator but not host) can modify host flags
       await expect(set(ref(user2Db, 'rooms/test-room-creator-override/players/user-2/isHost'), true)).resolves.not.toThrow()
+      await get(ref(user2Db, 'rooms/test-room-creator-override/players/user-2/isHost'))
       await expect(set(ref(user2Db, 'rooms/test-room-creator-override/players/user-1/isHost'), false)).resolves.not.toThrow()
     })
   })
@@ -511,6 +521,7 @@ describe('RTDB security rules integration tests', () => {
       }
       await set(ref(user1Db, 'rooms/test-room-slug-delete'), roomData)
       await set(ref(user1Db, 'slugs/test-slug-delete'), 'test-room-slug-delete')
+      await get(ref(user1Db, 'slugs/test-slug-delete'))
       
       // Test: user-2 (non-host) cannot delete slug
       const user2Db = testEnv.authenticatedContext('user-2').database()
