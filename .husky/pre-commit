@@ -1,5 +1,5 @@
 echo "🔍 Running Gitleaks to check for secrets..."
-gitleaks git --staged --config .gitleaks.toml --verbose
+npm run gitleaks:staged
 
 if [ $? -ne 0 ]; then
   echo "❌ Gitleaks found potential secrets. Please review and remove them before committing."

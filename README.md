@@ -18,7 +18,7 @@ A real-time, multiplayer word party game built with Next.js, TypeScript, and Fir
 - **Backend**: Firebase (Auth, Realtime Database, Firestore)
 - **Testing**: Jest, React Testing Library
 - **Storybook**: Component development and documentation
-- **Development**: ESLint, Husky pre-commit hooks
+- **Development**: ESLint, Husky hooks, Gitleaks secret scanning
 
 ## Getting Started
 
@@ -27,6 +27,13 @@ A real-time, multiplayer word party game built with Next.js, TypeScript, and Fir
 - Node.js 18+ 
 - npm, yarn, pnpm, or bun
 - Firebase project with Realtime Database enabled
+- Gitleaks installed locally for the pre-commit secret scan
+
+Install Gitleaks on macOS with Homebrew:
+
+```bash
+brew install gitleaks
+```
 
 ### Installation
 
@@ -395,6 +402,7 @@ When switching to production but still connecting to emulator:
 ### Code Quality
 
 - ESLint for code linting
+- Husky pre-commit hook for Gitleaks staged secret scanning
 - Husky pre-push hooks for automated testing:
   - Unit tests run on every push
   - Integration tests run when Firebase code changes
