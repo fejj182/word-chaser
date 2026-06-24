@@ -131,7 +131,7 @@ These backend‑level tests run against the Firebase Realtime Database emulator 
 1) Start the RTDB emulator (using npx):
 
 ```bash
-npx firebase emulators:start --config src/lib/firebase/config/emulator.json --only database --project demo-word-chaser
+npx firebase emulators:start --config src/lib/firebase/config/emulator.json --project demo-word-chaser
 ```
 
 Optionally customize via environment variables (defaults shown):
