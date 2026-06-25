@@ -67,6 +67,8 @@ const CreateRoomUI: React.FC<CreateRoomUIProps> = ({ onSubmit, isLoading, error 
         <input
           type="text"
           id="alias"
+          name="alias"
+          autoComplete="nickname"
           value={alias}
           onChange={(e) => setAlias(e.target.value)}
           className="form-input"

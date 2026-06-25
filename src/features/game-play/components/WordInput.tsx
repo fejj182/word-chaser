@@ -140,7 +140,7 @@ export const WordInput: React.FC = () => {
       <div className={`space-y-4`}>
         <h2 className="text-xl font-semibold text-gray-900">Submit Words</h2>
       
-      <form name="submit-words" onSubmit={handleSubmit} className="space-y-3" role="form">
+      <form name="submit-words" autoComplete="off" onSubmit={handleSubmit} className="space-y-3" role="form">
         <div>
           <label htmlFor="word-input" className="form-label">
             Current Word
@@ -148,7 +148,12 @@ export const WordInput: React.FC = () => {
           <input
             ref={inputRef}
             id="word-input"
+            name="word"
             type="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="characters"
+            spellCheck={false}
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value.toUpperCase())}
             className={`form-input text-center text-lg font-mono ${

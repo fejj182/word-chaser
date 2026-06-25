@@ -41,6 +41,8 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
           <input
             type="text"
             id="alias"
+            name="alias"
+            autoComplete="nickname"
             value={alias}
             onChange={(e) => onAliasChange(e.target.value)}
             className="form-input"
@@ -58,6 +60,8 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
           <input
             type="text"
             id="roomId"
+            name="roomId"
+            autoComplete="off"
             value={roomId}
             onChange={(e) => onRoomIdChange(e.target.value)}
             className="form-input"
@@ -80,6 +84,5 @@ const JoinRoomUI: React.FC<JoinRoomUIProps> = ({
 };
 
 export default JoinRoomUI;
-
 
 
