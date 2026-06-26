@@ -1,12 +1,30 @@
 # Word Chaser
 
-A real-time multiplayer word game where players compete in fast-paced word challenges using a shared game room.
+This README is a documented exploration of AI-assisted software engineering, using the development of a real-time multiplayer word game - Word Chaser - as the vehicle.
 
-It was built as an exploration of building production-quality real-time multiplayer software using an AI-assisted development workflow.
+The goal wasn't simply to build an application, but to understand how AI changes the way experienced engineers design, build and ship software.
 
-![alt text](docs/gameplay/active-game.gif)
+The project was built between July and October 2025. Most of the work was completed during 13 weeks of parental leave, providing the opportunity to experiment with an AI-first development workflow using the models and tools available at the time.
 
-![alt text](docs/gameplay/multiplayer-flow.gif)
+Rather than using AI only to generate code, I integrated it throughout the entire development lifecycle—from product discovery, design and architecture to implementation, debugging, testing and documentation.
+
+![active game](docs/gameplay/active-game.gif)
+
+![multiplayer flow](docs/gameplay/multiplayer-flow.gif)
+
+## Why I Built This
+
+My goal wasn't simply to recreate Boggle — or Yahoo Games' classic *Word Racer*, which was one of my favourite internet games as a child.
+
+Instead, I wanted a project that was technically challenging enough to explore how AI changes the way software is designed, built and shipped.
+
+Throughout the project, I set out to answer questions such as:
+
+* How much can AI accelerate an experienced solo developer?
+* Where does AI genuinely improve productivity?
+* Where do its limits lie?
+* Where is human judgment still indispensable?
+
 
 ## Features
 
