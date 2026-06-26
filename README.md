@@ -25,13 +25,52 @@ Throughout the project, I set out to answer questions such as:
 * Where do the limits of the technology lie?
 * Where is my human judgment still fundamental?
 
-## Tools
+## Tool Selection
 
 The specific tools were mostly incidental. I used Cursor with Claude Sonnet 4 for coding and Gemini for more general queries, as these were the models and editor available to me through Thoughtworks at the time.
 
 Likewise, I chose Next.js because I had recently been working on a Next.js project and it allowed me to focus on the experiment rather than learning a new framework.
 
-While differences between models became apparent over the course of the project, it wasn't my aim to compare them. The primary focus was on the overall workflow rather than the capabilities of any individual tool.
+For the backend, however, I wanted something more lightweight. I decided to go serverless with Firebase because it optimised for simplicity, speed of development and cost. The goal of the project was to explore AI-assisted software engineering rather than infrastructure, so this felt like the right trade-off.
+
+While differences between models naturally became apparent over the course of the project, it wasn't my aim to compare them. The primary focus was on the overall workflow rather than the capabilities of any individual tool.
+
+## Working with AI
+
+At the time, a lot of the discussion around AI focused on one-shot prompting and getting it to write software for you, which wasn't what I wanted to explore.
+
+Instead, I treated AI more like a collaborator. I would have long conversations, ask loads of questions, challenge its suggestions and try to understand the reasoning behind its output. If I didn't understand something, I'd keep asking until I did.
+
+My goal also wasn't simply to produce working software — it was to produce software that was better than I could have built without AI, while still fully understanding it. I still wanted the code to remain mine though, with every important change reviewed and every significant decision understood.
+
+I also decided against a fully agentic workflow. At the time it felt like it would probably slow me down and was overkill for the size of the project. As the tooling matures that may well change, but for this project a conversational workflow felt like the better fit.
+
+## Decision Making Through Documentation
+
+One of the biggest surprises was how AI changed my approach to documentation.
+
+Because I was constantly trying to understand the reasoning behind technical decisions, it became natural to document them as ADRs. Since generating them took seconds rather than hours, I found myself writing far more of them than I normally would.
+
+I started to think of ADRs as a way of asking the AI to justify its recommendations in a structured way. If it couldn't make a convincing case for a decision, it was often a sign that I needed to challenge it further or explore alternatives.
+
+When tackling more complex technical problems, I would often ask the model to write a spike document, much as we would in an agile team. This helped me investigate options, compare trade-offs and ultimately make better decisions—for example when choosing Playwright as the E2E testing framework.
+
+I also generated architecture diagrams throughout the project. They were quick to produce and helped me step back from the implementation details to better understand the overall system.
+
+## Testing
+
+At Thoughtworks, testing is part of our DNA, and I've fully embraced it as a way of building safe, easily changeable software. That mindset was always going to be part of this project.
+
+I also wanted to see how comfortable it would be to build fully tested software with AI support. One of the first rules I gave Cursor, for example, was to run the relevant tests as part of every task before considering the work complete. This undoubtedly slowed the workflow a little, but it more than paid for itself by catching defects early.
+
+I was also happy for the model to write many of the test cases while I reviewed them. At the time, some people argued that tests should still be written manually for safety, but I found reviewing AI-generated tests to be no different from reviewing a pull request from a teammate. The value came from the review, not from writing every test myself.
+
+One of the trickier parts of the project was getting meaningful Firebase integration tests running against the local emulator, particularly for the Realtime Database security rules. They took some effort to set up, but gave me confidence that the rules enforced the principle of least privilege.
+
+I also found the model less effective at writing Playwright end-to-end tests, so I kept those intentionally simple and wrote them myself. It reinforced one of the project's broader lessons: AI was an excellent collaborator, but some tasks still benefited from a more hands-on approach.
+
+Ultimately, the testing strategy came from my own engineering experience. Word Chaser includes unit, integration and end-to-end tests because that's how I build confidence in software, regardless of whether the code or the tests were drafted by AI.
+
 
 ## Features
 
