@@ -1,10 +1,10 @@
 # Word Chaser
 
-This README is a documented exploration of AI-assisted software engineering, using the development of a real-time multiplayer word game - Word Chaser - as the vehicle.
+This is a documented exploration of AI-assisted software engineering, using the development of a real-time multiplayer word game - Word Chaser - as a vehicle.
 
-The goal wasn't simply to build an application, but to understand how AI changes the way experienced engineers design, build and ship software.
+My goal wasn't just to build an app, but to understand how AI changes the way experienced engineers design, build and ship software.
 
-The project was built between July and October 2025. Most of the work was completed during 13 weeks of parental leave, providing the opportunity to experiment with an AI-first development workflow using the models and tools available at the time.
+The project was mostly built between August and October 2025, during 13 weeks of parental leave, and provided me with the opportunity to experiment with an AI-first development workflow using the models and tools available at the time.
 
 Rather than using AI only to generate code, I integrated it throughout the entire development lifecycle—from product discovery, design and architecture to implementation, debugging, testing and documentation.
 
@@ -16,14 +16,14 @@ Rather than using AI only to generate code, I integrated it throughout the entir
 
 My goal wasn't simply to recreate Boggle — or Yahoo Games' classic *Word Racer*, which was one of my favourite internet games as a child.
 
-Instead, I wanted a project that was technically challenging enough to explore how AI changes the way software is designed, built and shipped.
+Instead, I wanted a project that was technically challenging, but still realistic to build by myself in a relatively short period of time.
 
 Throughout the project, I set out to answer questions such as:
 
-* How much can AI accelerate an experienced solo developer?
-* Where does AI genuinely improve productivity?
-* Where do its limits lie?
-* Where is human judgment still indispensable?
+* How much can an experienced solo developer by accelerated?
+* Where does this improvement appear most?
+* Where do the limits of the technology lie?
+* Where is my human judgment still fundamental?
 
 
 ## Features
