@@ -1,6 +1,6 @@
 # Word Chaser
 
-Word Chaser is a real-time multiplayer word game where players compete in fast-paced word challenges using a shared game room.
+A real-time multiplayer word game where players compete in fast-paced word challenges using a shared game room.
 
 It was built as an exploration of building production-quality real-time multiplayer software using an AI-assisted development workflow.
 
