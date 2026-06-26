@@ -1,6 +1,10 @@
 # Word Chaser
 
-A real-time, multiplayer word party game built with Next.js, TypeScript, and Firebase. Players authenticate as guests, create or join code-based rooms, and compete in live word challenges.
+Word Chaser is a real-time multiplayer word game where players compete in fast-paced word challenges using a shared game room.
+
+It was built as an exploration of building production-quality real-time multiplayer software using an AI-assisted development workflow.
+
+![alt text](docs/gameplay/active-game.png)
 
 ## Features
 
