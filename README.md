@@ -25,6 +25,13 @@ Throughout the project, I set out to answer questions such as:
 * Where do the limits of the technology lie?
 * Where is my human judgment still fundamental?
 
+## Tools
+
+The specific tools were mostly incidental. I used Cursor with Claude Sonnet 4 for coding and Gemini for more general queries, as these were the models and editor available to me through Thoughtworks at the time.
+
+Likewise, I chose Next.js because I had recently been working on a Next.js project and it allowed me to focus on the experiment rather than learning a new framework.
+
+While differences between models became apparent over the course of the project, it wasn't my aim to compare them. The primary focus was on the overall workflow rather than the capabilities of any individual tool.
 
 ## Features
 
