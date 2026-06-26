@@ -4,7 +4,9 @@ A real-time multiplayer word game where players compete in fast-paced word chall
 
 It was built as an exploration of building production-quality real-time multiplayer software using an AI-assisted development workflow.
 
-![alt text](docs/gameplay/active-game.png)
+![alt text](docs/gameplay/active-game.gif)
+
+![alt text](docs/gameplay/multiplayer-flow.gif)
 
 ## Features
 
