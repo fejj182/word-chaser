@@ -74,9 +74,11 @@ Although the original roadmap and effort estimates weren't preserved, I can say 
 
 At the time, much of the discussion around AI focused on one-shot prompting and getting it to write software for you. Instead, I treated it as a collaborator. I had long conversations, asked lots of questions, challenged its suggestions and tried to understand the reasoning behind its output. If I didn't understand something, I'd keep asking until I did.
 
-That said, it was able to generate large amounts of high quality code for me in a scarily short amount of time. When things went smoothly, I could finish small features in minutes and larger, cross-functional pieces of work in hours. The same work might previously have taken half a day for a small feature, or several days for a larger one. Needless to say, I was impressed.
+That said, it was able to generate large amounts of high quality code for me in a scarily short amount of time. When things went smoothly, I could finish small features in minutes and larger, cross-functional pieces of work in hours. The same work might previously have taken half a day for a small feature, or several days for a larger one. Needless to say, I was impressed. 
 
-I also wanted to produce software that was better than I would have written on my own, while still fully understanding it. It was also important to me that that the code would remain mine, with every important change reviewed and every significant decision understood. I wasn't ready to hand off full accountability just yet.
+A less obvious benefit was that changing direction no longer felt like a costly mistake. If I realised an earlier decision wasn't ideal, the cost of revisiting it no longer seemed prohibitive. Refactoring became quicker, experimenting with alternative approaches became more practical, and I found myself more willing to improve the design rather than simply living with earlier decisions.
+
+I also wanted to produce software that was better than I would have written on my own, while still fully understanding it. It was also important to me that the code would remain mine, with every important change reviewed and every significant decision understood. I wasn't ready to hand off full accountability just yet.
 
 ### Decision Making Through Documentation
 
@@ -100,7 +102,7 @@ I was also happy for the model to write many of the test cases while I reviewed 
 
 One of the trickier parts of the project was getting meaningful Firebase integration tests running against the local emulator, particularly for the Realtime Database security rules. They took some effort to set up, but gave me confidence that the rules enforced the principle of least privilege, a key safety feature in a production ready app.
 
-I also found the model less effective at writing Playwright end-to-end tests, so I kept those intentionally simple, smaller in number, and wrote them myself. Looking back, an MCP server — allowing the AI to interact directly with tools such as the browser and test runne — would probably have been beneficial here. I was hesitant to introduce more tooling at the time, but if the project were to continue long term, it's something I would almost certainly add.
+I also found the model less effective at writing Playwright end-to-end tests, so I kept those intentionally simple, smaller in number, and wrote them myself. Looking back, an MCP server — allowing the AI to interact directly with tools such as the browser and test runner — would probably have been beneficial here. I was hesitant to introduce more tooling at the time, but if the project were to continue long term, it's something I would almost certainly add.
 
 ## Failure Modes
 
@@ -132,11 +134,11 @@ One of the biggest signals I got from working on this project was whether, after
 
 Despite the occasional rabbit holes and frustrations, I found this way of working incredibly enjoyable and powerful. It felt much faster not just to write code, but to understand the problem, explore possible solutions and simply learn more about what I was working on.
 
-Another big surprise was that, rather than encouraging me to cut corners, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system.
+Another big surprise was that, rather than encouraging me to cut corners, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system. It also made it much easier to change direction when I realised a better approach existed.
 
 Perhaps my biggest takeaway, however, was about the question everyone has been asking: will AI replace software engineers? After spending three months building software this way, my answer is that I think we're asking the wrong question.
 
 Today's AI is an extraordinary amplifier for an experienced engineer. It made me faster, helped me learn unfamiliar domains, challenged my thinking and removed much of the friction from documentation, testing and exploration. At the same time, it still relied on me to provide direction, exercise judgement, recognise when it was wrong and ultimately take responsibility for the quality of the software.
 
-I think we'd be in a far better place if we focused on using AI to make software engineers better rather than trying to remove them from the process.
+I believe we'd be in a far better place if we focused on using AI to make software engineers better rather than trying to remove them from the process.
 
