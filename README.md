@@ -20,7 +20,7 @@ Instead, I wanted a project that was technically challenging, but still realisti
 
 Throughout the project, I set out to answer questions such as:
 
-* How much can an experienced solo developer by accelerated?
+* How much can an experienced solo developer be accelerated?
 * Where does this improvement appear most?
 * Where do the limits of the technology lie?
 * Where is my human judgment still fundamental?
@@ -35,15 +35,47 @@ For the backend however, I wanted something more lightweight. I decided to go se
 
 While differences between models naturally became apparent over the course of the project, it wasn't my aim to compare them. The primary focus was on the overall workflow rather than the capabilities of any individual tool.
 
-## Working with AI
+## AI-assisted development
 
-At the time, a lot of the discussion around AI focused on one-shot prompting and getting it to write software for you, which wasn't what I wanted to explore.
+This project also serves as a small case study in AI-assisted solo development.
 
-Instead, I treated AI more like a collaborator. I would have long conversations, ask loads of questions, challenge its suggestions and try to understand the reasoning behind its output. If I didn't understand something, I'd keep asking until I did.
+Over the main build period—from **29 July to 13 October 2025**—a single experienced developer designed, built and documented a production-ready multiplayer word game from scratch. The delivered scope spanned product design, frontend, backend, infrastructure, security, testing and documentation.
 
-My goal also wasn't simply to produce working software — it was to produce software that was better than I could have built without AI, while still fully understanding it. I still wanted the code to remain mine though, with every important change reviewed and every significant decision understood.
+### Product & gameplay
 
-I did use AI throughout the loop: planning, implementation, testing and iteration. What I avoided was handing that loop over wholesale. I kept the workflow conversational and deliberately human-led, using AI to accelerate and challenge each stage rather than letting it independently drive whole features from brief to completion.
+* Multiplayer game flow with host-managed lobbies
+* Guest authentication and realtime Firebase rooms
+* Algorithmically generated word grids
+* Dictionary-backed word validation and pathfinding
+* Live scoring, rounds and final results
+
+### Engineering
+
+* Next.js application with Firebase backend
+* Real-time multiplayer architecture
+* Secure database rules
+
+### Quality & maintainability
+
+* Unit tests
+* Firebase emulator integration tests
+* Backend API tests
+* Playwright end-to-end tests
+* Storybook component stories
+* Architecture Decision Records (ADRs)
+* Spike documents and architecture diagrams
+
+I don't claim this demonstrates an exact productivity multiplier. The original roadmap and effort estimates weren't preserved, so it's impossible to make a rigorous comparison between planned and actual delivery.
+
+What I can say with confidence is that I would not have been able to deliver a project of this breadth and technical complexity in anywhere near the same timeframe without AI.
+
+That wasn't because I treated AI as a code generator. At the time, much of the discussion around AI focused on one-shot prompting and getting it to write software for you. Instead, I treated it as a collaborator.
+
+I had long conversations, asked lots of questions, challenged its suggestions and tried to understand the reasoning behind its output. If I didn't understand something, I'd keep asking until I did.
+
+My goal wasn't simply to produce working software—it was to produce software that was better than I could have built on my own while still fully understanding it. I wanted the code to remain mine, with every important change reviewed and every significant decision understood.
+
+AI was involved throughout the development process, but I deliberately kept the workflow human-led. Rather than handing entire features to the model, I used it to explore ideas, challenge assumptions, review designs, write and review code, generate tests, diagnose bugs and improve documentation. The value came from the ongoing conversation, not from delegating the work.
 
 ## Decision Making Through Documentation
 
