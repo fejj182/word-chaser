@@ -125,3 +125,18 @@ Responsive design was a particular example of this. AI could often add the right
 In fact, the mobile experience is probably the weakest part of Word Chaser. The game was originally designed for desktop, and I only realised partway through development how challenging it would be to adapt the interface for mobile. AI could help generate the code, but it wasn't particularly good at understanding what good felt like, so I deliberately chose not to invest too much time refining it.
 
 This reinforced the same broader lesson: AI was helpful at producing raw material, but it didn't replace taste, user empathy or the need to actually use the thing I was building.
+
+## Final Thoughts
+
+One of the biggest signals I got from working on this project was whether, after completing it, I would ever want to go back to working without AI. The answer was a very clear no.
+
+Despite the occasional rabbit holes and frustrations, I found this way of working incredibly enjoyable and powerful. It felt much faster not just to write code, but to understand the problem, explore possible solutions and simply learn more about what I was working on.
+
+Another big surprise was that, rather than encouraging me to cut corners, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system.
+
+Perhaps my biggest takeaway, however, was about the question everyone has been asking: will AI replace software engineers? After spending three months building software this way, my answer is that I think we're asking the wrong question.
+
+Today's AI is an extraordinary amplifier for an experienced engineer. It made me faster, helped me learn unfamiliar domains, challenged my thinking and removed much of the friction from documentation, testing and exploration. At the same time, it still relied on me to provide direction, exercise judgement, recognise when it was wrong and ultimately take responsibility for the quality of the software.
+
+I think we'd be in a far better place if we focused on using AI to make software engineers better rather than trying to remove them from the process.
+
