@@ -31,7 +31,7 @@ The specific tools were mostly incidental. I used Cursor with Claude Sonnet 4 fo
 
 Likewise, I chose Next.js because I had recently been working on a Next.js project and it allowed me to focus on the experiment rather than learning a new framework.
 
-For the backend, however, I wanted something more lightweight. I decided to go serverless with Firebase because it optimised for simplicity, speed of development and cost. The goal of the project was to explore AI-assisted software engineering rather than infrastructure, so this felt like the right trade-off.
+For the backend however, I wanted something more lightweight. I decided to go serverless with Firebase because it optimised for simplicity, speed of development and cost. The goal of the project was to explore AI-assisted software engineering rather than infrastructure, so this felt like the right trade-off.
 
 While differences between models naturally became apparent over the course of the project, it wasn't my aim to compare them. The primary focus was on the overall workflow rather than the capabilities of any individual tool.
 
@@ -43,7 +43,7 @@ Instead, I treated AI more like a collaborator. I would have long conversations,
 
 My goal also wasn't simply to produce working software — it was to produce software that was better than I could have built without AI, while still fully understanding it. I still wanted the code to remain mine though, with every important change reviewed and every significant decision understood.
 
-I also decided against a fully agentic workflow. At the time it felt like it would probably slow me down and was overkill for the size of the project. As the tooling matures that may well change, but for this project a conversational workflow felt like the better fit.
+I did use AI throughout the loop: planning, implementation, testing and iteration. What I avoided was handing that loop over wholesale. I kept the workflow conversational and deliberately human-led, using AI to accelerate and challenge each stage rather than letting it independently drive whole features from brief to completion.
 
 ## Decision Making Through Documentation
 
@@ -61,7 +61,7 @@ I also generated architecture diagrams throughout the project. They were quick t
 
 At Thoughtworks, testing is part of our DNA, and I've fully embraced it as a way of building safe, easily changeable software. That mindset was always going to be part of this project.
 
-I also wanted to see how comfortable it would be to build fully tested software with AI support. One of the first rules I gave Cursor, for example, was to run the relevant tests as part of every task before considering the work complete. This undoubtedly slowed the workflow a little, but it more than paid for itself by catching defects early.
+I wanted to see how comfortable it would be to build fully tested software with AI support. One of the first rules I gave Cursor, for example, was to run the relevant tests as part of every task before considering the work complete. This undoubtedly slowed the workflow a little, but it more than paid for itself by catching defects early.
 
 I was also happy for the model to write many of the test cases while I reviewed them. At the time, some people argued that tests should still be written manually for safety, but I found reviewing AI-generated tests to be no different from reviewing a pull request from a teammate. The value came from the review, not from writing every test myself.
 
