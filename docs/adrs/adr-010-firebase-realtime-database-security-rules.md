@@ -126,7 +126,7 @@ While implementing these security rules required careful consideration of RTDB's
 
 * **Unified Security Model**: Security rules are part of the same Firebase project, eliminating the need for separate authentication/authorization services
 * **Real-time Enforcement**: Security is enforced at the database level in real-time, providing immediate protection without additional API layers
-* **Cost Efficiency**: Security rules don't add to the per-operation costs that would exist with Firestore
+* **Cost Efficiency**: Security rules enforce access at the database layer without adding extra application infrastructure
 * **Development Simplicity**: Despite the learning curve, RTDB rules are simpler than implementing custom authorization middleware
 * **Emulator Support**: Firebase emulators support security rules, enabling comprehensive local testing
 

@@ -25,7 +25,6 @@ describe('API Route Integration Tests', () => {
   beforeAll(async () => {
     testEnv = await initializeTestEnvironment({
       projectId: 'demo-word-chaser',
-      firestore: undefined,
       database: {
         rules,
         host: process.env.RTD_EMULATOR_HOST || '127.0.0.1',
@@ -72,5 +71,3 @@ describe('API Route Integration Tests', () => {
     });
   });
 });
-
-

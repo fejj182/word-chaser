@@ -39,7 +39,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 - **Frontend**: Next.js 15 App Router, React 19, TypeScript
 - **Styling**: Tailwind CSS 4
-- **Backend**: Firebase Auth, Realtime Database, Firestore, Firebase Admin SDK
+- **Backend**: Firebase Auth, Realtime Database, Firebase Admin SDK
 - **Testing**: Jest, React Testing Library, Playwright
 - **Tooling**: ESLint, Husky, Gitleaks, Storybook
 

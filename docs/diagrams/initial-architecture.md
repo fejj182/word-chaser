@@ -9,9 +9,7 @@ graph TD
     subgraph Backend ["Serverless Cloud Services - Firebase"]
         subgraph Real-time & Database
             C -- Manages Connections & Data Sync --> D1(Firebase Realtime Database <br> Fast, frequent game state)
-            C -- Manages Connections & Data Sync --> D2(Firestore <br> Structured data, user profiles, leaderboards)
             D1 -- Triggers --> E
-            D2 -- Triggers --> E
         end
 
         subgraph Serverless Functions ["Backend Logic & AI"]
@@ -39,7 +37,6 @@ graph TD
     style B fill:#e0f2f7,stroke:#3498db,stroke-width:2px
     style C fill:#f0f7f4,stroke:#2ecc71,stroke-width:2px
     style D1 fill:#f0f7f4,stroke:#2ecc71,stroke-width:2px
-    style D2 fill:#f0f7f4,stroke:#2ecc71,stroke-width:2px
     style E fill:#f0f7f4,stroke:#2ecc71,stroke-width:2px
     style F fill:#fff2e6,stroke:#e67e22,stroke-width:2px
     style G fill:#f0f7f4,stroke:#2ecc71,stroke-width:2px

@@ -34,7 +34,6 @@ describe('RTDB security rules integration tests', () => {
     // Initialize test environment with actual security rules
     testEnv = await initializeTestEnvironment({
       projectId: 'demo-word-chaser',
-      firestore: undefined, // We're only testing RTDB
       database: {
         rules,
         host: process.env.RTD_EMULATOR_HOST || '127.0.0.1',
