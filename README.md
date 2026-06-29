@@ -81,7 +81,7 @@ That said, it was able to generate large amounts of high quality code for me in 
 
 A less obvious benefit was that changing direction no longer felt like a costly mistake. If I realised an earlier decision wasn't ideal, the cost of revisiting it no longer seemed prohibitive. Refactoring became quicker, experimenting with alternative approaches became more practical, and I found myself more willing to improve the design rather than simply living with earlier decisions.
 
-I also wanted to produce software that was better than I would have written on my own, while still fully understanding it. It was also important to me that the code would remain mine, with every important change reviewed and every significant decision understood. I wasn't ready to hand off full accountability just yet.
+I also wanted to produce software that was better than I would have written on my own, while still fully understanding it. And it was important to me that the code would remain mine, with every important change reviewed and every significant decision understood. I wasn't ready to hand off full accountability just yet.
 
 ### Decision Making Through Documentation
 
@@ -127,17 +127,17 @@ The model was generally good at producing clean-looking components, especially w
 
 Responsive design was a particular example of this. AI could often add the right Tailwind classes (although usually far more than I would have liked), but that didn't mean the UI had been properly designed for mobile. I still had to interact with the UI in the browser, think about the player experience and make judgment calls that were more product design than software engineering.
 
-In fact, the mobile experience is probably the weakest part of Word Chaser. The game was originally designed for desktop, and I only realised partway through development how challenging it would be to adapt the interface for mobile. AI could help generate the code, but it wasn't particularly good at understanding what good felt like, so I deliberately chose not to invest too much time refining it.
+In fact, the mobile experience is probably the weakest part of Word Chaser. The game was originally designed for desktop, and I only realised partway through development how challenging it would be to adapt the interface for mobile. AI could help generate the code, but it wasn't particularly good at understanding what good UX felt like, so I deliberately chose not to invest too much time refining it.
 
 This reinforced the same broader lesson: AI was helpful at producing raw material, but it didn't replace taste, user empathy or the need to actually use the thing I was building.
 
 ## Final Thoughts
 
-One of the biggest signals I got from working on this project was whether, after completing it, I would ever want to go back to working without AI. The answer was a very clear no.
+One of the biggest signals I got from working on this project was whether, after completing it, I would ever want to go back to programming without AI. The answer was a very clear no.
 
 Despite the occasional rabbit holes and frustrations, I found this way of working incredibly enjoyable and powerful. It felt much faster not just to write code, but to understand the problem, explore possible solutions and simply learn more about what I was working on.
 
-Another big surprise was that, rather than encouraging me to cut corners, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system. It also made it much easier to change direction when I realised a better approach existed.
+Another surprise was that, rather than encouraging me to cut corners, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system. It also made it easier to change direction when I realised a better approach existed.
 
 Perhaps my biggest takeaway, however, was about the question everyone has been asking: will AI replace software engineers? After spending three months building software this way, my answer is that I think we're asking the wrong question.
 
