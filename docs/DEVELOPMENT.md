@@ -89,7 +89,7 @@ For production deployments, the application uses Firebase Admin SDK for server-s
 
 **Quick Setup:**
 - **Development**: No additional setup needed (uses emulators)
-- **Production**: Set `GOOGLE_APPLICATION_CREDENTIALS` to your service account JSON file path
+- **Production**: Set `GOOGLE_APPLICATION_CREDENTIALS` to the raw service account JSON string expected by `src/lib/firebase/admin.ts`
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 

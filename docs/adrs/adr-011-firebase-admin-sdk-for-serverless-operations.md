@@ -33,7 +33,7 @@ We will use **Firebase Admin SDK** for all server-side operations in API routes,
 
 3. **Environment Configuration**:
    - **Development**: Admin SDK uses default credentials with emulators
-   - **Production**: Admin SDK uses service account credentials or platform defaults
+   - **Production**: Admin SDK uses service account credentials from environment configuration
 
 ## Consequences
 
@@ -71,9 +71,8 @@ We will use **Firebase Admin SDK** for all server-side operations in API routes,
 # Development (emulators) - no additional setup needed
 NEXT_PUBLIC_USE_EMULATORS=true
 
-# Production - service account credentials
-GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account.json
-# OR platform-specific defaults (Vercel, etc.)
+# Production - service account JSON
+GOOGLE_APPLICATION_CREDENTIALS={"type":"service_account","project_id":"your-project-id",...}
 ```
 
 ### Security Model
