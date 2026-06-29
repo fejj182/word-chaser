@@ -18,8 +18,9 @@ _Multiplayer lobby flow_
 
 This repository is organised into two parts:
 
-- 📖 **Case Study (this README)** — an exploration of AI-assisted software engineering through the development of Word Chaser.
-- 🛠️ **Developer Documentation** — setup, architecture, testing and contribution guides. See [`docs/development/README.md`](docs/development/README.md).
+- **Case Study (this README)** — an exploration of AI-assisted software engineering through the development of Word Chaser.
+- **Live Demo** — [Play Word Chaser](https://word-chaser-alpha.vercel.app/) (requires two players).
+- **Developer Documentation** — setup, architecture, testing and contribution guides. See [`docs/development/README.md`](docs/development/README.md).
 
 ## Why I Built This
 
