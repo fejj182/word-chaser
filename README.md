@@ -44,7 +44,7 @@ While differences between LLMs naturally became apparent over the course of the 
 
 ## AI-assisted development
 
-Over the main build period — from **29 July to 13 October 2025** - I designed, built and documented a production-ready multiplayer word game from scratch.
+Over the main build period — from **29 July to 13 October 2025** - I designed, built and documented a fully playable real-time multiplayer word game using professional software engineering practices.
 
 ### Product & gameplay
 
@@ -96,11 +96,11 @@ I also generated architecture diagrams throughout the project. They were quick t
 
 At Thoughtworks, testing is part of our DNA, and I've fully embraced it as a way of building safe, easily changeable software.
 
-I wanted to see how comfortable it would be to build fully tested software with AI support. One of the first rules I gave Cursor, for example, was to run the relevant tests as part of every task before considering the work complete. This slowed the workflow a little, but it more than paid for itself by catching defects early.
+I wanted to see how comfortable it would be to build well tested software with AI support. One of the first rules I gave Cursor, for example, was to run the relevant tests as part of every task before considering the work complete. This slowed the workflow a little, but it more than paid for itself by catching defects early.
 
 I was also happy for the model to write many of the test cases while I reviewed them. At the time, some people argued that tests should still be written manually for safety, but I found reviewing AI-generated tests to be no different from reviewing a pull request from a teammate. The quality assurance came from the review, not from writing every test myself.
 
-One of the trickier parts of the project was getting meaningful Firebase integration tests running against the local emulator, particularly for the Realtime Database security rules. They took some effort to set up, but gave me confidence that the rules enforced the principle of least privilege, a key safety feature in a production ready app.
+One of the trickier parts of the project was getting meaningful Firebase integration tests running against the local emulator, particularly for the Realtime Database security rules. They took some effort to set up, but gave me confidence that the rules enforced the principle of least privilege, a key safety feature that helps prevent users from accessing or modifying data they shouldn't.
 
 I also found the model less effective at writing Playwright end-to-end tests, so I kept those intentionally simple, smaller in number, and wrote them myself. Looking back, an MCP server — allowing the AI to interact directly with tools such as the browser and test runner — would probably have been beneficial here. I was hesitant to introduce more tooling at the time, but if the project were to continue long term, it's something I would almost certainly add.
 
