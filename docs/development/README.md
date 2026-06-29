@@ -131,7 +131,7 @@ npx firebase emulators:start --config src/lib/firebase/config/emulator.json --on
 npm run test:integration
 ```
 
-The RTDB integration suite lives at `src/lib/firebase/__tests__/rtdb.integration.test.ts`. If the emulator is not running, `npm run test:integration` fails instead of silently skipping the suite.
+Firebase integration tests live in `src/lib/firebase/__tests__/*.integration.test.ts`. If the emulator is not running, `npm run test:integration` fails instead of silently skipping the suites.
 
 Run Playwright E2E tests:
 
