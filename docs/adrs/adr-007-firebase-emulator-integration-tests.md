@@ -19,7 +19,8 @@ E2E tests can verify user journeys but are slower, flakier, and less targeted fo
 
 Adopt a lean Firebase Realtime Database (RTDB) emulator integration test suite that:
 
-- Runs only when a local RTDB emulator is available (auto‑detected or via environment variables); otherwise it no‑ops so default `npm test` remains fast and green.
+- Runs separately from the default Jest suite so `npm test` remains fast and does not require local Firebase emulators.
+- Fails loudly when explicitly invoked and the local RTDB emulator is unavailable.
 - Validates our rules and invariants with deterministic backend‑level checks.
 - Keeps scope tight to avoid “testing Firebase itself”; we test our contracts, not SDK internals.
 - Leaves broader user journeys to E2E and logic branches to unit tests.
@@ -27,9 +28,10 @@ Adopt a lean Firebase Realtime Database (RTDB) emulator integration test suite t
 ## Implementation Details
 
 - Test file: `src/lib/firebase/__tests__/rtdb.integration.test.ts`
-- Conditional execution:
-  - Detect emulator via `RTD_EMULATOR_HOST`/`RTD_EMULATOR_PORT`/`RTD_EMULATOR_PROJECT` or by probing the emulator endpoint.
-  - If not available, exit early without failing CI.
+- Execution:
+  - `npm test` excludes `*.integration.test.*` files.
+  - `npm run test:integration` runs `*.integration.test.*` files.
+  - If the emulator is unavailable during `npm run test:integration`, fail the run instead of silently skipping coverage.
 - Emulator wiring:
   - Set `NEXT_PUBLIC_FIREBASE_PROJECT_ID` and `NEXT_PUBLIC_FIREBASE_DATABASE_URL` to the emulator namespace.
   - Use `connectDatabaseEmulator(db, host, port)` to point the SDK at the emulator.
@@ -46,7 +48,7 @@ Adopt a lean Firebase Realtime Database (RTDB) emulator integration test suite t
 - Local run:
   1. Start RTDB emulator, e.g. `firebase emulators:start --only database --project demo-word-chaser`
   2. Optionally export `RTD_EMULATOR_HOST`, `RTD_EMULATOR_PORT`, `RTD_EMULATOR_PROJECT`
-  3. Run `npm test`
+  3. Run `npm run test:integration`
 
 ## Consequences
 

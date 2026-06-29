@@ -5,6 +5,10 @@
 import { initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import {
+  cleanupFirebaseAdminApps,
+  getEmulatorUnavailableMessage,
+} from '@/lib/firebase/test-utils/emulator-test-utils'
 
 const rulesPath = join(__dirname, '../config/database.rules.json')
 const rules = readFileSync(rulesPath, 'utf8')
@@ -23,22 +27,31 @@ describe('API Route Integration Tests', () => {
   let testEnv: RulesTestEnvironment
 
   beforeAll(async () => {
-    testEnv = await initializeTestEnvironment({
-      projectId: 'demo-word-chaser',
-      database: {
-        rules,
-        host: process.env.RTD_EMULATOR_HOST || '127.0.0.1',
-        port: Number(process.env.RTD_EMULATOR_PORT || 9000),
-      },
-    })
+    try {
+      testEnv = await initializeTestEnvironment({
+        projectId: 'demo-word-chaser',
+        database: {
+          rules,
+          host: process.env.RTD_EMULATOR_HOST || '127.0.0.1',
+          port: Number(process.env.RTD_EMULATOR_PORT || 9000),
+        },
+      })
+    } catch (error) {
+      throw new Error(getEmulatorUnavailableMessage(error))
+    }
   })
 
   afterAll(async () => {
-    await testEnv.cleanup()
+    if (testEnv) {
+      await testEnv.cleanup()
+    }
+    await cleanupFirebaseAdminApps()
   })
 
   afterEach(async () => {
-    await testEnv.clearDatabase()
+    if (testEnv) {
+      await testEnv.clearDatabase()
+    }
   })
 
   describe('Leave Room API', () => {

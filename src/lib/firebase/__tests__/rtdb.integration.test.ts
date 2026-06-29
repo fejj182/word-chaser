@@ -13,6 +13,7 @@ import { initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules
 import { ref, set, get } from 'firebase/database'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { getEmulatorUnavailableMessage } from '@/lib/firebase/test-utils/emulator-test-utils'
 
 // Load the actual security rules as a string
 const rulesPath = join(__dirname, '../config/database.rules.json')
@@ -31,24 +32,31 @@ describe('RTDB security rules integration tests', () => {
       originalConsoleWarn(message, ...args)
     })
 
-    // Initialize test environment with actual security rules
-    testEnv = await initializeTestEnvironment({
-      projectId: 'demo-word-chaser',
-      database: {
-        rules,
-        host: process.env.RTD_EMULATOR_HOST || '127.0.0.1',
-        port: Number(process.env.RTD_EMULATOR_PORT || 9000),
-      },
-    })
+    try {
+      testEnv = await initializeTestEnvironment({
+        projectId: 'demo-word-chaser',
+        database: {
+          rules,
+          host: process.env.RTD_EMULATOR_HOST || '127.0.0.1',
+          port: Number(process.env.RTD_EMULATOR_PORT || 9000),
+        },
+      })
+    } catch (error) {
+      throw new Error(getEmulatorUnavailableMessage(error))
+    }
   })
 
   afterAll(async () => {
-    await testEnv.cleanup()
+    if (testEnv) {
+      await testEnv.cleanup()
+    }
     console.warn = originalConsoleWarn // Restore original console.warn
   })
 
   afterEach(async () => {
-    await testEnv.clearDatabase()
+    if (testEnv) {
+      await testEnv.clearDatabase()
+    }
   })
 
   describe('Authentication Requirements', () => {

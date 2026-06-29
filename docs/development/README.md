@@ -102,7 +102,7 @@ See [environment configuration](environment.md) for all environment files, switc
 - `npm run build` - Build for production
 - `npm run start` - Start the production server
 - `npm run lint` - Run ESLint
-- `npm test` - Run Jest tests
+- `npm test` - Run Jest unit tests
 - `npm run test:watch` - Run Jest in watch mode
 - `npm run test:coverage` - Run Jest with coverage
 - `npm run test:integration` - Run `*.integration.test.*` files
@@ -114,7 +114,7 @@ See [environment configuration](environment.md) for all environment files, switc
 - `npm run gitleaks:scan` - Scan the repository for secrets
 - `npm run gitleaks:staged` - Scan staged changes for secrets
 
-Husky runs `npm run gitleaks:staged` before commits. Before pushes, it runs `npm test`, then conditionally runs Firebase integration tests or E2E tests when related files changed. Those conditional checks require the Firebase emulators to be running.
+Husky runs `npm run gitleaks:staged` before commits. Before pushes, it runs `npm test`, then conditionally runs Firebase integration tests or E2E tests when related files changed. Those conditional checks require the Firebase emulators to be running and fail loudly if they are unavailable.
 
 ## Testing
 
@@ -131,7 +131,7 @@ npx firebase emulators:start --config src/lib/firebase/config/emulator.json --on
 npm run test:integration
 ```
 
-The RTDB integration suite lives at `src/lib/firebase/__tests__/rtdb.integration.test.ts`. If the emulator is not running, the suite exits early instead of failing.
+The RTDB integration suite lives at `src/lib/firebase/__tests__/rtdb.integration.test.ts`. If the emulator is not running, `npm run test:integration` fails instead of silently skipping the suite.
 
 Run Playwright E2E tests:
 

@@ -81,4 +81,4 @@ Playwright starts app servers on ports `3000` and `3001` using `playwright.confi
 
 The RTDB integration test file is `src/lib/firebase/__tests__/rtdb.integration.test.ts`.
 
-It validates Firebase rules and backend room behavior against the emulator. It exits early when the emulator is unavailable, so `npm test` can still run without local Firebase.
+It validates Firebase rules and backend room behavior against the emulator. `npm test` excludes this file so unit tests can run without local Firebase. `npm run test:integration` runs it separately and fails if the emulator is unavailable.
