@@ -3,24 +3,24 @@ graph TD
     subgraph Frontend ["Next.js Application"]
         A[Player's Browser / Device] --> B(Next.js Client-Side App)
         B -- Real-time Updates (WebSockets via Firebase SDK) --> C(Firebase Client SDK)
-        B -- AI Hints/Logic Requests --> E
+        B -- Server-side Requests --> E
     end
 
-    subgraph Backend ["Serverless Cloud Services - Firebase"]
+    subgraph Backend ["Firebase Services"]
         subgraph Real-time & Database
             C -- Manages Connections & Data Sync --> D1(Firebase Realtime Database <br> Fast, frequent game state)
-            D1 -- Triggers --> E
-        end
-
-        subgraph Serverless Functions ["Backend Logic & AI"]
-            E(Firebase Cloud Functions <br> Game Logic, AI Integration)
-            E -- Calls External API --> F(Generative AI Service <br> e.g., Google Gemini API)
         end
 
         subgraph Authentication & Storage
             G[Firebase Authentication]
             H[Firebase Storage <br> Optional: for game assets]
         end
+    end
+
+    subgraph AppBackend ["Next.js Server-side Routes"]
+        E(Next.js API Routes <br> Trusted Game Operations)
+        E -- Admin SDK --> D1
+        E -- Future AI Calls --> F(Generative AI Service <br> Optional)
     end
 
     subgraph Deployment & Management
@@ -30,6 +30,7 @@ graph TD
 
     A -- Accesses --> I
     I -- Serves --> B
+    I -- Hosts --> E
     B -. Authenticates via .-> G
     B -. Accesses .-> H
 

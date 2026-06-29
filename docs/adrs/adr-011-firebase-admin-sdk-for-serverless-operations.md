@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Following the implementation of player score updates in the Realtime Database (ADR 010), we encountered a permission error when attempting to update player scores from API routes. The issue was that Firebase client SDK operations in serverless functions (Next.js API routes) are subject to security rules that require user authentication context, but serverless functions run without user authentication.
+Following the implementation of player score updates in the Realtime Database (ADR 010), we encountered a permission error when attempting to update player scores from API routes. The issue was that Firebase client SDK operations in server-side API routes are subject to security rules that require user authentication context, but API routes run without user authentication.
 
 The error occurred because:
 - **Client SDK**: Requires user authentication context (`auth != null`)
@@ -39,7 +39,7 @@ We will use **Firebase Admin SDK** for all server-side operations in API routes,
 
 ### Positive
 
-- **Resolves Permission Issues**: Serverless functions can perform trusted database operations without authentication context
+- **Resolves Permission Issues**: API routes can perform trusted database operations without authentication context
 - **Maintains Security Model**: Client-side operations still use security rules, server-side operations are trusted
 - **Industry Standard**: This is the standard pattern for Firebase serverless applications
 - **Scalable**: Admin SDK works with all serverless platforms (Vercel, Netlify, AWS Lambda)
@@ -85,7 +85,7 @@ Server Operations (Admin SDK) → Bypass Rules → Database
 ## Alternatives Considered
 
 ### Option 1: Modify Security Rules
-- **Approach**: Allow serverless functions to bypass authentication
+- **Approach**: Allow API routes to bypass authentication
 - **Rejected**: Less secure, harder to maintain, not recommended by Firebase
 
 ### Option 2: Client-Side Only
@@ -93,7 +93,7 @@ Server Operations (Admin SDK) → Bypass Rules → Database
 - **Rejected**: Vulnerable to cheating, no server-side validation
 
 ### Option 3: Custom Authentication
-- **Approach**: Implement custom auth for serverless functions
+- **Approach**: Implement custom auth for API routes
 - **Rejected**: Overly complex, unnecessary for this use case
 
 ## References

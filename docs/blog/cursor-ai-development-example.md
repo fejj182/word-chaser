@@ -13,7 +13,7 @@ This post chronicles that experience: the wins, the challenges, and the surprisi
 Word Chaser is built on a modern serverless stack:
 
 - **Frontend**: Next.js 15 with App Router, TypeScript, and Tailwind CSS
-- **Backend**: Firebase (Realtime Database, Auth, future Cloud Functions)
+- **Backend**: Firebase (Realtime Database, Auth) and Next.js API routes with Firebase Admin SDK
 - **Testing**: Jest + React Testing Library, Playwright E2E, Firebase emulators
 - **Architecture**: Feature-based organization with React Context state management
 
