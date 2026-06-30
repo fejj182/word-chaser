@@ -137,7 +137,7 @@ One of the biggest signals I got from working on this project was whether, after
 
 Despite the occasional rabbit holes and frustrations, I found this way of working incredibly enjoyable and powerful. It felt much faster not just to write code, but to understand the problem, explore possible solutions and simply learn more about what I was working on.
 
-Another surprise was that, rather than encouraging me to cut corners, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system. It also made it easier to change direction when I realised a better approach existed.
+Another surprise was that, rather than leading to the drop in quality many people worry about, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system. It also made it easier to change direction when I realised a better approach existed.
 
 Of course it wasn't all smooth sailing. The project also exposed some recurring failure modes — particularly around debugging rabbit holes and its poor feel for good UX.
 
