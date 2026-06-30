@@ -143,7 +143,7 @@ Of course it wasn't all smooth sailing. The project also exposed some recurring 
 
 Perhaps my biggest takeaway, however, was about the question everyone has been asking: will AI replace software engineers? After spending three months building software this way, my answer is that I think we're asking the wrong question.
 
-Today's AI is an extraordinary amplifier for an experienced engineer. It made me faster, helped me learn unfamiliar domains, challenged my thinking and removed much of the friction from documentation, testing and exploration. At the same time, it still relied on me to provide direction, exercise judgement, recognise when it was wrong and ultimately take responsibility for the quality of the software.
+Today's AI is an extraordinary amplifier for an experienced engineer. It made me faster, helped me learn unfamiliar domains, challenged my thinking and removed much of the friction from documentation, testing and exploration. At the same time, it still relied on me to review its output, provide direction, exercise judgement, recognise when it was wrong and ultimately take responsibility for the quality of the software.
 
 I believe we'd be in a far better place if we focused on using AI to make software engineers better rather than trying to remove them from the process.
 
