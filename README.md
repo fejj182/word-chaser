@@ -139,7 +139,7 @@ Despite the occasional rabbit holes and frustrations, I found this way of workin
 
 Another surprise was that, rather than encouraging me to cut corners, AI often had the opposite effect. By reducing the cost of documentation, refactoring and exploration, it allowed me to invest more time in the parts of software engineering that improve the quality and maintainability of a system. It also made it easier to change direction when I realised a better approach existed.
 
-Of course it wasn't all smooth sailing. The project also exposed some recurring failure modes — particularly around debugging rabbit holes and it's poor feel for good UX.
+Of course it wasn't all smooth sailing. The project also exposed some recurring failure modes — particularly around debugging rabbit holes and its poor feel for good UX.
 
 Perhaps my biggest takeaway, however, was about the question everyone has been asking: will AI replace software engineers? After spending three months building software this way, my answer is that I think we're asking the wrong question.
 
